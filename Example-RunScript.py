@@ -1,14 +1,10 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
 import copy
-import xml.etree.ElementTree as ET
-import os
 import sys
 import pickle
 sys.path.append('../..')
-import FEAST_Path_To_Equivalence_2019 as feast
-from FEAST_Path_To_Equivalence_2019.GeneralClassesFunctions.simulation_classes import Component
+import feast
+from feast.GeneralClassesFunctions.simulation_classes import Component
 
 # np.random.seed(0)
 

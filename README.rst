@@ -1,10 +1,10 @@
 =====
-FEAST v2.0
+FEAST v3.0
 =====
 
 Introduction:
 -------------
-FEAST is a Fugitive Emissions Abatement Simulation Toolkit for evaluating natural gas leak detection and repair (LDAR) programs. FEAST can be used to estimate natural gas savings and net present value of LDAR programs. Version 2.0 is an update of version 1.0 released in 2016. Version 2.0 was ported from Matlab to Python, a more advanced infrared camera simulation module was added, and several steps were taken to improve the speed and readability of the model's code.
+FEAST is a Fugitive Emissions Abatement Simulation Toolkit for evaluating natural gas leak detection and repair (LDAR) programs. FEAST can be used to estimate natural gas savings and net present value of LDAR programs. FEAST 1.0 was developed by the Environmental Assessment and Optimization group at Stanfor University and released in 2016. It was initially written in the Matlab programming language. Version 2.0 was written in Python and released in 2017. Version 3.0 incorporated additional emission data sets, eliminated explicit plume models in favor probability of detection curves to simulate detection technologies and incorporated permitted emissions that are not repaired by leak detection and repair programs.
 
 Tutorial:
 ---------
@@ -25,14 +25,16 @@ Python FEAST consists of a directory containing over 30 python module and object
 	|----field_simulation.py
 	|----Glossary.txt
 	|----README.rst
+    |----requirements.txt
+    |----setup.cfg
+    |----setup.py
 	|----DetectionModules
 		|----__init__.py
 		|----abstract_detection_method.py
-		|----dd.py
-		|----fid.py
-		|----helper_functions.py
-		|----ir.py
-		|----null.py
+		|----helper_functions
+        |----null.py
+        |----tech_detect.py
+        |----tiered_detect.py
 	|----GeneralClassesFunctions
 		|----__init__.py
 		|----leak_class_functions.py
@@ -40,29 +42,44 @@ Python FEAST consists of a directory containing over 30 python module and object
 		|----results_analysis_functions.py
 		|----simulation_classes.py
 		|----simulation_functions.py
+        |----site_emission_methods.py
 	|----InputData
 		|----input_data_classes.py
 		|----DataObjectInstances
 			|----arpae_wind.p
+            |----COGCC_site_prod_2019.p
 			|----fernandez_leak_reapair_costs_2006.p
 			|----fort_worth_leaks.p
+            |----fort_worth_tank.p
+            |----fort_worth_notank.p
 			|----fort_worth_wind.p
 			|----hitran_database.p
 			|----pnnl_methane.p
+            |----production-emissions.p
 		|----RawData
+            |----Allen_leakdata_2013.csv
+            |----COGCC-2019-Production.xlsx
+            |----COGCC-2019-well-locations.dbf
 			|----ARPAEWind.csv
 			|----FernandezRepairCost.csv
 			|----FortWorth.csv
 			|----FortWorthwindData.csv
 			|----HITRAN_database.csv
+            |----octave-leak-data.csv
 			|----pnnl_methane.csv
+            |----ProductionSite-ComponentEmissions.xlsx
 		|----RawDataProcessingScripts
+            |----allend_data_prep.py
 			|----arpae_wind_reader.py
+			|----COGCC_2019_prodctiondata.py
 			|----fernandez_repair_cost_reader.py
 			|----fort_worth_data_prep.py
+			|----fort_worth_tank_notank.py
 			|----fort_worth_wind_reader.py
 			|----HITRAN_reader.py
 			|----pnnl_reader.py
+			|----production_emission_data.py
+			|----README.txt
 			|----repair_cost_data_reader.py
 			|----wind_data_reader.py
 

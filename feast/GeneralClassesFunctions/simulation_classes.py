@@ -7,7 +7,6 @@ from .leak_class_functions import leak_objects_generator as leak_obj_gen
 from . import leak_class_functions as lcf
 import pickle
 from .simulation_functions import set_kwargs_attrs
-from .constants import *
 from os.path import dirname, abspath
 import os
 
