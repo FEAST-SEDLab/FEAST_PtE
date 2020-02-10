@@ -1,8 +1,6 @@
 import numpy as np
 import copy
-import sys
 import pickle
-sys.path.append('../..')
 import feast
 from feast.GeneralClassesFunctions.simulation_classes import Component
 
