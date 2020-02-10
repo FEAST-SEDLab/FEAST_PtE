@@ -1,0 +1,5 @@
+dd --  distributed detector detection method
+FEAST -- fugitive emissions abatement simulation testbed
+fid -- flame ionization detector detection method
+ir -- infrared
+LDAR -- leak detection and repair
