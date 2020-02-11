@@ -12,6 +12,8 @@ import csv
 from ..input_data_classes import LeakData
 import pickle
 from os.path import dirname, abspath
+import os
+
 # -------------- Hard coded values --------------
 # In some cases, a leak would be detected with an FID or IR camera, but no flux could be measured with the HI-FLOW
 # sampler. In these cases, the study team assigned a flux of 0.001 cfm to the leak. These data are omitted from FEAST.
@@ -25,9 +27,9 @@ flux_IR = []  # g/s
 counter = 0
 flux = 0
 
-rsc_path = '/'.join(dirname(abspath(__file__)).split('/')[:-1])
-file_in = '/'.join([rsc_path, 'RawData', 'Allen_leakdata_2013.csv'])
-file_out = '/'.join([rsc_path, 'DataObjectInstances/allen_leaks.p'])
+rsc_path, _ = os.path.split(dirname(abspath(__file__)))
+file_in = os.path.join(rsc_path, 'RawData', 'Allen_leakdata_2013.csv')
+file_out = os.path.join(rsc_path, 'DataObjectInstances', 'allen_leaks.p')
 
 with open(file_in) as csvfile:
     data = csv.reader(csvfile, delimiter=',', quotechar='|')

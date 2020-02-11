@@ -28,8 +28,8 @@ import os
 
 rsc_path, _ = os.path.split(dirname(abspath(__file__)))
 file_in = os.path.join(rsc_path, 'RawData', 'FortWorth.csv')
-file_out_tank = os.path.join(rsc_path, 'DataObjectInstances/fort_worth_tank.p')
-file_out_notank = os.path.join(rsc_path, 'DataObjectInstances/fort_worth_notank.p')
+file_out_tank = os.path.join(rsc_path, 'DataObjectInstances', 'fort_worth_tank.p')
+file_out_notank = os.path.join(rsc_path, 'DataObjectInstances', 'fort_worth_notank.p')
 
 
 # -------------- Hard coded values --------------

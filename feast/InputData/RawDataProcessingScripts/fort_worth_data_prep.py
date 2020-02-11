@@ -24,10 +24,12 @@ import csv
 from ..input_data_classes import LeakData
 import pickle
 from os.path import dirname, abspath
+import os
 
-rsc_path = '/'.join(dirname(abspath(__file__)).split('/')[:-1])
-file_in = '/'.join([rsc_path, 'RawData', 'FortWorth.csv'])
-file_out = '/'.join([rsc_path, 'DataObjectInstances/fort_worth_leaks.p'])
+rsc_path = rsc_path = dirname(abspath(__file__))
+rsc_path, _ = os.path.split(rsc_path)
+file_in = os.path.join(rsc_path, 'RawData', 'FortWorth.csv')
+file_out = os.path.join(rsc_path, 'DataObjectInstances', 'fort_worth_leaks.p')
 
 # -------------- Hard coded values --------------
 # In some cases, a leak would be detected with an FID or IR camera, but no flux could be measured with the HI-FLOW
