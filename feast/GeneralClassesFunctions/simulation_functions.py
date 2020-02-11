@@ -2,7 +2,6 @@
 All functions that are required in the simulations and independent of input data and detection method are stored here.
 """
 
-import numpy as np
 import os
 import pickle
 

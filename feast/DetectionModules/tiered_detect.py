@@ -49,12 +49,13 @@ class TieredDetect(DetectionMethod):
         self.secondary_survey_cost = np.zeros(time.n_timesteps)
         # leaks_per_timestep is calculated based on the survey speed and number of leaks at the beginning of each survey
         self.leaks_per_timestep = 0
-        self.l = np.log(self.lam)
-        self.m = np.log(self.mu)
-        self.l2 = np.log(self.lam2)
-        self.m2 = np.log(self.mu2)
+        self.loglam = np.log(self.lam)
+        self.logmu = np.log(self.mu)
+        self.loglam2 = np.log(self.lam2)
+        self.logmu2 = np.log(self.mu2)
         self.site_survey_index = 0
         self.comp_survey_index = 0
+        self.repair_delay = 0  # days
         # -------------- Financial Properties --------------
         self.capital_0 = 0 * self.time_factor  # dollars (defaults to zero)
         self.maintenance_0 = self.capital_0 * 0.1  # dollars/year
@@ -73,7 +74,6 @@ class TieredDetect(DetectionMethod):
             curr_time = ind * time.delta_t
             if curr_time % self.survey_interval < time.delta_t:
                 self.find_cost[ind] = self.survey_cost
-
 
     @staticmethod
     def time_in_ophrs(ct, et, op_begin, op_end):
@@ -126,7 +126,8 @@ class TieredDetect(DetectionMethod):
                 scores = np.random.uniform(0, 1, n_sites_surveyed)
                 cond = site_flux > 0
                 probs = np.zeros(n_sites_surveyed)
-                probs[cond] = 0.5 + 0.5 * scipy.special.erf((np.log(site_flux[cond]) - self.m) / (self.l * np.sqrt(2)))
+                probs[cond] = 0.5 + 0.5 * scipy.special.erf((np.log(site_flux[cond]) - self.logmu) /
+                                                            (self.loglam * np.sqrt(2)))
                 sites_flagged = np.where(scores < probs)[0] + self.site_survey_index
                 self.prelim_survey_time += n_sites_surveyed / self.sites_per_day * self.work_time
                 if end_survey:
@@ -141,12 +142,11 @@ class TieredDetect(DetectionMethod):
                     cond = np.where((self.leaks.site_index == site_ind) &
                                     (self.leaks.flux > 0))[0]
                     scores = np.random.uniform(0, 1, len(cond))
-                    probs = 0.5 + 0.5 * scipy.special.erf((np.log(self.leaks.flux[cond]) - self.m2) /
-                                                          (self.l2 * np.sqrt(2)))
+                    probs = 0.5 + 0.5 * scipy.special.erf((np.log(self.leaks.flux[cond]) - self.logmu2) /
+                                                          (self.loglam2 * np.sqrt(2)))
                     detect = cond[scores < probs]
                     self.repair_cost[time.time_index] += \
                         np.sum(np.random.choice(gas_field.repair_cost_dist.repair_costs,
                                                 np.sum(self.leaks.reparable[detect])))
-                    self.leaks.delete_leaks(detect[self.leaks.reparable[detect]])
-                    #self.leaks.endtime[detect] = time.current_time
+                    self.leaks.endtime[detect[self.leaks.reparable[detect]]] = time.current_time + self.repair_delay
                 self.secondary_survey_cost[time.time_index] = self.labor * secondary_survey_time

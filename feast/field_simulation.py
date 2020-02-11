@@ -23,13 +23,12 @@ def check_timestep(gas_field, time):
                           site.name, comp.name))
 
 
-def field_simulation(gas_field=None, input_leaks=None, dir_out='Results', time=None,
+def field_simulation(gas_field=None, dir_out='Results', time=None,
                      econ_set=None, tech_dict=None, detection_techs=None, display_status=True,
                      save_norepair_scenario=False):
     """
     field_simulation generates a single realization of scenario. The scenario is defined by the input values.
     gas_field           a GasField object
-    input_leaks         a list of leaks to be generated at each timestep
     dir_out             directory name in which to save results
     time                a Time object
     econ_set            a FinanceSettings object
@@ -77,7 +76,7 @@ def field_simulation(gas_field=None, input_leaks=None, dir_out='Results', time=N
             if len(tech_obj.leaks.flux) > 0:
                 timestep_fraction = (tech_obj.leaks.endtime - time.current_time + time.delta_t) / time.delta_t
                 emissions = tech_obj.leaks.flux * np.min([np.ones(len(tech_obj.leaks.endtime)),
-                                                               timestep_fraction], axis=0)
+                                                          timestep_fraction], axis=0)
                 tech_obj.emissions.append(np.sum(emissions))
                 tech_obj.vents.append(np.sum(emissions[np.invert(tech_obj.leaks.reparable)]))
             else:

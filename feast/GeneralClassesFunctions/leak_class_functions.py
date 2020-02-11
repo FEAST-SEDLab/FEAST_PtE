@@ -28,7 +28,7 @@ class Leak:
         endtime             time index when emission will stop if not repaired
         """
 
-        if leaks_detected is () and flux is not ():
+        if leaks_detected == () and flux != ():
             leaks_detected = np.zeros(len(flux))
         try:
             length_in = len(flux)

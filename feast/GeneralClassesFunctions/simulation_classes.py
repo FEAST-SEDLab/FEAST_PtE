@@ -78,7 +78,7 @@ class GasField:
     """
     GasField accommodates all data that defines a gas field at the beginning of a simulation.
     """
-    def __init__(self, time=Time(), initial_leaks=None, **kwargs):
+    def __init__(self, time=Time(), **kwargs):
         """
         Input params:
             initial_leaks     The set of leaks that exist at the beginning of the simulation
@@ -104,6 +104,8 @@ class GasField:
         self.h0_max = 5  # m
         # Plume temperature
         self.t_plume = 300  # K
+        # Initial leaks defined for the gas field
+        self.initial_leaks = None
         # Update any attributes defined by kwargs
         set_kwargs_attrs(self, kwargs)
 
@@ -134,20 +136,21 @@ class GasField:
         cap_est = 0
         for site_dict in self.sites.values():
             cap_est += site_dict['number'] * 10
-        self.initial_leaks = lcf.Leak(capacity=cap_est)
-        # This generates new leaks for each component type in each site type
-        for sitedict in self.sites.values():
-            site = sitedict['parameters']
-            for comp_name in site.comp_dict:
-                compobj = site.comp_dict[comp_name]['parameters']
-                n_comp = sitedict['number'] * site.comp_dict[comp_name]['number']
-                if compobj.leak_production_rate > 0:
-                    n_leaks = np.random.binomial(n_comp, compobj.leaks_per_comp)
-                else:
-                    n_leaks = 0
-                self.leak_maker(n_leaks, self.initial_leaks, comp_name, n_comp, time, site)
-            if site.site_em_dist:
-                self.site_emissions_enforcer(site)
+        if self.initial_leaks is None:
+            self.initial_leaks = lcf.Leak(capacity=cap_est)
+            # This generates new leaks for each component type in each site type
+            for sitedict in self.sites.values():
+                site = sitedict['parameters']
+                for comp_name in site.comp_dict:
+                    compobj = site.comp_dict[comp_name]['parameters']
+                    n_comp = sitedict['number'] * site.comp_dict[comp_name]['number']
+                    if compobj.leak_production_rate > 0:
+                        n_leaks = np.random.binomial(n_comp, compobj.leaks_per_comp)
+                    else:
+                        n_leaks = 0
+                    self.leak_maker(n_leaks, self.initial_leaks, comp_name, n_comp, time, site)
+                if site.site_em_dist:
+                    self.site_emissions_enforcer(site)
         self.n_sites = site_ind
         # Distribution of leak repair costs
         rsc_path, _ = os.path.split(dirname(abspath(__file__)))
@@ -189,7 +192,8 @@ class GasField:
                 self.leak_maker(n_leaks, new_leaks, compname, n_comp, time, site)
         return new_leaks
 
-    def leak_maker(self, n_leaks, new_leaks, comp_name, n_comp, time, site, n_episodic=None):
+    @staticmethod
+    def leak_maker(n_leaks, new_leaks, comp_name, n_comp, time, site, n_episodic=None):
         """
         Updates a leak object with new values returned by leak_size_maker
         :param n_leaks: number of new leaks to create
@@ -198,6 +202,7 @@ class GasField:
         :param n_comp: the number of components to model
         :param time: a time object
         :param site: a site object
+        :param n_episodic: number of episodic emissions to create
         :return: None
         """
         comp = site.comp_dict[comp_name]['parameters']

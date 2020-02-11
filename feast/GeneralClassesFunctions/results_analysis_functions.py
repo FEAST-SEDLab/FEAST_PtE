@@ -84,14 +84,11 @@ def npv_calculator(filepath):
         find_cost[index, :] = sample.tech_dict[techs[index]].find_cost / discount_array
         maintenance_cost[index, :] = sample.tech_dict[techs[index]].maintenance / discount_array
         capital_cost[index, :] = sample.tech_dict[techs[index]].capital / discount_array
-        # gas_value_no_repair[index] = sum((np.array(sample.no_repair_emissions)-sample.tech_dict[techs[index]].emissions) /
-        #                                  discount_array) * sample.time.delta_t*24*3600*sample.econ_settings.gas_price
-        # repair_cost_no_repair[index, :] = sample.tech_dict[techs[index]].repair_cost / discount_array
         if techs[index] != 'Null':
             ind = index - null_correct
             repair_cost_null[ind, :] = sample.tech_dict[techs[index]].repair_cost / discount_array - null_repair_cost
             gas_value_n[ind] = sum((null_emissions-sample.tech_dict[techs[index]].emissions) / discount_array) * \
-                               sample.time.delta_t*24*3600*sample.econ_settings.gas_price
+                sample.time.delta_t*24*3600*sample.econ_settings.gas_price
             capital_cost_null[ind, :] = sample.tech_dict[techs[index]].capital / discount_array
             find_cost_null[ind, :] = sample.tech_dict[techs[index]].find_cost / discount_array
             maintenance_cost_null[ind, :] = sample.tech_dict[techs[index]].maintenance / discount_array

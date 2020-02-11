@@ -1,6 +1,5 @@
 import numpy as np
 import copy
-import pickle
 import feast
 from feast.GeneralClassesFunctions.simulation_classes import Component
 
@@ -28,7 +27,7 @@ misc_vent = Component(
 plunger = feast.GeneralClassesFunctions.simulation_classes.Component(
     name='plunger',
     leak_production_rate=0,
-    episodic_emission_sizes=[50.36], # [totals['t_plunger_methane'] / totals['n_plunger_events'] * 1e6 / 2059], #gram-per-sec
+    episodic_emission_sizes=[50.36],  # gram-per-sec
     episodic_emission_duration=2059 / 3600 / 24,  # see Zaimes Figure S5
     episodic_emission_per_day=0.0165  # totals['n_plunger_events'] / totals['n_plunger_wells'] / 365
 )
@@ -42,15 +41,16 @@ noplunger = feast.GeneralClassesFunctions.simulation_classes.Component(
 )
 
 
+# Assign the number of wells per site
 n_sites = 93
+# The well per site distribution was built using data from the Colorado Oil and Gas Conservation Commission
+well_dist = np.cumsum([0.7842, 0.0762, 0.0382, 0.0280, 0.0150, 0.0114, 0.0082, 0.0111, 0.0047, 0.0045, 0.0035, 0.0038,
+                      0.0027, 0.0016, 0.0018, 0.0026, 0.0010, 0.0011, 0.0006])
+n_wells_odds = np.random.uniform(0, 1, n_sites)
+n_wells_samp = np.zeros(n_sites)
+for ind in range(n_sites):
+    n_wells_samp[ind] = np.min(np.where(n_wells_odds[ind] < well_dist)[0]) + 1
 
-with open('wells_per_site.p', 'rb') as f:
-    n_wells = pickle.load(f)
-
-with open('../2020-01-22-ComponentEmissionsDistributions/production_by_site.p', 'rb') as f:
-    site_prod = pickle.load(f)
-
-n_wells_samp = np.random.choice(n_wells, n_sites)
 counts, n_wells_bin = np.histogram(n_wells_samp,
                                    bins=np.linspace(0.5, np.max(n_wells_samp) + 0.5, np.max(n_wells_samp) + 1))
     
@@ -58,10 +58,11 @@ counts, n_wells_bin = np.histogram(n_wells_samp,
 for ind in range(1):
     print('Iteration number: {:0.0f}'.format(ind))
     site_dict = {}
+    # Assign a number of components to each site based on the number of wells
     for ind2 in range(1, np.max(n_wells_samp)):
         if counts[ind2 - 1] == 0:
             continue
-        cond = (n_wells == ind2) & (site_prod[:, 2] > 0)    
+        cond = (n_wells_samp == ind2)
         basicpad = feast.GeneralClassesFunctions.simulation_classes.Site(
             name='basic pad',
             comp_dict={
@@ -98,7 +99,7 @@ for ind in range(1):
         'ogi': {'survey_interval': 180, 'mu': 0.0018,
                 'lam': 2.23, 'survey_speed': 400},
         'drone': {'survey_interval': 180, 'mu': 0.0057,
-                 'lam': 4.52, 'survey_speed': 983}
+                  'lam': 4.52, 'survey_speed': 983}
     }
     tech_dict = {}
     for tech, params in tech.items():

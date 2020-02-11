@@ -18,7 +18,7 @@ file_out = os.path.join(rsc_path, 'DataObjectInstances', 'production-emissions.p
 
 dat = pd.read_excel(file_in,
                     sheet_name="AllSources-kgday-methane",
-                   header=3)
+                    header=3)
 em_array = []
 for study in dat:
     if 'Ravikumar-Measured' in study:

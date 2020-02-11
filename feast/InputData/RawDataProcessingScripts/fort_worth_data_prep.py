@@ -26,7 +26,7 @@ import pickle
 from os.path import dirname, abspath
 import os
 
-rsc_path = rsc_path = dirname(abspath(__file__))
+rsc_path = dirname(abspath(__file__))
 rsc_path, _ = os.path.split(rsc_path)
 file_in = os.path.join(rsc_path, 'RawData', 'FortWorth.csv')
 file_out = os.path.join(rsc_path, 'DataObjectInstances', 'fort_worth_leaks.p')

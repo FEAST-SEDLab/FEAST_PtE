@@ -1,6 +1,6 @@
 """ allen_data_prep loads data from the Allen emissions data spreadsheet and processes it before saving the
     results to a DataFile object. The Allen emissions data are from the following resource:
-    D. Allen, V. M. Torres, et al. \Measurements of methane emissions at natural
+    D. Allen, V. M. Torres, et al. Measurements of methane emissions at natural
     gas production sites in the United States David". In: Proceedings of the National
     Academy of Sciences 110.44 (Sept. 2013), pp. 18025{18030. issn: 0027-8424.
     doi: 10.1073/pnas.1315099110. url: http://www.pnas.org/cgi/doi/10.

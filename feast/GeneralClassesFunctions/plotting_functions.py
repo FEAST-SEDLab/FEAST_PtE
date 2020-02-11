@@ -20,7 +20,7 @@ color_set = np.array([
 ]) / 255
 
 
-def plot_fixer(fig=None, ax=None, fsize=18, color=[0, 0, 0], tight_layout=True):
+def plot_fixer(fig=None, ax=None, fsize=18, color=(0, 0, 0), tight_layout=True):
     rc('font', weight='bold')
     rcParams['text.latex.preamble'] = [r'\usepackage{sfmath} \boldmath']
     # fig.canvas.draw()
@@ -38,7 +38,7 @@ def plot_fixer(fig=None, ax=None, fsize=18, color=[0, 0, 0], tight_layout=True):
         for ln in ax.lines:
             ln.set_linewidth(lw)
         for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
-                ax.get_xticklabels() + ax.get_yticklabels()):
+                     ax.get_xticklabels() + ax.get_yticklabels()):
             item.set_fontsize(fsize)
             item.set_color(color)
         try:
@@ -53,11 +53,6 @@ def plot_fixer(fig=None, ax=None, fsize=18, color=[0, 0, 0], tight_layout=True):
         ax.yaxis.label.set_fontweight('bold')
     if tight_layout:
         plt.tight_layout()
-
-
-# for i in range(0, len(color_set)):
-#     for j in range(0, len(color_set[i])):
-#         color_set[i][j] /= 255
 
 
 def display_save(display, save, file_out):
@@ -80,28 +75,7 @@ def display_save(display, save, file_out):
     plt.ioff()
 
 
-def display_settings(interactive=True, inline=True):
-    """
-    If running in IPYTHON, display_settings uses magic commands to plot interactively
-    interactive         determines whether the plot is interactive
-    """
-    if interactive:
-        # display settings depend on the python environment being used
-        try:
-            __IPYTHON__
-            ipy = get_ipython()
-            if inline is True:
-                try:
-                    ipy.magic("matplotlib inline")
-                except:
-                    ipy.magic("matplotlib")
-            else:
-                ipy.magic("matplotlib")
-        except:
-            plt.ion()
-
-
-def time_series(results_file, display=True, save=False, file_out=None, interactive=True):
+def time_series(results_file, display=True, save=False, file_out=None):
     """
     Display a time series of emissions from each detection method in a results file
     Inputs:
@@ -109,9 +83,7 @@ def time_series(results_file, display=True, save=False, file_out=None, interacti
         display         choose whether to display the plot or not
         save            choose whether to save the plot or not
         file_out        define a path at which to save the file
-        interactive     choose whether to make the plot interactive
     """
-    display_settings(interactive)
     results = load(open(results_file, 'rb'))
     tech_dict = results.tech_dict
     fig = plt.figure()
@@ -129,7 +101,7 @@ def time_series(results_file, display=True, save=False, file_out=None, interacti
     return ax
 
 
-def summary_plotter(directory, display=True, save=False, file_out=None, interactive=True, n_wells=None, ylabel=None):
+def summary_plotter(directory, display=True, save=False, file_out=None, n_wells=None, ylabel=None):
     """
     The NPV for each realization stored in 'directory is calculated and displayed in a stacked bar chart. Each component
     of the NPV is displayed separately in the chart.
@@ -138,7 +110,6 @@ def summary_plotter(directory, display=True, save=False, file_out=None, interact
         display      boolean value that determines whether or not the plot is displayed
         save         boolean value that determines whether the plot is saved
         file_out     file_out path to a file in which to save the figure if save is True
-        interactive  determines whether the plot is produced interactively
     """
     # load data
     files = [f for f in listdir(directory) if isfile(join(directory, f))]
@@ -163,7 +134,6 @@ def summary_plotter(directory, display=True, save=False, file_out=None, interact
         npv[key] = np.sum(npv_in[key], 1)/n_realizations
 
     # create figure
-    display_settings(interactive)
     plt.figure(figsize=(10, 5))
     width = 0.35
     ind = np.linspace(0, n_tech-2, n_tech-1)
@@ -205,7 +175,7 @@ def summary_plotter(directory, display=True, save=False, file_out=None, interact
     display_save(display, save, file_out)
 
 
-def hist_plotter(directory, display=True, save=False, file_out=None, interactive=True, inline=False, bins=None):
+def hist_plotter(directory, display=True, save=False, file_out=None, bins=None):
     """
     Plots histogram of leaks found by each technology based on results in the folder 'Directory'
     Inputs:
@@ -213,13 +183,10 @@ def hist_plotter(directory, display=True, save=False, file_out=None, interactive
         display      boolean value that determines whether or not the plot is displayed
         save         boolean value that determines whether the plot is saved
         file_out     file_out path to a file in which to save the figure if save is True
-        interactive  determines whether the plot is produced interactively
-        inline       determines whether the plot is displayed inline if possible
         bins         defines the bins used in the histograms
     Return: None
     """
 
-    display_settings(interactive, inline=inline)
     _, _, found, _ = results_analysis_functions.results_analysis(directory)
     files = [f for f in listdir(directory) if isfile(join(directory, f))]
     leaks_made = []

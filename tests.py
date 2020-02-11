@@ -1,11 +1,10 @@
 import numpy as np
-import sys
-sys.path.append('.')
-import FEAST_Path_To_Equivalence_2019 as feast
-from FEAST_Path_To_Equivalence_2019.GeneralClassesFunctions import simulation_classes as sc
-import FEAST_Path_To_Equivalence_2019.GeneralClassesFunctions.leak_class_functions as lcf
-from FEAST_Path_To_Equivalence_2019 import DetectionModules as Dm
+import feast
+from feast.GeneralClassesFunctions import simulation_classes as sc
+import feast.GeneralClassesFunctions.leak_class_functions as lcf
+from feast import DetectionModules as Dm
 import os
+
 
 def test_gasfield_leak_maker():
     gf = sc.GasField()
@@ -75,7 +74,7 @@ def test_emissions_enforcer_high():
         raise ValueError("lcf.Leak initializing unexpected emissions")
     np.random.seed(0)
     gf.site_emissions_enforcer(gf.sites['site0']['parameters'])
-    if np.max(np.abs(gf.initial_leaks.flux - np.array([0.84898829, 0, 0, 0, 0, 0, 0, 0, 0, 0]))) > 1e-6:
+    if np.max(np.abs(gf.initial_leaks.flux - np.array([0.68284285, 0, 0, 0, 0, 0, 0, 0, 0, 0]))) > 1e-6:
         raise(ValueError("emissions_enforcer is not removing emissions as expected"))
 
 
@@ -127,7 +126,6 @@ def test_gasfield_leak_size_maker():
         leak_production_rate=5.4 / 650 / 365
     )
     n_sites = 100
-    n_wells_samp = np.ones(n_sites) * 2
     site_dict = {}
     basicpad = feast.GeneralClassesFunctions.simulation_classes.Site(
         # Simulates two wells, one tank, total components=11302
@@ -142,7 +140,7 @@ def test_gasfield_leak_size_maker():
         sites=site_dict,
         time=timeobj
     )
-    new_leaks = gas_field.leak_size_maker(timeobj)
+    _ = gas_field.leak_size_maker(timeobj)
     return
 
 
@@ -175,21 +173,22 @@ def test_field_simulation():
     os.remove('ResultsTemp/realization0.p')
     os.rmdir('ResultsTemp')
 
-# test_gasfield_leak_maker()
-#
-# test_null_repair()
-#
-# test_alvarez_colorado_em_dist()
-#
-# test_emissions_enforcer_low()
-#
-# test_emissions_enforcer_high()
-#
-# test_emissions_enforcer_no_repairable()
 
-# test_bootstrap_leak_maker()
-#
-# test_gasfield_leak_size_maker()
+test_gasfield_leak_maker()
+
+test_null_repair()
+
+test_alvarez_colorado_em_dist()
+
+test_emissions_enforcer_low()
+
+test_emissions_enforcer_high()
+
+test_emissions_enforcer_no_repairable()
+
+test_bootstrap_leak_maker()
+
+test_gasfield_leak_size_maker()
 
 test_field_simulation()
 

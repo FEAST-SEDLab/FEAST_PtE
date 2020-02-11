@@ -17,12 +17,18 @@ class DetectionMethod:
         """
         self.notes = notes
         self.null_repaired = []
+        self.repair_delay = 0  # days
+        self.ophrs = {'begin': 0, 'end': 2400}
+        self.survey_interval = 365  # days
+        self.comps_per_timestep = 0
         self.repair_cost = np.zeros(time.n_timesteps)
         self.capital = np.zeros(time.n_timesteps)
         self.find_cost = np.zeros(time.n_timesteps)
         # leaks will be updated throughout simulations. initial_leaks should remain constant, so a copy is needed.
         self.leaks = copy.deepcopy(gas_field.initial_leaks)
         self.insurvey = False
+        self.site_survey_index = 0
+        self.comp_survey_index = 0
         self.count_found = []
         self.emissions = []
         self.vents = []
@@ -36,17 +42,7 @@ class DetectionMethod:
             time         a time object (Defined in simulation_classes)
         """
         self.end_intermittents(time)
-        # reparable_inds = np.where(self.leaks.reparable[:self.leaks.n_leaks])[0]
-        # compinds = self.leaks.comp_index[reparable_inds]
-        # siteinds = self.leaks.site_index[reparable_inds]
-        # for compname in gas_field.comp_dict:
-        #
-        #     n_repaired = np.random.poisson(len(reparable_inds) * gas_field.comp_dict[compname].null_repair_rate *
-        #                                time.delta_t)
-        #     index_repaired = np.random.choice(reparable_inds, n_repaired, replace=False)
-        #     self.leaks.delete_leaks(index_repaired)
-        #     self.repair_cost[time.time_index] += sum(np.random.choice(gas_field.repair_cost_dist.repair_costs,
-        #                                                           n_repaired))
+
     @staticmethod
     def find_site_name(gas_field, site_index):
         for sitename, site in gas_field.sites.items():
@@ -78,8 +74,8 @@ class DetectionMethod:
                     end_survey = True
                     break
                 cond.extend(np.where((self.leaks.site_index == self.site_survey_index) &
-                                (self.leaks.comp_index >= self.comp_survey_index) &
-                                (self.leaks.comp_index < self.comp_survey_index + remaining_comps))[0])
+                                     (self.leaks.comp_index >= self.comp_survey_index) &
+                                     (self.leaks.comp_index < self.comp_survey_index + remaining_comps))[0])
                 if remaining_comps + self.comp_survey_index > gas_field.sites[site_name]['parameters'].max_comp_ind:
                     remaining_comps -= (gas_field.sites[site_name]['parameters'].max_comp_ind - self.comp_survey_index)
                     self.comp_survey_index = 0
@@ -93,7 +89,7 @@ class DetectionMethod:
                     np.sum(np.random.choice(gas_field.repair_cost_dist.repair_costs,
                                             np.sum(self.leaks.reparable[detect])))
                 # Delete found leaks that are reparable
-                self.leaks.delete_leaks(detect[self.leaks.reparable[detect]])
+                self.leaks.endtime[detect[self.leaks.reparable[detect]]] = time.current_time + self.repair_delay
             if end_survey:
                 self.insurvey = False
                 self.site_survey_index = 0

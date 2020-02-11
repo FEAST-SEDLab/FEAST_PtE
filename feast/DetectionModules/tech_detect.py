@@ -38,8 +38,8 @@ class TechDetect(DetectionMethod):
         set_kwargs_attrs(self, kwargs)
         # -------------- Set calculated parameters --------------
         self.survey_time = (gas_field.n_comps / self.survey_speed +
-                            gas_field.site_spacing / self.drive_speed / 3600 * gas_field.n_sites + self.setup_time * \
-                                                                                   gas_field.n_sites)  #
+                            gas_field.site_spacing / self.drive_speed / 3600 * gas_field.n_sites + self.setup_time *
+                            gas_field.n_sites)  # Time per survey
         work_time = (self.ophrs['end'] - self.ophrs['begin']) / 2400
         self.comps_per_timestep = self.survey_speed * 24 * time.delta_t * np.min([1, work_time / time.delta_t])
         # hours per site
@@ -49,8 +49,8 @@ class TechDetect(DetectionMethod):
         self.time_factor = self.survey_time / (self.survey_interval * work_time)
         # leaks_per_timestep is calculated based on the survey speed and number of leaks at the beginning of each survey
         self.leaks_per_timestep = 0
-        self.l = np.log(self.lam)
-        self.m = np.log(self.mu)
+        self.loglam = np.log(self.lam)
+        self.logmu = np.log(self.mu)
         # -------------- Financial Properties --------------
         self.capital_0 = 0 * self.time_factor  # dollars (defaults to zero)
         self.maintenance_0 = self.capital_0 * 0.1  # dollars/year
@@ -74,7 +74,6 @@ class TechDetect(DetectionMethod):
         """
         This function determines which leaks are found given an array of indexes defined by "cond"
         In this case, the detect leaks are determined using a probability of detection curve
-        :param compname: a component key to a set of leaks
         :param cond: The set of indexes to be considered
         :return detect: the indexes of detected leaks
         """
@@ -84,8 +83,8 @@ class TechDetect(DetectionMethod):
         cond = cond[self.leaks.flux[cond] > 0]
         n_scores = len(cond)
         scores = np.random.uniform(0, 1, n_scores)
-        probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - self.m) / (self.l * np.sqrt(2))) for f
-                                  in self.leaks.flux[cond]])
+        probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - self.logmu) / (self.loglam * np.sqrt(2))) for f
+                                      in self.leaks.flux[cond]])
         detect = cond[scores <= probs]
         return detect
 

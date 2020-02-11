@@ -25,16 +25,16 @@ Python FEAST consists of a directory containing over 30 python module and object
 	|----field_simulation.py
 	|----Glossary.txt
 	|----README.rst
-    |----requirements.txt
-    |----setup.cfg
-    |----setup.py
+	|----requirements.txt
+	|----setup.cfg
+	|----setup.py
 	|----DetectionModules
 		|----__init__.py
 		|----abstract_detection_method.py
 		|----helper_functions
-        |----null.py
-        |----tech_detect.py
-        |----tiered_detect.py
+		|----null.py
+		|----tech_detect.py
+		|----tiered_detect.py
 	|----GeneralClassesFunctions
 		|----__init__.py
 		|----leak_class_functions.py
@@ -42,34 +42,34 @@ Python FEAST consists of a directory containing over 30 python module and object
 		|----results_analysis_functions.py
 		|----simulation_classes.py
 		|----simulation_functions.py
-        |----site_emission_methods.py
+		|----site_emission_methods.py
 	|----InputData
 		|----input_data_classes.py
 		|----DataObjectInstances
 			|----arpae_wind.p
-            |----COGCC_site_prod_2019.p
+			|----COGCC_site_prod_2019.p
 			|----fernandez_leak_reapair_costs_2006.p
 			|----fort_worth_leaks.p
-            |----fort_worth_tank.p
-            |----fort_worth_notank.p
+			|----fort_worth_tank.p
+			|----fort_worth_notank.p
 			|----fort_worth_wind.p
 			|----hitran_database.p
 			|----pnnl_methane.p
-            |----production-emissions.p
+			|----production-emissions.p
 		|----RawData
-            |----Allen_leakdata_2013.csv
-            |----COGCC-2019-Production.xlsx
-            |----COGCC-2019-well-locations.dbf
+			|----Allen_leakdata_2013.csv
+			|----COGCC-2019-Production.xlsx
+			|----COGCC-2019-well-locations.dbf
 			|----ARPAEWind.csv
 			|----FernandezRepairCost.csv
 			|----FortWorth.csv
 			|----FortWorthwindData.csv
 			|----HITRAN_database.csv
-            |----octave-leak-data.csv
+			|----octave-leak-data.csv
 			|----pnnl_methane.csv
-            |----ProductionSite-ComponentEmissions.xlsx
+			|----ProductionSite-ComponentEmissions.xlsx
 		|----RawDataProcessingScripts
-            |----allend_data_prep.py
+			|----allend_data_prep.py
 			|----arpae_wind_reader.py
 			|----COGCC_2019_prodctiondata.py
 			|----fernandez_repair_cost_reader.py

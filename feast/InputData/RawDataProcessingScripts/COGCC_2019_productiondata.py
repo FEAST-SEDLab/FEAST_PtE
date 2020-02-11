@@ -103,8 +103,8 @@ def crude_lat_dist(l1, l2):
     :return: the north south distance between the latitudes
     """
 
-    earthR = 6373  # km
-    return earthR * np.pi / 180 * np.abs(l1 - l2)  # km
+    earth_radius = 6373  # km
+    return earth_radius * np.pi / 180 * np.abs(l1 - l2)  # km
 
 
 def binary_find_min(a, ls):
@@ -199,7 +199,7 @@ for site in pad:
     longs = []
     site_prod.append([0, 0, 0, 0])
     for well in site:
-        cond = np.where(cscode==well[2])[0]
+        cond = np.where(cscode == well[2])[0]
         site_prod[-1][2] += np.sum(dat['gas_prod'][cond])
         site_prod[-1][3] += np.sum(dat['oil_prod'][cond])
         lats.append(well[0])
