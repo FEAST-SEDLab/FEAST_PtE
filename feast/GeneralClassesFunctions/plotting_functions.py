@@ -6,17 +6,18 @@ import numpy as np
 from . import results_analysis_functions
 from matplotlib import rc, rcParams
 
-# Stanford bright color palette (https://identity.stanford.edu/overview/color)
-# color_set = [[140, 21, 21], [0, 152, 219], [0, 155, 118],  [178, 111, 22], [83, 40, 79],  [0, 0, 0], [77, 79, 83]]
-
+# The color set defined here is the Tableau 10 color set.
 color_set = np.array([
-    [0, 61, 50],
-    [193, 176, 92],
-    [72, 24, 21],
-    [48, 155, 255],
-    [22, 104, 9],
-    [0, 0, 0],
-    [32, 25, 55]
+    [78, 121, 167],
+    [242, 142,  43],
+    [225,  87,  89],
+    [118, 183, 178],
+    [89, 161,  79],
+    [237, 201, 72],
+    [176, 122, 161],
+    [255, 157, 167],
+    [156, 117,  95],
+    [186, 176, 172]
 ]) / 255
 
 

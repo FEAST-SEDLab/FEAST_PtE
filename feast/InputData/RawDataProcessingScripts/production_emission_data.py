@@ -14,7 +14,7 @@ import os
 rsc_path = dirname(abspath(__file__))
 rsc_path, _ = os.path.split(rsc_path)
 file_in = os.path.join(rsc_path, 'RawData', 'ProductionSite-ComponentEmissions.xlsx')
-file_out = os.path.join(rsc_path, 'DataObjectInstances', 'production-emissions.p')
+file_out = os.path.join(rsc_path, 'DataObjectInstances', 'production_emissions.p')
 
 dat = pd.read_excel(file_in,
                     sheet_name="AllSources-kgday-methane",
@@ -39,7 +39,7 @@ emissions = LeakData(notes=notes, raw_file_name=file_in.split('/')[-1], data_pre
 
 leak_data = {'All': em_array}
 well_counts = {'All': 2612}
-comp_counts = {'All': 2612 * 650}
+comp_counts = {'All': 650}  # Assumed components per well
 
 emissions.define_data(leak_data=leak_data, well_counts=well_counts, comp_counts=comp_counts)
 

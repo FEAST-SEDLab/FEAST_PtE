@@ -30,7 +30,7 @@ class TechDetect(DetectionMethod):
 
         # -------------- Detection Variables -------------
         self.mu = 0.0185  # g/s
-        self.lam = 0.9  # g/s
+        self.lam = 2.23
         self.ophrs = {'begin': 800, "end": 1700}
         self.insurvey = False
         self.site_survey_index = 0

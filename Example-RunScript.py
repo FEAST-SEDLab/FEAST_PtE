@@ -9,7 +9,7 @@ from feast.GeneralClassesFunctions.simulation_classes import Component
 # Generates reparable fugitive emissions
 comp_fug = Component(
     name='Fugitive emitters',
-    leak_data_path='production-emissions.p',
+    leak_data_path='production_emissions.p',
     leaks_per_comp=0.00231,
     leak_production_rate=5.4 / 650 / 365
 )
@@ -17,7 +17,7 @@ comp_fug = Component(
 # Generates miscelaneous emissions that cannot be repaired
 misc_vent = Component(
     name='misc vents',
-    leak_data_path='production-emissions.p',
+    leak_data_path='production_emissions.p',
     leaks_per_comp=0.00231,
     leak_production_rate=5.4 / 650 / 365,
     base_reparable=False,
@@ -47,13 +47,13 @@ n_sites = 93
 well_dist = np.cumsum([0.7842, 0.0762, 0.0382, 0.0280, 0.0150, 0.0114, 0.0082, 0.0111, 0.0047, 0.0045, 0.0035, 0.0038,
                       0.0027, 0.0016, 0.0018, 0.0026, 0.0010, 0.0011, 0.0006])
 n_wells_odds = np.random.uniform(0, 1, n_sites)
-n_wells_samp = np.zeros(n_sites)
+n_wells_samp = np.zeros(n_sites, dtype=int)
 for ind in range(n_sites):
     n_wells_samp[ind] = np.min(np.where(n_wells_odds[ind] < well_dist)[0]) + 1
 
 counts, n_wells_bin = np.histogram(n_wells_samp,
                                    bins=np.linspace(0.5, np.max(n_wells_samp) + 0.5, np.max(n_wells_samp) + 1))
-    
+
 
 for ind in range(1):
     print('Iteration number: {:0.0f}'.format(ind))
@@ -114,7 +114,7 @@ for ind in range(1):
             'lam2': 2.23, 'mu2': 0.002,
             'secondary_comps_hr': 400}
     }
-  
+
     for tech, params in tiered_tech.items():
         tech_dict[tech] = feast.DetectionModules.tiered_detect.TieredDetect(
             timeobj, gas_field,

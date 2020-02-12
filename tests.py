@@ -95,7 +95,7 @@ def test_emissions_enforcer_no_repairable():
 def test_bootstrap_leak_maker():
     comp_fug = sc.Component(
         name='Fugitive emitters',
-        leak_data_path='production-emissions.p',
+        leak_data_path='production_emissions.p',
         leaks_per_comp=0.0026,
         leak_production_rate=5.4 / 650 / 365
     )
@@ -121,7 +121,7 @@ def test_bootstrap_leak_maker():
 def test_gasfield_leak_size_maker():
     comp_fug = sc.Component(
         name='Fugitive emitters',
-        leak_data_path='production-emissions.p',
+        leak_data_path='production_emissions.p',
         leaks_per_comp=0.0026,
         leak_production_rate=5.4 / 650 / 365
     )
@@ -147,7 +147,7 @@ def test_gasfield_leak_size_maker():
 def test_field_simulation():
     comp_fug = sc.Component(
         name='Fugitive emitters',
-        leak_data_path='production-emissions.p',
+        leak_data_path='production_emissions.p',
         leaks_per_comp=0.0026,
         leak_production_rate=5.4 / 650 / 365
     )

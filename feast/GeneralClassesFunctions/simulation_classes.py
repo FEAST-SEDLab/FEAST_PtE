@@ -45,7 +45,7 @@ class Component:
         # Events with a constant probability of occurring and duration determined by the null repair rate
         # emission specifications may or may not be reparable before the null repair process
         self.dist_type = 'bootstrap'
-        self.leak_data_path = 'fort_worth_leaks.p'
+        self.leak_data_path = 'production_emissions.p'
         self.leak_production_rate = 1e-5  # new leaks per component per day
         self.leaks_per_comp = 'default'
         self.base_reparable = True
