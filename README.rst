@@ -111,6 +111,8 @@ simulation_functions.py
 	-save_results	        Generates and saves a Results object.	
 	-set_kwargs_attrs	Allows any attribute to be set using key word arguments.
 
+site_emission_methdods.py
+	allows initial gas field emisions to be controlled at the site level.
 
 InputData:
 ----------
