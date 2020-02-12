@@ -109,7 +109,8 @@ simulation_functions.py
 	defines functions that are necessary for a simulation but are neither part of a LDAR program nor methods of a class. The functions are listed below:
 	
 	save_results:	Generates a Results object at the end of a simulation and saves it.
-	set_kwargs_attrs:	Allows any attribute specified in a class to be set using key word arguments
+	
+	set_kwargs_attrs:	Allows any attribute specified in a class to be set using key word arguments.
 
 InputData:
 ----------
