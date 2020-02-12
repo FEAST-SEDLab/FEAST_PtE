@@ -17,68 +17,54 @@ File Structure:
 Python FEAST consists of a directory containing over 30 python module and object files. The file map below illustrates where each file is stored. The map is followed by a short description of the files.
 
 ::
-
-	FEAST
+	FEAST_PtE
 	|----field_simulation.py
 	|----Glossary.txt
 	|----README.rst
 	|----requirements.txt
 	|----setup.cfg
 	|----setup.py
-	|----DetectionModules
-		|----__init__.py
-		|----abstract_detection_method.py
-		|----helper_functions
-		|----null.py
-		|----tech_detect.py
-		|----tiered_detect.py
-	|----GeneralClassesFunctions
-		|----__init__.py
-		|----leak_class_functions.py
-		|----plotting_functions.py
-		|----results_analysis_functions.py
-		|----simulation_classes.py
-		|----simulation_functions.py
-		|----site_emission_methods.py
-	|----InputData
-		|----input_data_classes.py
-		|----DataObjectInstances
-			|----arpae_wind.p
-			|----COGCC_site_prod_2019.p
-			|----fernandez_leak_reapair_costs_2006.p
-			|----fort_worth_leaks.p
-			|----fort_worth_tank.p
-			|----fort_worth_notank.p
-			|----fort_worth_wind.p
-			|----hitran_database.p
-			|----pnnl_methane.p
-			|----production-emissions.p
-		|----RawData
-			|----Allen_leakdata_2013.csv
-			|----COGCC-2019-Production.xlsx
-			|----COGCC-2019-well-locations.dbf
-			|----ARPAEWind.csv
-			|----FernandezRepairCost.csv
-			|----FortWorth.csv
-			|----FortWorthwindData.csv
-			|----HITRAN_database.csv
-			|----octave-leak-data.csv
-			|----pnnl_methane.csv
-			|----ProductionSite-ComponentEmissions.xlsx
-		|----RawDataProcessingScripts
-			|----allend_data_prep.py
-			|----arpae_wind_reader.py
-			|----COGCC_2019_prodctiondata.py
-			|----fernandez_repair_cost_reader.py
-			|----fort_worth_data_prep.py
-			|----fort_worth_tank_notank.py
-			|----fort_worth_wind_reader.py
-			|----HITRAN_reader.py
-			|----pnnl_reader.py
-			|----production_emission_data.py
-			|----README.txt
-			|----repair_cost_data_reader.py
-			|----wind_data_reader.py
+	|----FEAST
+		|----DetectionModules
+			|----__init__.py
+			|----abstract_detection_method.py
+			|----null.py
+			|----tech_detect.py
+			|----tiered_detect.py
+		|----GeneralClassesFunctions
+			|----__init__.py
+			|----leak_class_functions.py
+			|----plotting_functions.py
+			|----results_analysis_functions.py
+			|----simulation_classes.py
+			|----simulation_functions.py
+			|----site_emission_methods.py
+		|----InputData
+			|----input_data_classes.py
+			|----DataObjectInstances
+				|----allen_leaks.p
+				|----COGCC_site_prod_2019.p
+				|----fernandez_leak_reapair_costs_2006.p
+				|----fort_worth_leaks.p
+				|----fort_worth_notank.p
+				|----fort_worth_tank.p
+				|----production-emissions.p
+			|----RawData
+				|----Allen_leakdata_2013.csv
+				|----COGCC-2019-Production.xlsx
+				|----COGCC-2019-well-locations.dbf
+				|----FernandezRepairCost.csv
+				|----FortWorth.csv
+				|----ProductionSite-ComponentEmissions.xlsx
+			|----RawDataProcessingScripts
+				|----allend_data_prep.py
+				|----COGCC_2019_prodctiondata.py
+				|----fernandez_repair_cost_reader.py
+				|----fort_worth_data_prep.py
+				|----fort_worth_tank_notank.py
+				|----production_emission_data.py
+				|----README.txt
+				|----repair_cost_data_reader.py
 
 File descriptions
 -----------------
