@@ -71,73 +71,61 @@ Python FEAST consists of a directory containing over 30 python module and object
 File descriptions
 -----------------
 field_simulation.py 
-	contains one function of the same name (field_simulation). One call to field_simulation() creates one realization of a FEAST 		scenario. field_simulation() accepts several optional input arguments to change parameters from their default settings.
+	contains one function of the same name (field_simulation). One call to field_simulation() creates one realization of a FEAST scenario. field_simulation() accepts several optional input arguments to change parameters from their default settings.
 
 DetectionModules:
------------------
+=================
 DetectionModules is the directory containing all of the LDAR program files:
 
 abstract_detection_method.py 
 	defines a parent class with the attributes and methods that all LDAR programs have. 
 
-helper_functions.py 
-	contains a few short functions that are used by multiple LDAR programs. 
-
 null.py 
 	defines the null detection method. 
+	
+tech_detect.py
+	defines a class of LDAR programs that perform periodic surveys and identify emission sources at the component level.
 
-dd.py 
-	defines a "Distributed Detector" LDAR program
-
-ir.py
-	defines LDAR programs that use an infrared camera. An a manual subclass and an airborne, automated subclass are included.
-
-fid.py
-	defines an LDAR program based on a flame ionization detector
+tiered_detect.py
+	defines a class of LDAR programs that perform periodic surveys that identify emission sources at the site level. Secondary surveys are used to identify the emitting components at high emitting sites.
 
 GeneralClassesFunctions:
 ------------------------
-GeneralClassesFunctions contains files that define classes and functions that are not directly specified by LDAR programs or input data. Each module in the directory is described below:
+GeneralClassesFunctions contains files that define classes and functions that store simulation settings and gas field states:
 
 leak_class_functions.py
-	defines the Leak class used to store all the data required to define a set of leaks. The module also contains function
-	definitions used to create and manipulate leak objects.
+	defines the Leak class used to store all the data required to define a set of leaks. The module also contains function definitions used to create and manipulate leak objects.
 
 plotting_functions.py 
 	defines functions for plotting simulation results.
 
 results_analysis_functions.py 
-	defines functions that compile results from numerous realizations of a scenario to calculate mean net present value, detected
-	leak size distributions and other statistics. plotting_functions.py calls results_analysis_functions.py to produce plots.
+	defines functions that compile results from numerous realizations of a scenario to calculate mean net present value, detected	leak size distributions and other statistics. plotting_functions.py calls results_analysis_functions.py to produce plots.
 
 simulation_classes.py 
-	defines classes that are necessary for a simulation. These classes are GasField, FinanceSettings, Atmosphere, Time and Results.
+	defines classes that are necessary for a simulation. These classes are Component, GasField, FinanceSettings, Results, Site and Time.
 
 simulation_functions.py 
-	defines functions that are necessary for a simulation but are neither part of a LDAR program nor methods of a class. The
-	functions are listed below:
+	defines functions that are necessary for a simulation but are neither part of a LDAR program nor methods of a class. The functions are listed below:
 	
-	-new_leak_count      Calculates the number of new leaks to generate at a time step
 	-save_results        Generates a Results object at the end of a simulation and saves it.
 	-set_kwargs_attrs    Allows any attribute specified in a class to be set using key word arguments
-	-gauss_leak_model    Calculates the concentration of gas due to a leak at specified location and conditions.
-
 
 InputData:
 ----------
-InputData is a directory containing raw data files, scripts for processing those raw data files and python object files created from the raw data. PyFEAST only uses the python object files, but the raw files and processing files are included for transparency and to allow for alternative processing files to be added in the future. The following list describes the subdirectories and class file in InputData.
+InputData is a directory containing raw data files, scripts for processing those raw data files and python object files created from the raw data. FEAST v3.0 only uses the python object files, but the raw files and processing files are included for transparency and to allow for alternative processing files to be added in the future. The following list describes the subdirectories and class file in InputData.
 
 input_data_classes.py    
-	Defines all of the input data classes used by PyFEAST.
+	Defines all of the input data classes used by FEAST.
 	
 DataObjectInstances    
-	Contains python data object files used by PyFEAST
+	Contains python data object files used by FEAST
 	
 RawData    
-	Contains raw csv files for wind speed, leak data sets and other inputs to PyFEAST.
+	Contains raw csv files for leak data sets and other inputs to PyFEAST.
 	
 RawDataProcessingScripts    
-	Contains the scripts used to produce the objects in DataObjectInstaces from the csv files in RawData.
+	Contains the scripts used to produce the objects in DataObjectInstaces from the files in RawData.
 
 Author:
 -------
