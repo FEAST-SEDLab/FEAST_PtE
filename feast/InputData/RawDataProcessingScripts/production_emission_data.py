@@ -37,8 +37,9 @@ notes = \
 
 emissions = LeakData(notes=notes, raw_file_name=file_in.split('/')[-1], data_prep_file='production_emission_data.py')
 
+# The dict structure allows for multiple types of detection methods used in the study
 leak_data = {'All': em_array}
-well_counts = {'All': 2612}
+well_counts = {'All': 2612} # Number of wells in the study
 comp_counts = {'All': 650}  # Assumed components per well
 
 emissions.define_data(leak_data=leak_data, well_counts=well_counts, comp_counts=comp_counts)
