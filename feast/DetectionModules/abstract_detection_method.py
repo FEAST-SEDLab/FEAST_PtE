@@ -102,3 +102,15 @@ class DetectionMethod:
         :return:
         """
         self.leaks.delete_leaks(np.where(self.leaks.endtime <= time.current_time)[0])
+
+    def replacement_cap(self, time):
+        """
+        Enters the replacement value of the technology into tech.capital at the end of its lifetime.
+        Inputs:
+            time        Object defining time parameters for the simulation
+            tech        LDAR technology object
+        """
+        lifetimes = 0
+        while lifetimes < time.end_time:
+            self.capital[max(1, round(lifetimes / time.delta_t))] = self.capital_0
+            lifetimes += self.lifetime

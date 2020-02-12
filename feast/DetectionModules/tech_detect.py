@@ -1,7 +1,6 @@
 from .abstract_detection_method import DetectionMethod
 from ..GeneralClassesFunctions.simulation_functions import set_kwargs_attrs
 import numpy as np
-from . import helper_functions
 
 
 class TechDetect(DetectionMethod):
@@ -56,7 +55,7 @@ class TechDetect(DetectionMethod):
         self.maintenance_0 = self.capital_0 * 0.1  # dollars/year
 
         self.capital = np.zeros(time.n_timesteps)
-        helper_functions.replacement_cap(time, self)
+        self.replacement_cap(time)
 
         # maintenance costs are estimated as 10% of capital per year
         self.maintenance = [self.maintenance_0 * time.delta_t / 365, ] * time.n_timesteps  # $

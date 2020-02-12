@@ -86,7 +86,7 @@ field_simulation.py
 	contains one function of the same name (field_simulation). One call to field_simulation() creates one realization of a FEAST 		scenario. field_simulation() accepts several optional input arguments to change parameters from their default settings.
 
 DetectionModules:
------------------
+=================
 DetectionModules is the directory containing all of the LDAR program files:
 
 abstract_detection_method.py 

@@ -1,0 +1,5 @@
+Component -- A potential emission source.  Valves, open ended lines and connectors are typical examples of components.
+    Components can also be an unloading well or a pneumatic controller.
+FEAST -- fugitive emissions abatement simulation testbed
+Gas field -- A collection of sites to be simulated
+Site -- A collection of components whose emissions may be aggregated for site-based survey methods
