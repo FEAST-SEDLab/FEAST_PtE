@@ -63,7 +63,7 @@ def field_simulation(gas_field=None, dir_out='Results', time=None,
     # check_timestep(gas_field, time)
     for time.time_index in range(0, time.n_timesteps):
         if display_status and time.current_time % int(time.end_time/10) < time.delta_t:
-            print("Currently evaluating time step " + str(time.time_index) + " of " + str(time.n_timesteps))
+            print("The evaluation is {:0.0f}% complete" .format(100 * time.time_index / time.n_timesteps))
         if gas_field.input_leaks is None:
             new_leaks.append(gas_field.leak_size_maker(time))
         else:
