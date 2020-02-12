@@ -8,12 +8,8 @@ FEAST is a Fugitive Emissions Abatement Simulation Toolkit for evaluating natura
 
 Tutorial:
 ---------
-Clicking the "launch/binder" link below will open the FEAST directory on a server that is able to run Python. Once the directory opens, select the file "Tutorial.ipynb" to open an interactive Jupyter notebook that illustrates what FEAST can do.
-
-.. image:: http://mybinder.org/badge.svg 
-	:target: http://mybinder.org:/repo/eaogroup/feast
-
-Note: this tutorial is supported by mybinder.org. Occassionally, the mybinder service is unavailable. In that case the notebook will hang on the mybinder loading screen. You can check the status of mybinder here: http://mybinder.org/status If the service is down, you will have to either check back later or install python and clone the repository to your machine in order to run the tutorial. 
+Clicking the link below will direct you to a jupyter notebook server that demonstrates a few basic simulations in FEAST. The server will not support advanced simulations and your results will not be maintained indefinitely, so it should be used as an educational tool rather than an analysis platform. Enter any username and password to access the server. By recording your username and password you will be able to reaccess your work after the server times out.
+http://64.225.7.26/
 
 File Structure:
 ---------------
