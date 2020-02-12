@@ -134,4 +134,4 @@ Chandler Kemp https://github.com/ChandlerKemp
 
 Acknowledgments:
 ----------------
-JP Addison reviewed all code developed for the Python implementation of FEAST.
+JP Addison reviewed all code developed for FEAST 2.0.
