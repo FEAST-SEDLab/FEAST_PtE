@@ -92,10 +92,14 @@ def time_series(results_file, display=True, save=False, file_out=None):
     counter = -1
     for tech in tech_dict.keys():
         counter += 1
-        tech_dict[tech].line = ax.plot(np.array(range(0, results.time.n_timesteps)) * results.time.delta_t,
+        tech_dict[tech].line = ax.plot(np.array(range(0, results.time.n_timesteps)) * results.time.delta_t / 365,
                                        np.array(tech_dict[tech].emissions)/tech_dict[tech].emissions[0], label=tech,
                                        color=color_set[counter])
-    plt.xlabel('Time [days]', fontweight='bold')
+        avg_emissions = np.mean(np.array(tech_dict[tech].emissions)/tech_dict[tech].emissions[0])
+        ax.plot([0, results.time.end_time / 365],
+                [avg_emissions, avg_emissions],
+                '--', label=tech + ' Average', color=color_set[counter])
+    plt.xlabel('Time [years]', fontweight='bold')
     plt.ylabel('Fraction of initial emissions', fontweight='bold')
     plt.legend()
     display_save(display, save, file_out)
