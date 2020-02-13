@@ -4,6 +4,7 @@ from feast.GeneralClassesFunctions import simulation_classes as sc
 import feast.GeneralClassesFunctions.leak_class_functions as lcf
 from feast import DetectionModules as Dm
 import os
+import pickle
 
 
 def test_gasfield_leak_maker():
@@ -175,6 +176,37 @@ def test_field_simulation():
     os.rmdir('ResultsTemp')
 
 
+def test_leak_obj():
+    dat_test = feast.InputData.input_data_classes.LeakData(notes='test')
+    leak_data = {'All': np.array([1, 4, 2, 3, 2, 4])}
+    well_counts = {'All': 1}  # Number of wells in the study
+    comp_counts = {'All': 600}  # Assumed components per well
+    dat_test.define_data(leak_data=leak_data, well_counts=well_counts, comp_counts=comp_counts)
+    pickle.dump(dat_test, open('temp_dat.p', 'wb'))
+    comp_fug = feast.GeneralClassesFunctions.simulation_classes.Component(
+        name='Fugitive emitters',
+        emission_data_path='temp_dat.p',
+        emission_per_comp=0.00231,
+        emission_production_rate=5.4 / 650 / 365
+    )
+    file_out = 'temp_dat.p'
+    lsm, _, _, _ = feast.GeneralClassesFunctions.leak_class_functions.leak_objects_generator('bootstrap', file_out)
+    basicpad = feast.GeneralClassesFunctions.simulation_classes.Site(
+        name='basic pad',
+        comp_dict={
+            # ------ The number of components is proportional to the number of wells, ind2
+            'Fugitive': {'number': 600, 'parameters': comp_fug}
+        },
+    )
+    basicpad.site_inds = [0, 1]
+    timeobj = feast.GeneralClassesFunctions.simulation_classes.Time(delta_t=1 / 24, end_time=3 * 365)
+    leak = lsm(6, 'Fugitive', basicpad, timeobj)
+    for f in leak.flux:
+        if f not in leak_data['All']:
+            raise ValueError('leak_objects_generator is not using the correct input emission data file')
+    os.remove(file_out)
+
+
 test_gasfield_leak_maker()
 
 test_null_repair()
@@ -192,5 +224,7 @@ test_bootstrap_leak_maker()
 test_gasfield_leak_size_maker()
 
 test_field_simulation()
+
+test_leak_obj()
 
 print("Successfully completed all tests")

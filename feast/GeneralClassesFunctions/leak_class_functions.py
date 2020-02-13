@@ -205,7 +205,10 @@ def leak_objects_generator(dist_type, leak_data_path):
         leak_data_path      Path to a leak data file
     """
     rsc_path, _ = os.path.split(dirname(abspath(__file__)))
-    rsc_path = os.path.join(rsc_path, 'InputData', 'DataObjectInstances', leak_data_path)
+    if leak_data_path in os.listdir(os.path.join(rsc_path, 'InputData', 'DataObjectInstances')):
+        rsc_path = os.path.join(rsc_path, 'InputData', 'DataObjectInstances', leak_data_path)
+    else:
+        rsc_path = leak_data_path
     with open(rsc_path, 'rb') as f:
         leak_data = pickle.load(f)
 
