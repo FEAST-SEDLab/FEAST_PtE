@@ -13,13 +13,14 @@ def test_gasfield_leak_maker():
     time.current_time = 10
     np.random.seed(0)
     gf.leak_maker(10, new_leaks, 'default', 0, time, gf.sites['default']['parameters'])
-    expected = np.array([0.001951722536, 0.002732411550, 0.002112817094, 0.000154898614, 0.050311069805, 0.003423259368,
-                         0.001375499692, 0.022832055693, 0.018364779668, 0.036927829561])
+    expected = np.array([0.02689507, 0.00775865, 0.00228167, 0.01050579, 0.00157465,
+                         0.0149844, 0.04953858, 0.49138137, 0.09214868, 0.04406508])
     if np.max(np.abs(expected - new_leaks.flux)) > 1e-8:
         raise ValueError("unexpected flux value")
     expected_endtimes = np.array([
-        1464.853673030148, 605.412672264341, 831.474926906344, 28.542856664766, 949.804487527753, 935.743064465414,
-        948.012668427203, 2823.325523307107, 1129.438403135151, 445.519642662429
+        391.04863847, 165.94777145, 225.15696612, 14.85666044,
+        256.14930494, 252.46640114, 255.67999985, 746.85338952,
+        303.1982008, 124.06931841
     ])
     if np.max(np.abs(expected_endtimes - new_leaks.endtime)) > 1e-6:
         raise ValueError("unexpected endtime")
@@ -74,7 +75,7 @@ def test_emissions_enforcer_high():
         raise ValueError("lcf.Leak initializing unexpected emissions")
     np.random.seed(0)
     gf.site_emissions_enforcer(gf.sites['site0']['parameters'])
-    if np.max(np.abs(gf.initial_leaks.flux - np.array([0.68284285, 0, 0, 0, 0, 0, 0, 0, 0, 0]))) > 1e-6:
+    if np.max(gf.initial_leaks.flux[1:]) > 0 or gf.initial_leaks.flux[0] >= 1000:
         raise(ValueError("emissions_enforcer is not removing emissions as expected"))
 
 
@@ -95,9 +96,9 @@ def test_emissions_enforcer_no_repairable():
 def test_bootstrap_leak_maker():
     comp_fug = sc.Component(
         name='Fugitive emitters',
-        leak_data_path='production_emissions.p',
-        leaks_per_comp=0.0026,
-        leak_production_rate=5.4 / 650 / 365
+        emission_data_path='production_emissions.p',
+        emission_per_comp=0.0026,
+        emission_production_rate=5.4 / 650 / 365
     )
     basicpad = feast.GeneralClassesFunctions.simulation_classes.Site(
         name='basic pad',
@@ -121,9 +122,9 @@ def test_bootstrap_leak_maker():
 def test_gasfield_leak_size_maker():
     comp_fug = sc.Component(
         name='Fugitive emitters',
-        leak_data_path='production_emissions.p',
-        leaks_per_comp=0.0026,
-        leak_production_rate=5.4 / 650 / 365
+        emission_data_path='production_emissions.p',
+        emission_per_comp=0.0026,
+        emission_production_rate=5.4 / 650 / 365
     )
     n_sites = 100
     site_dict = {}
@@ -147,9 +148,9 @@ def test_gasfield_leak_size_maker():
 def test_field_simulation():
     comp_fug = sc.Component(
         name='Fugitive emitters',
-        leak_data_path='production_emissions.p',
-        leaks_per_comp=0.0026,
-        leak_production_rate=5.4 / 650 / 365
+        emission_data_path='production_emissions.p',
+        emission_per_comp=0.0026,
+        emission_production_rate=5.4 / 650 / 365
     )
     n_sites = 100
     site_dict = {}

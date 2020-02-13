@@ -45,11 +45,11 @@ class Component:
         # Events with a constant probability of occurring and duration determined by the null repair rate
         # emission specifications may or may not be reparable before the null repair process
         self.dist_type = 'bootstrap'
-        self.leak_data_path = 'production_emissions.p'
-        self.leak_production_rate = 1e-5  # new leaks per component per day
-        self.leaks_per_comp = 'default'
+        self.emission_data_path = 'production_emissions.p'
+        self.emission_production_rate = 1e-5  # new leaks per component per day
+        self.emission_per_comp = 'default'
         self.base_reparable = True
-        # Permitted events with a constant probability of occuring and known duration NOT REPARABLE
+        # Permitted events with a constant probability of occurring and known duration NOT REPARABLE
         self.episodic_emission_sizes = [0]  # g/s
         self.episodic_emission_per_day = 0
         self.episodic_emission_duration = 0
@@ -60,15 +60,15 @@ class Component:
         self.vent_starts = np.array([])
         # Update any attributes defined by kwargs
         set_kwargs_attrs(self, kwargs)
-        self.leak_size_maker, self.leak_params, self.leaks_per_well, leaks_per_comp \
-            = leak_obj_gen(self.dist_type, self.leak_data_path)
-        if self.leaks_per_comp == 'default':
-            self.leaks_per_comp = leaks_per_comp
+        self.leak_size_maker, self.leak_params, self.emission_per_well, emission_per_comp \
+            = leak_obj_gen(self.dist_type, self.emission_data_path)
+        if self.emission_per_comp == 'default':
+            self.emission_per_comp = emission_per_comp
         if null_repair_rate is None:
-            if self.leaks_per_comp == 0:
+            if self.emission_per_comp == 0:
                 self.null_repair_rate = 0
             else:
-                self.null_repair_rate = self.leak_production_rate / self.leaks_per_comp
+                self.null_repair_rate = self.emission_production_rate / self.emission_per_comp
         else:
             self.null_repair_rate = null_repair_rate
         self.emission_maker = lcf.permitted_emission
@@ -144,8 +144,8 @@ class GasField:
                 for comp_name in site.comp_dict:
                     compobj = site.comp_dict[comp_name]['parameters']
                     n_comp = sitedict['number'] * site.comp_dict[comp_name]['number']
-                    if compobj.leak_production_rate > 0:
-                        n_leaks = np.random.binomial(n_comp, compobj.leaks_per_comp)
+                    if compobj.emission_production_rate > 0:
+                        n_leaks = np.random.binomial(n_comp, compobj.emission_per_comp)
                     else:
                         n_leaks = 0
                     self.leak_maker(n_leaks, self.initial_leaks, comp_name, n_comp, time, site)
@@ -163,7 +163,7 @@ class GasField:
             site = site_dict['parameters']
             for compname, comp in site.comp_dict.items():
                 n_comp = site_dict['number'] * comp['number']
-                n_leaks = np.random.poisson(n_comp * comp['parameters'].leak_production_rate * time.end_time)
+                n_leaks = np.random.poisson(n_comp * comp['parameters'].emission_production_rate * time.end_time)
                 n_episodic = np.random.poisson(n_comp * comp['parameters'].episodic_emission_per_day * time.end_time)
                 self.leak_maker(n_leaks, new_leaks, compname, n_comp, time, site, n_episodic=n_episodic)
         start_times = np.random.randint(0, time.n_timesteps, new_leaks.n_leaks, dtype=int)
@@ -188,7 +188,7 @@ class GasField:
             site = site_dict['parameters']
             for compname, comp in site.comp_dict.items():
                 n_comp = site_dict['number'] * comp['number']
-                n_leaks = np.random.poisson(n_comp * comp['parameters'].leak_production_rate * time.delta_t)
+                n_leaks = np.random.poisson(n_comp * comp['parameters'].emission_production_rate * time.delta_t)
                 self.leak_maker(n_leaks, new_leaks, compname, n_comp, time, site)
         return new_leaks
 

@@ -91,9 +91,12 @@ def time_series(results_file, display=True, save=False, file_out=None):
     ax = fig.add_subplot(111)
     counter = -1
     for tech in tech_dict.keys():
+        lab = tech
+        if tech.lower() == 'null':
+            lab = 'No LDAR'
         counter += 1
         tech_dict[tech].line = ax.plot(np.array(range(0, results.time.n_timesteps)) * results.time.delta_t / 365,
-                                       np.array(tech_dict[tech].emissions)/tech_dict[tech].emissions[0], label=tech,
+                                       np.array(tech_dict[tech].emissions)/tech_dict[tech].emissions[0], label=lab,
                                        color=color_set[counter])
         avg_emissions = np.mean(np.array(tech_dict[tech].emissions)/tech_dict[tech].emissions[0])
         ax.plot([0, results.time.end_time / 365],
