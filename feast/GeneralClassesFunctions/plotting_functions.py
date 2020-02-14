@@ -101,7 +101,7 @@ def time_series(results_file, display=True, save=False, file_out=None):
         avg_emissions = np.mean(np.array(tech_dict[tech].emissions)/tech_dict[tech].emissions[0])
         ax.plot([0, results.time.end_time / 365],
                 [avg_emissions, avg_emissions],
-                '--', label=tech + ' Average', color=color_set[counter])
+                '--', label=lab + ' Average', color=color_set[counter])
     plt.xlabel('Time [years]', fontweight='bold')
     plt.ylabel('Fraction of initial emissions', fontweight='bold')
     plt.legend()
