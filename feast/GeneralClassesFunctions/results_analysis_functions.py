@@ -20,14 +20,12 @@ def results_analysis(directory):
     sample = load(open(directory + '/' + files[0], 'rb'))
     n_techs = len(sample.tech_dict)
     # Initialize an array to store a time series of emissions for every LDAR program in every realization
-    emissions_timeseries = np.zeros([n_techs + 1, sample.time.n_timesteps, n_realizations])
-    leaks_found = [[] for _ in range(n_techs)]
+    emissions_timeseries = np.zeros([n_techs, sample.time.n_timesteps, n_realizations])
     techs = list(sample.tech_dict.keys())
     no_repair_npv = dict()
     null_npv = dict()
     npv_keys = ['Capital', 'Maintenance', 'Repair', 'Finding', 'Gas', 'Total']
     for key in npv_keys:
-        no_repair_npv[key] = np.zeros([n_techs, n_realizations])
         null_npv[key] = np.zeros([n_techs-1, n_realizations])
     # iterate through each realization
     for jindex in range(0, len(files)):
@@ -35,16 +33,12 @@ def results_analysis(directory):
         # iterate through each LDAR program
         for index in range(0, len(techs)):
             emissions_timeseries[index, :, jindex] = sample.tech_dict[techs[index]].emissions
-            if techs[index] == 'Null':
-                leaks_found[index].append(sample.tech_dict[techs[index]].null_repaired)
-            else:
-                leaks_found[index].append(sample.tech_dict[techs[index]].leaks_found)
         # iterate through each category of value
-        no_repair_npv_temp, null_npv_temp = npv_calculator(directory + '/' + files[jindex])
+        null_npv_temp = npv_calculator(directory + '/' + files[jindex])
         for key in null_npv.keys():
             # no_repair_npv[key][:, jindex] = no_repair_npv_temp[key]
             null_npv[key][:, jindex] = null_npv_temp[key]
-    return no_repair_npv, null_npv, leaks_found, emissions_timeseries
+    return null_npv, emissions_timeseries
 
 
 def npv_calculator(filepath):
@@ -67,11 +61,9 @@ def npv_calculator(filepath):
     discount_array = (1 + sample.econ_settings.discount_rate)**(time / 365)
     # Initialize all arrays
     gas_value_n = np.zeros(len(techs)-1)
-    gas_value_no_repair = np.zeros(len(techs))
     find_cost = np.zeros([len(techs), sample.time.n_timesteps])
     find_cost_null = np.zeros([len(techs)-1, sample.time.n_timesteps])
     repair_cost_null = np.zeros([len(techs)-1, sample.time.n_timesteps])
-    repair_cost_no_repair = np.zeros([len(techs), sample.time.n_timesteps])
     capital_cost = np.zeros([len(techs), sample.time.n_timesteps])
     capital_cost_null = np.zeros([len(techs)-1, sample.time.n_timesteps])
     maintenance_cost = np.zeros([len(techs), sample.time.n_timesteps])
@@ -88,7 +80,7 @@ def npv_calculator(filepath):
             ind = index - null_correct
             repair_cost_null[ind, :] = sample.tech_dict[techs[index]].repair_cost / discount_array - null_repair_cost
             gas_value_n[ind] = sum((null_emissions-sample.tech_dict[techs[index]].emissions) / discount_array) * \
-                sample.time.delta_t*24*3600*sample.econ_settings.gas_price
+                sample.time.delta_t * 24 * 3600 * sample.econ_settings.gas_price
             capital_cost_null[ind, :] = sample.tech_dict[techs[index]].capital / discount_array
             find_cost_null[ind, :] = sample.tech_dict[techs[index]].find_cost / discount_array
             maintenance_cost_null[ind, :] = sample.tech_dict[techs[index]].maintenance / discount_array
@@ -96,19 +88,10 @@ def npv_calculator(filepath):
             null_correct += 1
     # consolidate costs into totals
     cap, find, main = np.sum(capital_cost, 1), np.sum(find_cost, 1), np.sum(maintenance_cost, 1)
-    no_repair = np.sum(repair_cost_no_repair, 1)
-    no_repair_npv = {'Capital': cap, 'Maintenance': main, 'Repair': no_repair, 'Finding': find}
     cap_n, find_n = np.sum(capital_cost_null, 1), np.sum(find_cost_null, 1)
     main_n = np.sum(maintenance_cost_null, 1)
     n_repair = np.sum(repair_cost_null, 1)
     null_npv = {'Capital': cap_n, 'Maintenance': main_n, 'Repair': n_repair, 'Finding': find_n, 'Gas': gas_value_n}
     tot_n = -cap_n - main_n - n_repair - find_n + gas_value_n
     null_npv['Total'] = tot_n
-    no_repair_npv['Gas'] = gas_value_no_repair
-    no_repair_npv['Total'] = -cap - main - no_repair - find + gas_value_no_repair
-    # adjust units
-    # for key in no_repair_npv.keys():
-    #     no_repair_npv[key] /= site_count*1000
-    # for key in null_npv.keys():
-    #     null_npv[key] /= site_count*1000
-    return no_repair_npv, null_npv
+    return null_npv

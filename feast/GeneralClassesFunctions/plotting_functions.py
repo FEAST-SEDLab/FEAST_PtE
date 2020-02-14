@@ -122,7 +122,7 @@ def summary_plotter(directory, display=True, save=False, file_out=None, n_wells=
     # load data
     files = [f for f in listdir(directory) if isfile(join(directory, f))]
     sample = load(open(directory + '/' + files[0], 'rb'))
-    _, npv_in, _, emissions = results_analysis_functions.results_analysis(directory)
+    npv_in, emissions = results_analysis_functions.results_analysis(directory)
     # Normalize to the number of wells
     if n_wells is not None:
         for cost_type in npv_in:
@@ -181,79 +181,3 @@ def summary_plotter(directory, display=True, save=False, file_out=None, n_wells=
     ax.legend(bbox_to_anchor=(1.4, 1), fontsize=18)
     plot_fixer()
     display_save(display, save, file_out)
-
-
-def hist_plotter(directory, display=True, save=False, file_out=None, bins=None):
-    """
-    Plots histogram of leaks found by each technology based on results in the folder 'Directory'
-    Inputs:
-        directory     Path to a results folder to be analyzed
-        display      boolean value that determines whether or not the plot is displayed
-        save         boolean value that determines whether the plot is saved
-        file_out     file_out path to a file in which to save the figure if save is True
-        bins         defines the bins used in the histograms
-    Return: None
-    """
-
-    _, _, found, _ = results_analysis_functions.results_analysis(directory)
-    files = [f for f in listdir(directory) if isfile(join(directory, f))]
-    leaks_made = []
-    sample = load(open(directory + '/' + files[0], 'rb'))
-    techs = sample.tech_dict.keys()
-    tech_leaks_found = {}
-    well_count = 0
-    # Load data from files
-    for tech in techs:
-        tech_leaks_found[tech] = []
-    for file in files:
-        with open(directory + '/' + file, 'rb') as f:
-            sample = load(f)
-            leaks_made.extend(sample.gas_field.initial_leaks.flux)
-            well_count += sample.gas_field.site_count
-            for leak_list in sample.new_leaks:
-                leaks_made.extend(leak_list.flux)
-            for tech in techs:
-                tech_leaks_found[tech].extend(sample.tech_dict[tech].leaks_found)
-    leaks_made = np.array(leaks_made)
-    n_bins = 30
-    if bins is None:
-        bins = np.linspace(0, max(leaks_made), n_bins+1)
-    cumsum_points = 100
-    counts, bins, patches = plt.hist(leaks_made, bins, normed=0, alpha=0.75)
-    plt.close()
-    # Calculative the cumulative fraction of emissions above a range of leak fluxes
-    cumsum = np.zeros(cumsum_points)
-    cumsumx = np.linspace(0, max(bins), cumsum_points)
-    for ind in reversed(range(0, cumsum_points-1)):
-        cumsum[ind] = sum(leaks_made[leaks_made > cumsumx[ind]])
-    cumsum /= cumsum[0]
-    centers = 0.5*(bins[1:] + bins[:-1])
-    ind = 0
-    delta = bins[1] - bins[0]
-    # Create a separate plot for each technology
-    for tech in techs:
-        if tech.lower() == 'null':
-            continue
-        fig, ax1 = plt.subplots()
-        ax2 = ax1.twinx()
-        counts_temp, bins_temp, patches = ax1.hist(tech_leaks_found[tech], bins, normed=0, alpha=0.75)
-        ax1.cla()
-        counts_temp /= well_count
-        ax1.bar(bins_temp[0:n_bins], counts_temp, width=delta, color=color_set[ind+1], label="Leaks found")
-        ax1.plot(centers, counts/well_count, 'o', color=color_set[0], label="Leaks generated")
-        ax2.plot(cumsumx, cumsum, label="Cumulative emissions fraction")
-        plt.title(tech)
-        ax1.set_xlabel("Leak flux (g/s)")
-        ax1.set_ylabel("Leaks found per well")
-        ax2.set_ylabel("Cumulative emissions fraction")
-        ax1.set_ylim(0, 2)
-        handles1, labels1 = ax1.get_legend_handles_labels()
-        handles2, labels2 = ax2.get_legend_handles_labels()
-        handles = handles1
-        handles.extend(handles2)
-        labels = labels1
-        labels.extend(labels2)
-        fig.legend(handles, labels, bbox_to_anchor=(0.9, 0.7), fontsize=16)
-        ind += 1
-        plot_fixer()
-        display_save(display, save, file_out)

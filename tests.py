@@ -2,6 +2,7 @@ import numpy as np
 import feast
 from feast.GeneralClassesFunctions import simulation_classes as sc
 import feast.GeneralClassesFunctions.leak_class_functions as lcf
+import feast.GeneralClassesFunctions.results_analysis_functions as raf
 from feast import DetectionModules as Dm
 import os
 import pickle
@@ -172,7 +173,8 @@ def test_field_simulation():
             time=timeobj, gas_field=gas_field,
             tech_dict={}, dir_out='ResultsTemp', display_status=True
         )
-    os.remove('ResultsTemp/realization0.p')
+    for f in os.listdir('ResultsTemp'):
+        os.remove(os.path.join('ResultsTemp', f))
     os.rmdir('ResultsTemp')
 
 
@@ -207,6 +209,25 @@ def test_leak_obj():
     os.remove(file_out)
 
 
+def test_results_analysis():
+    for ind in range(3):
+        feast.field_simulation.field_simulation(dir_out='ResultsTemp', display_status=False)
+    null_npv, emissions = raf.results_analysis('ResultsTemp')
+    if len(null_npv.keys()) != 6:
+        raise ValueError("results analysis function returning the wrong number of keys")
+    with open('ResultsTemp/realization0.p', 'rb') as f:
+        res = pickle.load(f)
+    if null_npv['Finding'].shape != (1, 3):
+        raise ValueError("results analysis function returning the wrong number of realizations or LDAR programs in "
+                         "null npv")
+    if emissions.shape != (2, 4001, 3):
+        raise ValueError("results analysis function returning the wrong number of realizations or "
+                         "LDAR programs in emissions")
+    for f in os.listdir('ResultsTemp'):
+        os.remove(os.path.join('ResultsTemp', f))
+    os.rmdir('ResultsTemp')
+
+
 test_gasfield_leak_maker()
 
 test_null_repair()
@@ -226,5 +247,7 @@ test_gasfield_leak_size_maker()
 test_field_simulation()
 
 test_leak_obj()
+
+test_results_analysis()
 
 print("Successfully completed all tests")
