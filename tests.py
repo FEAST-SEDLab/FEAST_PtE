@@ -215,8 +215,6 @@ def test_results_analysis():
     null_npv, emissions = raf.results_analysis('ResultsTemp')
     if len(null_npv.keys()) != 6:
         raise ValueError("results analysis function returning the wrong number of keys")
-    with open('ResultsTemp/realization0.p', 'rb') as f:
-        res = pickle.load(f)
     if null_npv['Finding'].shape != (1, 3):
         raise ValueError("results analysis function returning the wrong number of realizations or LDAR programs in "
                          "null npv")

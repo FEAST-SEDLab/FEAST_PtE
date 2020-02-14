@@ -44,7 +44,7 @@ class TechDetect(DetectionMethod):
         # hours per site
         # time_factor accounts for the finite simulation size. The effective capital cost is
         # reduced in the simulation based on the ratio of the wells in the
-        # simulation to the number of wells that a single FID could survey.
+        # simulation to the number of wells that a single capital investment could survey
         self.time_factor = self.survey_time / (self.survey_interval * work_time)
         # leaks_per_timestep is calculated based on the survey speed and number of leaks at the beginning of each survey
         self.leaks_per_timestep = 0
@@ -64,10 +64,10 @@ class TechDetect(DetectionMethod):
         self.survey_cost = self.labor * self.survey_time
 
         # find_cost is the cost of searching for leaks
-        for ind in range(0, time.n_timesteps):
-            curr_time = ind * time.delta_t
-            if curr_time % self.survey_interval < time.delta_t:
-                self.find_cost[ind] = self.survey_cost
+        self.find_cost[]
+        survey_inds = [int(ind * self.survey_interval / time.delta_t) for ind in
+                       range(int(time.end_time / self.survey_interval) + 1)]
+        self.find_cost[survey_inds] = self.survey_cost
 
     def detect_prob_curve(self, cond):
         """
