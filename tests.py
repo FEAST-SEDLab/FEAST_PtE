@@ -182,14 +182,14 @@ def test_leak_obj():
     well_counts = {'All': 1}  # Number of wells in the study
     comp_counts = {'All': 600}  # Assumed components per well
     dat_test.define_data(leak_data=leak_data, well_counts=well_counts, comp_counts=comp_counts)
-    pickle.dump(dat_test, open('temp_dat.p', 'wb'))
+    file_out = 'temp_dat.p'
+    pickle.dump(dat_test, open(file_out, 'wb'))
     comp_fug = feast.GeneralClassesFunctions.simulation_classes.Component(
         name='Fugitive emitters',
         emission_data_path='temp_dat.p',
         emission_per_comp=0.00231,
         emission_production_rate=5.4 / 650 / 365
     )
-    file_out = 'temp_dat.p'
     lsm, _, _, _ = feast.GeneralClassesFunctions.leak_class_functions.leak_objects_generator('bootstrap', file_out)
     basicpad = feast.GeneralClassesFunctions.simulation_classes.Site(
         name='basic pad',
