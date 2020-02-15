@@ -64,7 +64,6 @@ class TechDetect(DetectionMethod):
         self.survey_cost = self.labor * self.survey_time
 
         # find_cost is the cost of searching for leaks
-        self.find_cost[]
         survey_inds = [int(ind * self.survey_interval / time.delta_t) for ind in
                        range(int(time.end_time / self.survey_interval) + 1)]
         self.find_cost[survey_inds] = self.survey_cost
