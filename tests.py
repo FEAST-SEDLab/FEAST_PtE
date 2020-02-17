@@ -6,7 +6,7 @@ import feast.GeneralClassesFunctions.results_analysis_functions as raf
 from feast import DetectionModules as Dm
 import os
 import pickle
-
+import time as ti
 
 def test_gasfield_leak_maker():
     gf = sc.GasField()
@@ -171,7 +171,7 @@ def test_field_simulation():
     )
     feast.field_simulation.field_simulation(
             time=timeobj, gas_field=gas_field,
-            tech_dict={}, dir_out='ResultsTemp', display_status=True
+            tech_dict={}, dir_out='ResultsTemp', display_status=False
         )
     for f in os.listdir('ResultsTemp'):
         os.remove(os.path.join('ResultsTemp', f))
@@ -185,7 +185,8 @@ def test_leak_obj():
     comp_counts = {'All': 600}  # Assumed components per well
     dat_test.define_data(leak_data=leak_data, well_counts=well_counts, comp_counts=comp_counts)
     file_out = 'temp_dat.p'
-    pickle.dump(dat_test, open(file_out, 'wb'))
+    with open(file_out, 'wb') as f:
+        pickle.dump(dat_test, f)
     comp_fug = feast.GeneralClassesFunctions.simulation_classes.Component(
         name='Fugitive emitters',
         emission_data_path='temp_dat.p',
@@ -226,6 +227,69 @@ def test_results_analysis():
     os.rmdir('ResultsTemp')
 
 
+def test_npv_calculator():
+    file_out = 'temp_emissions.p'
+    rep_file_out = 'temp_rep_costs.p'
+    em_array = np.ones(100)
+    emissions = feast.InputData.input_data_classes.LeakData()
+    # The dict structure allows for multiple types of detection methods used in the study
+    leak_data = {'All': em_array}
+    well_counts = {'All': 100}  # Number of wells in the study
+    comp_counts = {'All': 100}  # Assumed components per well
+    emissions.define_data(leak_data=leak_data, well_counts=well_counts, comp_counts=comp_counts)
+    with open(file_out, 'wb') as f:
+        pickle.dump(emissions, f)
+    repair_out = feast.InputData.input_data_classes.RepairData()
+    repair_out.define_data(repair_costs=np.ones(5) * 2)
+    with open(rep_file_out, 'wb') as f:
+        pickle.dump(repair_out, f)
+
+    comp_fug = sc.Component(
+        name='Fugitive emitters',
+        emission_data_path=file_out,
+        emission_per_comp=0.1,
+        emission_production_rate=0
+    )
+    n_sites = 100
+    site_dict = {}
+    basicpad = feast.GeneralClassesFunctions.simulation_classes.Site(
+        # Simulates two wells, one tank, total components=11302
+        name='basic pad',
+        comp_dict={
+            'Fugitive ': {'number': 100, 'parameters': comp_fug},
+        }
+    )
+    site_dict['basic pad'] = {'number': n_sites, 'parameters': basicpad}
+    timeobj = feast.GeneralClassesFunctions.simulation_classes.Time(delta_t=1, end_time=2)
+    initial_leaks = feast.GeneralClassesFunctions.leak_class_functions.Leak(
+        flux=np.ones(1000), site_index=np.random.randint(0, n_sites, 1000),
+        comp_index=np.random.randint(0, 100, 1000)
+    )
+    gas_field = feast.GeneralClassesFunctions.simulation_classes.GasField(
+        sites=site_dict,
+        time=timeobj,
+        repair_cost_path=rep_file_out,
+        initial_leaks=initial_leaks
+    )
+    tech_dict = {'TechDetect': feast.DetectionModules.tech_detect.TechDetect(timeobj, gas_field, survey_speed=10000)}
+    feast.field_simulation.field_simulation(
+        time=timeobj, gas_field=gas_field, dir_out='ResultsTemp', display_status=False, tech_dict=tech_dict
+    )
+    npv = feast.GeneralClassesFunctions.results_analysis_functions.npv_calculator('ResultsTemp/realization0.p')
+    if npv['Repair'] != 2000:
+        raise ValueError("npv_calculator not returning the expected repair cost")
+    os.remove(file_out)
+    os.remove(rep_file_out)
+    for f in os.listdir('ResultsTemp'):
+        os.remove(os.path.join('ResultsTemp', f))
+    try:
+        os.rmdir('ResultsTemp')
+    except PermissionError:
+        # If there is an automated syncing process, a short pause may be necessary before removing "ResultsTemp"
+        ti.sleep(5)
+        os.rmdir('ResultsTemp')
+
+
 test_gasfield_leak_maker()
 
 test_null_repair()
@@ -247,5 +311,7 @@ test_field_simulation()
 test_leak_obj()
 
 test_results_analysis()
+
+test_npv_calculator()
 
 print("Successfully completed all tests")

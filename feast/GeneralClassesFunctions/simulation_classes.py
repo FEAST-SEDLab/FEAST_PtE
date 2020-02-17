@@ -106,6 +106,8 @@ class GasField:
         self.t_plume = 300  # K
         # Initial leaks defined for the gas field
         self.initial_leaks = None
+        # Repair cost data file path
+        self.repair_cost_path = 'fernandez_leak_repair_costs_2006.p'
         # Update any attributes defined by kwargs
         set_kwargs_attrs(self, kwargs)
 
@@ -154,7 +156,10 @@ class GasField:
         self.n_sites = site_ind
         # Distribution of leak repair costs
         rsc_path, _ = os.path.split(dirname(abspath(__file__)))
-        rsc_path = os.path.join(rsc_path, 'InputData', 'DataObjectInstances', 'fernandez_leak_repair_costs_2006.p')
+        if self.repair_cost_path in os.listdir(os.path.join(rsc_path, 'InputData', 'DataObjectInstances')):
+            rsc_path = os.path.join(rsc_path, 'InputData', 'DataObjectInstances', self.repair_cost_path)
+        else:
+            rsc_path = self.repair_cost_path
         with open(rsc_path, 'rb') as f:
             self.repair_cost_dist = pickle.load(f)
 

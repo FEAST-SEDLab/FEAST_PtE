@@ -47,7 +47,6 @@ def npv_calculator(filepath):
         Inputs:
             filepath        path to a results file
         Return:
-            no_repair_npv     NPV of each LDAR program compared to a scenario with no repair [k$/well]
             null_npv          NPV of each LDAR program compared to a scenario with only the Null LDAR program [k$/well]
     """
     sample = load(open(filepath, 'rb'))
