@@ -216,6 +216,9 @@ Well location and production data that were downloaded from the COGCC.
 Production and location data by well for 2019 were downloaded from https://cogcc.state.co.us/data2.html#/downloads. 
 The downloads were completed on Jan. 13, 2020. In order to group wells into sites, any wells within
 50 meters of each other were assumed to be part of the same site.
+
+site_prod.site_prod contains 4 columns: latitude (degrees), longitude (degrees), gas production (mcf/year), oil 
+production (bbl/year)
 """
 site_prod = DataFile(notes=notes, raw_file_name=raw_data_file, data_prep_file='COGCC_2019_productiondata.py',
                      site_prod=site_prod)

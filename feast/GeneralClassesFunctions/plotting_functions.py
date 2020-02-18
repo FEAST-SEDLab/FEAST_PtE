@@ -170,7 +170,6 @@ def summary_plotter(directory, display=True, save=False, file_out=None, n_wells=
                     pos_bottoms[m] -= npv[key][m]
         counter += 1
     plt.bar(ind, npv['Gas'], width, bottom=pos_bottoms, color=color_set[counter], label='Gas')
-    npv_std /= np.sqrt(n_realizations)
     plt.errorbar(ind, totals, yerr=npv_std, linewidth=8, fmt='o', ms=1, label='Total NPV', ecolor='yellow')
     if ylabel is None:
         plt.ylabel("NPV ($)")

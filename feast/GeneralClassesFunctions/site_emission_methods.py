@@ -8,7 +8,7 @@ def alvarez_colorado_em_dist(prod):
     """
         Generates an emission for each site in prod according to a lognormal distribution.
         See Eq. 1 in the Supporting Materials for Alvarez et al 2018.
-        :input prod: an array of site production values. Must all be >0.
+        :input prod: an array of site production values. Must all be >0. (mcf/year)
         :return em: an array of site emissions [g/s]
     """
     if np.min(prod) <= 0:

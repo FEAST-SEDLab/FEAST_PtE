@@ -278,6 +278,8 @@ def test_npv_calculator():
     npv = feast.GeneralClassesFunctions.results_analysis_functions.npv_calculator('ResultsTemp/realization0.p')
     if npv['Repair'] != 2000:
         raise ValueError("npv_calculator not returning the expected repair cost")
+    if np.abs(npv['Gas'] - 34560) > 100:  # 34560 = gas_value * 1000 g/s * 2 days * 3600 * 24 sec/day--no discount rate.
+        raise ValueError("npv_calculator not returning the expected value of gas saved")
     os.remove(file_out)
     os.remove(rep_file_out)
     for f in os.listdir('ResultsTemp'):
