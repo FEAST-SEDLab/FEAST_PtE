@@ -11,7 +11,7 @@ from feast.GeneralClassesFunctions.simulation_classes import Component
 # The random seed below can be un-commented to generate reproducible realizations.
 # np.random.seed(0)
 
-
+# Defining component types in the gas field
 # Generates reparable fugitive emissions
 comp_fug = Component(
     name='Fugitive emitters',
@@ -50,7 +50,7 @@ noplunger = feast.GeneralClassesFunctions.simulation_classes.Component(
 )
 
 
-# ------This block of code defines the number of wells at each site
+# Define the number of wells at each site
 # Assign the number of wells per site
 n_sites = 93
 # The well per site distribution was built using data from the Colorado Oil and Gas Conservation Commission
@@ -69,7 +69,7 @@ counts, n_wells_bin = np.histogram(n_wells_samp,
 for ind in range(30):
     print('Iteration number: {:0.0f}'.format(ind))
     site_dict = {}
-    # ------ This for loop iterates over sites with each number of wells and assigns components to them
+    # Assign components to sites
     for n_wells_in_site in range(1, np.max(n_wells_samp)):
         if counts[n_wells_in_site - 1] == 0:
             continue
@@ -104,11 +104,15 @@ for ind in range(30):
     )
     site_dict['plunger'] = {'number': 6, 'parameters': plungersite}
     site_dict['unload no plunger'] = {'number': 1, 'parameters': unloadnp}
+
+    # Define time and gas field parameters
     timeobj = feast.GeneralClassesFunctions.simulation_classes.Time(delta_t=1/24, end_time=3*365)
     gas_field = feast.GeneralClassesFunctions.simulation_classes.GasField(
         sites=site_dict,
         time=timeobj
     )
+
+    # Define LDAR programs
     tech = {
         'ogi': {'survey_interval': 180, 'mu': 0.0018,
                 'lam': 2.23, 'survey_speed': 400},

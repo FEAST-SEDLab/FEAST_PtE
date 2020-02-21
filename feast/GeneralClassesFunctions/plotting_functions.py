@@ -104,7 +104,7 @@ def time_series(results_file, display=True, save=False, file_out=None):
                 '--', label=lab + ' Average', color=color_set[counter])
     plt.xlabel('Time [years]', fontweight='bold')
     plt.ylabel('Fraction of initial emissions', fontweight='bold')
-    plt.legend()
+    plt.legend(bbox_to_anchor=(1, 0.72))
     display_save(display, save, file_out)
     return ax
 
