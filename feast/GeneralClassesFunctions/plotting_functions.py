@@ -121,7 +121,6 @@ def abatement_cost_plotter(directory, gwp=34, display=True, save=False, file_out
     :param file_out: name to save the plot under
     :return:
     """
-    directory = '../2020-02-19-PreWebinar/ExampleRunScriptResults2'
     _, emissions, costs, techs = results_analysis_functions.results_analysis(directory)
     files = [f for f in listdir(directory) if isfile(join(directory, f))]
     with open(directory + '/' + files[0], 'rb') as f:
@@ -132,8 +131,9 @@ def abatement_cost_plotter(directory, gwp=34, display=True, save=False, file_out
     for ind in range(em_abate.shape[0]):
         em_abate[ind, :] = emissions[-1, :] - emissions[ind, :]
         cost_abate[ind, :] = costs[ind, :] - costs[-1, :]
-    abatement_cost = cost_abate / em_abate / 30
-    _ = plt.boxplot(np.transpose(abatement_cost))
+    abatement_cost = cost_abate / em_abate / gwp
+    medianprops = dict(color='k')
+    _ = plt.boxplot(np.transpose(abatement_cost), medianprops=medianprops)
     ax = plt.gca()
     ax.set_xticklabels(techs[:2])
     ax.set_ylabel('Mitigation cost\n(\$/metric ton CO$_2$ eq.)')
