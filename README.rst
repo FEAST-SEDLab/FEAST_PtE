@@ -20,8 +20,7 @@ FEAST publications:  [Will be Available Soon]
 
 Contact Information
 -------------------
-For any FEAST-related technical help, please send your questions to:
-feast.help [at] gmail [dot] com
+For any FEAST-related technical help, please send your questions to: feast.help [at] gmail [dot] com
 
 Tutorial:
 ---------
