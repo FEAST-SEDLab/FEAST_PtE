@@ -213,7 +213,7 @@ def test_leak_obj():
 def test_results_analysis():
     for ind in range(3):
         feast.field_simulation.field_simulation(dir_out='ResultsTemp', display_status=False)
-    null_npv, emissions = raf.results_analysis('ResultsTemp')
+    null_npv, emissions, costs, techs = raf.results_analysis('ResultsTemp')
     if len(null_npv.keys()) != 6:
         raise ValueError("results analysis function returning the wrong number of keys")
     if null_npv['Finding'].shape != (1, 3):
@@ -263,7 +263,7 @@ def test_npv_calculator():
     timeobj = feast.GeneralClassesFunctions.simulation_classes.Time(delta_t=1, end_time=2)
     initial_leaks = feast.GeneralClassesFunctions.leak_class_functions.Leak(
         flux=np.ones(1000), site_index=np.random.randint(0, n_sites, 1000),
-        comp_index=np.random.randint(0, 100, 1000)
+        comp_index=np.random.randint(0, 100, 1000), endtime=np.infty
     )
     gas_field = feast.GeneralClassesFunctions.simulation_classes.GasField(
         sites=site_dict,

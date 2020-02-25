@@ -41,8 +41,8 @@ class DetectionMethod:
         Inputs:
             time         a time object (Defined in simulation_classes)
         """
-        n_rep = np.sum((self.leaks.flux > 0) & self.leaks.reparable & (self.leaks.endtime < time.current_time))
-        self.repair_cost[time.time_index] += np.sum(np.choose(gas_field.repair_cost_dist, n_rep))
+        n_rep = np.sum((self.leaks.flux > 0) & self.leaks.reparable & (self.leaks.endtime <= time.current_time))
+        self.repair_cost[time.time_index] += np.sum(np.random.choice(gas_field.repair_cost_dist.repair_costs, n_rep))
         self.end_intermittents(time)
 
     @staticmethod
@@ -87,9 +87,9 @@ class DetectionMethod:
                     remaining_comps = 0
             if len(cond) > 0:
                 detect = fcn_detection(np.array(cond))
-                self.repair_cost[time.time_index] += \
-                    np.sum(np.random.choice(gas_field.repair_cost_dist.repair_costs,
-                                            np.sum(self.leaks.reparable[detect])))
+                # self.repair_cost[time.time_index] += \
+                #     np.sum(np.random.choice(gas_field.repair_cost_dist.repair_costs,
+                #                             np.sum(self.leaks.reparable[detect])))
                 # Delete found leaks that are reparable
                 self.leaks.endtime[detect[self.leaks.reparable[detect]]] = time.current_time + self.repair_delay
             if end_survey:

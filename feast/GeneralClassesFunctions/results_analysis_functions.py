@@ -12,7 +12,7 @@ def results_analysis(directory):
     Return:
         null_npv          array of null-NPV of each LDAR program in each realization [k$/well]
         emissions_timeseries  Array of emissions in each LDAR program in each realization at each time step
-        costs                 Array of costs associated with each LDAR program (
+        costs                 Array of costs associated with each LDAR program (no discounting, all costs summed)
     """
     files = [f for f in listdir(directory) if isfile(join(directory, f))]
     n_realizations = len(files)
@@ -33,16 +33,16 @@ def results_analysis(directory):
         # iterate through each LDAR program
         for index in range(0, len(techs)):
             emissions_timeseries[index, :, jindex] = sample.tech_dict[techs[index]].emissions
-            costs[index, jindex] = np.sum(sample.tech_dict[techs[index]].find_cost +
-                                          sample.tech_dict[techs[index]].mainitenance +
-                                          sample.tech_dict[techs[index]].capital +
-                                          sample.tech_dict[techs[index]].repair)
+            costs[index, jindex] = np.sum(sample.tech_dict[techs[index]].find_cost) + \
+                np.sum(sample.tech_dict[techs[index]].maintenance) + \
+                np.sum(sample.tech_dict[techs[index]].capital) + \
+                np.sum(sample.tech_dict[techs[index]].repair_cost)
         # iterate through each category of value
         null_npv_temp = npv_calculator(directory + '/' + files[jindex])
         for key in null_npv.keys():
             # no_repair_npv[key][:, jindex] = no_repair_npv_temp[key]
             null_npv[key][:, jindex] = null_npv_temp[key]
-    return null_npv, emissions_timeseries, costs
+    return null_npv, emissions_timeseries, costs, techs
 
 
 def npv_calculator(filepath):

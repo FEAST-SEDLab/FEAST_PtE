@@ -93,5 +93,5 @@ class TechDetect(DetectionMethod):
             time        an object of type Time (defined in feast_classes)
             gas_field   an object of type GasField (defined in feast_classes)
         """
-        self.null_detection(time, gas_field)
         self.survey_detection(time, gas_field, self.detect_prob_curve)
+        self.null_detection(time, gas_field)

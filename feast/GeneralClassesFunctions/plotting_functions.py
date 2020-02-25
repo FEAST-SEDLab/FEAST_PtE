@@ -109,9 +109,37 @@ def time_series(results_file, display=True, save=False, file_out=None):
     return ax
 
 
-def abatement_cost_plotter(directory, display=True, save=False, file_out=None, n_wells=None, ylabel=None):
-    _, emissions = results_analysis_functions.results_analysis(directory)
-
+def abatement_cost_plotter(directory, gwp=34, display=True, save=False, file_out=None):
+    """
+    Generates a box plot of the cost of abatement
+    gwp defaults to 34, which is the value provided in the IPCC 5th assessment report including climate-carbon feedbacks
+    (see Table 8.7, page 714 in Chapter 8 of Climate Change 2013: The Physical Science Basis.)
+    :param directory: A directory containing one or more realizations of a scenario
+    :param gwp: global warming potential of methane
+    :param display: display the plot
+    :param save: save the plot
+    :param file_out: name to save the plot under
+    :return:
+    """
+    directory = '../2020-02-19-PreWebinar/ExampleRunScriptResults2'
+    _, emissions, costs, techs = results_analysis_functions.results_analysis(directory)
+    files = [f for f in listdir(directory) if isfile(join(directory, f))]
+    with open(directory + '/' + files[0], 'rb') as f:
+        sample = load(f)
+    emissions = np.sum(emissions * sample.time.delta_t * 3600 * 24 / 1e6, axis=1)  # metric tonnes
+    em_abate = np.zeros([emissions.shape[0] - 1, emissions.shape[1]])
+    cost_abate = np.zeros([emissions.shape[0] - 1, emissions.shape[1]])
+    for ind in range(em_abate.shape[0]):
+        em_abate[ind, :] = emissions[-1, :] - emissions[ind, :]
+        cost_abate[ind, :] = costs[ind, :] - costs[-1, :]
+    abatement_cost = cost_abate / em_abate / 30
+    _ = plt.boxplot(np.transpose(abatement_cost))
+    ax = plt.gca()
+    ax.set_xticklabels(techs[:2])
+    ax.set_ylabel('Mitigation cost\n(\$/metric ton CO$_2$ eq.)')
+    ax.set_xlabel('LDAR program')
+    plot_fixer()
+    display_save(display, save, file_out)
 
 
 def summary_plotter(directory, display=True, save=False, file_out=None, n_wells=None, ylabel=None):
@@ -127,7 +155,7 @@ def summary_plotter(directory, display=True, save=False, file_out=None, n_wells=
     # load data
     files = [f for f in listdir(directory) if isfile(join(directory, f))]
     sample = load(open(directory + '/' + files[0], 'rb'))
-    npv_in, emissions = results_analysis_functions.results_analysis(directory)
+    npv_in, emissions, costs, techs = results_analysis_functions.results_analysis(directory)
     # Normalize to the number of wells
     if n_wells is not None:
         for cost_type in npv_in:

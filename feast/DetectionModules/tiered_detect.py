@@ -108,7 +108,6 @@ class TieredDetect(DetectionMethod):
             time        an object of type Time (defined in feast_classes)
             gas_field   an object of type GasField (defined in feast_classes)
         """
-        self.null_detection(time, gas_field)
         if time.current_time % self.survey_interval < time.delta_t:
             self.insurvey = True
         if self.insurvey:
@@ -144,8 +143,9 @@ class TieredDetect(DetectionMethod):
                     probs = 0.5 + 0.5 * scipy.special.erf((np.log(self.leaks.flux[cond]) - self.logmu2) /
                                                           (self.loglam2 * np.sqrt(2)))
                     detect = cond[scores < probs]
-                    self.repair_cost[time.time_index] += \
-                        np.sum(np.random.choice(gas_field.repair_cost_dist.repair_costs,
-                                                np.sum(self.leaks.reparable[detect])))
+                    # self.repair_cost[time.time_index] += \
+                    #     np.sum(np.random.choice(gas_field.repair_cost_dist.repair_costs,
+                    #                             np.sum(self.leaks.reparable[detect])))
                     self.leaks.endtime[detect[self.leaks.reparable[detect]]] = time.current_time + self.repair_delay
                 self.secondary_survey_cost[time.time_index] = self.labor * secondary_survey_time
+        self.null_detection(time, gas_field)
