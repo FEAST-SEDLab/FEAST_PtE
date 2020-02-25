@@ -139,5 +139,5 @@ for ind in range(30):
 
     feast.field_simulation.field_simulation(
         time=timeobj, gas_field=gas_field,
-        tech_dict=tech_dict, dir_out='ExampleRunScriptResults2', display_status=False
+        tech_dict=tech_dict, dir_out='ExampleRunScriptResults', display_status=False
     )
