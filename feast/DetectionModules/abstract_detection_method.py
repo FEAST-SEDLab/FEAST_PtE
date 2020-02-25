@@ -41,6 +41,8 @@ class DetectionMethod:
         Inputs:
             time         a time object (Defined in simulation_classes)
         """
+        n_rep = np.sum((self.leaks.flux > 0) & self.leaks.reparable & (self.leaks.endtime < time.current_time))
+        self.repair_cost[time.time_index] += np.sum(np.choose(gas_field.repair_cost_dist, n_rep))
         self.end_intermittents(time)
 
     @staticmethod

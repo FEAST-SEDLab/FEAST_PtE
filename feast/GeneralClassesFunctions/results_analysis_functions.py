@@ -10,10 +10,9 @@ def results_analysis(directory):
     Inputs:
         directory       A directory of results files all generated under the same scenario
     Return:
-        no_repair_npv     array of no-repair-NPVs of each LDAR program in each realization [k$/well]
         null_npv          array of null-NPV of each LDAR program in each realization [k$/well]
-        leaks_found       Cumulative lists of leaks found by each LDAR program over all realizations
         emissions_timeseries  Array of emissions in each LDAR program in each realization at each time step
+        costs                 Array of costs associated with each LDAR program (
     """
     files = [f for f in listdir(directory) if isfile(join(directory, f))]
     n_realizations = len(files)
@@ -21,6 +20,7 @@ def results_analysis(directory):
     n_techs = len(sample.tech_dict)
     # Initialize an array to store a time series of emissions for every LDAR program in every realization
     emissions_timeseries = np.zeros([n_techs, sample.time.n_timesteps, n_realizations])
+    costs = np.zeros([n_techs, n_realizations])
     techs = list(sample.tech_dict.keys())
     no_repair_npv = dict()
     null_npv = dict()
@@ -33,12 +33,16 @@ def results_analysis(directory):
         # iterate through each LDAR program
         for index in range(0, len(techs)):
             emissions_timeseries[index, :, jindex] = sample.tech_dict[techs[index]].emissions
+            costs[index, jindex] = np.sum(sample.tech_dict[techs[index]].find_cost +
+                                          sample.tech_dict[techs[index]].mainitenance +
+                                          sample.tech_dict[techs[index]].capital +
+                                          sample.tech_dict[techs[index]].repair)
         # iterate through each category of value
         null_npv_temp = npv_calculator(directory + '/' + files[jindex])
         for key in null_npv.keys():
             # no_repair_npv[key][:, jindex] = no_repair_npv_temp[key]
             null_npv[key][:, jindex] = null_npv_temp[key]
-    return null_npv, emissions_timeseries
+    return null_npv, emissions_timeseries, costs
 
 
 def npv_calculator(filepath):

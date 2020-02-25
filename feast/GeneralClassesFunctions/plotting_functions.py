@@ -109,6 +109,11 @@ def time_series(results_file, display=True, save=False, file_out=None):
     return ax
 
 
+def abatement_cost_plotter(directory, display=True, save=False, file_out=None, n_wells=None, ylabel=None):
+    _, emissions = results_analysis_functions.results_analysis(directory)
+
+
+
 def summary_plotter(directory, display=True, save=False, file_out=None, n_wells=None, ylabel=None):
     """
     The NPV for each realization stored in 'directory is calculated and displayed in a stacked bar chart. Each component
