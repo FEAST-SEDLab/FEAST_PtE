@@ -17,7 +17,7 @@ class Leak:
         Stores a list of leaks
     """
     def __init__(self, flux=(), leaks_detected=(), capacity=0,
-                 reparable=True, site_index=(), comp_index=(), endtime=np.infty):
+                 reparable=True, site_index=(), comp_index=(), endtime=np.infty, repair_cost=()):
         """
         Inputs:
         flux                leak size (g/s)
@@ -51,6 +51,7 @@ class Leak:
                     self.endtime = np.array(endtime)
             except TypeError:
                 self.endtime = np.ones(length_in) * endtime
+            self.repair_cost = np.array(repair_cost)
         else:
             self.flux = np.zeros(capacity)
             self.site_index = -np.ones(capacity, dtype=int)
@@ -58,12 +59,14 @@ class Leak:
             self.leaks_detected = np.zeros(capacity)
             self.reparable = np.ones(capacity, dtype=np.bool)
             self.endtime = np.ones(capacity) * np.inf
+            self.repair_cost = np.zeros(capacity)
             self.flux[0:length_in] = flux
             self.leaks_detected[0:length_in] = np.array(leaks_detected) if leaks_detected != () else np.zeros(length_in)
             self.reparable[0:length_in] = reparable
             self.site_index[0:length_in] = site_index
             self.comp_index[0:length_in] = comp_index
             self.endtime[0:length_in] = endtime
+            self.repair_cost[0:length_in] = repair_cost
         self.n_leaks = length_in
 
     def extend(self, leak_obj_in):
@@ -79,6 +82,7 @@ class Leak:
             self.endtime[self.n_leaks: self.n_leaks+leak_obj_in.n_leaks] = leak_obj_in.endtime
             self.site_index[self.n_leaks: self.n_leaks + leak_obj_in.n_leaks] = leak_obj_in.site_index
             self.comp_index[self.n_leaks: self.n_leaks + leak_obj_in.n_leaks] = leak_obj_in.comp_index
+            self.repair_cost[self.n_leaks: self.n_leaks + leak_obj_in.n_leaks] = leak_obj_in.repair_cost
         else:
             self.flux = np.append(self.flux, leak_obj_in.flux)
             self.leaks_detected = np.append(self.leaks_detected, leak_obj_in.leaks_detected)
@@ -86,6 +90,7 @@ class Leak:
             self.endtime = np.append(self.endtime, leak_obj_in.endtime)
             self.site_index = np.append(self.site_index, leak_obj_in.site_index)
             self.comp_index = np.append(self.comp_index, leak_obj_in.comp_index)
+            self.repair_cost = np.append(self.repair_cost, leak_obj_in.repair_cost)
 
         self.n_leaks += leak_obj_in.n_leaks
 
@@ -117,6 +122,7 @@ class Leak:
         self.endtime = np.delete(self.endtime, indexes_to_delete)
         self.site_index = np.delete(self.site_index, indexes_to_delete)
         self.comp_index = np.delete(self.comp_index, indexes_to_delete)
+        self.repair_cost = np.delete(self.repair_cost, indexes_to_delete)
         try:
             self.n_leaks -= len(indexes_to_delete)
         except TypeError:
@@ -134,6 +140,7 @@ class Leak:
         self.endtime[:self.n_leaks] = self.endtime[:self.n_leaks][sortorder]
         self.site_index[:self.n_leaks] = self.site_index[:self.n_leaks][sortorder]
         self.comp_index[:self.n_leaks] = self.comp_index[:self.n_leaks][sortorder]
+        self.repair_cost[:self.n_leaks] = self.repair_cost[:self.n_leaks][sortorder]
 
 
 def bootstrap_leak_maker(n_leaks_in, comp_name, site, time, capacity=0, reparable=True):
@@ -175,13 +182,14 @@ def bootstrap_leak_maker(n_leaks_in, comp_name, site, time, capacity=0, reparabl
     np.random.shuffle(flux)
     site_indexes = np.random.randint(site.site_inds[0], site.site_inds[1], len(flux))
     comp_indexes = comp_indexes_fcn(site, comp_name, len(flux))
+    repair_costs = np.random.choice(comp.repair_cost_dist.repair_costs, len(flux))
     if site.comp_dict[comp_name]['parameters'].null_repair_rate > 0:
         end_times = time.current_time + \
                     np.random.exponential(1 / site.comp_dict[comp_name]['parameters'].null_repair_rate, len(flux))
     else:
         end_times = np.inf
-    return Leak(flux=flux, leaks_detected=[0]*len(flux), reparable=reparable,
-                capacity=capacity, site_index=site_indexes, comp_index=comp_indexes, endtime=end_times)
+    return Leak(flux=flux, leaks_detected=[0]*len(flux), reparable=reparable, capacity=capacity,
+                site_index=site_indexes, comp_index=comp_indexes, endtime=end_times, repair_cost=repair_costs)
 
 
 def comp_indexes_fcn(site, comp_name, n_inds):

@@ -42,6 +42,8 @@ class Component:
     def __init__(self, null_repair_rate=None, **kwargs):
         self.name = 'default'
         self.component_type = "fugitive leak source"
+        # Repair cost data file path
+        self.repair_cost_path = 'fernandez_leak_repair_costs_2006.p'
         # Events with a constant probability of occurring and duration determined by the null repair rate
         # emission specifications may or may not be reparable before the null repair process
         self.dist_type = 'bootstrap'
@@ -60,6 +62,14 @@ class Component:
         self.vent_starts = np.array([])
         # Update any attributes defined by kwargs
         set_kwargs_attrs(self, kwargs)
+        # Distribution of leak repair costs
+        rsc_path, _ = os.path.split(dirname(abspath(__file__)))
+        if self.repair_cost_path in os.listdir(os.path.join(rsc_path, 'InputData', 'DataObjectInstances')):
+            rsc_path = os.path.join(rsc_path, 'InputData', 'DataObjectInstances', self.repair_cost_path)
+        else:
+            rsc_path = self.repair_cost_path
+        with open(rsc_path, 'rb') as f:
+            self.repair_cost_dist = pickle.load(f)
         self.leak_size_maker, self.leak_params, self.emission_per_well, emission_per_comp \
             = leak_obj_gen(self.dist_type, self.emission_data_path)
         if self.emission_per_comp == 'default':
@@ -106,8 +116,6 @@ class GasField:
         self.t_plume = 300  # K
         # Initial leaks defined for the gas field
         self.initial_leaks = None
-        # Repair cost data file path
-        self.repair_cost_path = 'fernandez_leak_repair_costs_2006.p'
         # Update any attributes defined by kwargs
         set_kwargs_attrs(self, kwargs)
 
@@ -154,14 +162,6 @@ class GasField:
                 if site.site_em_dist:
                     self.site_emissions_enforcer(site)
         self.n_sites = site_ind
-        # Distribution of leak repair costs
-        rsc_path, _ = os.path.split(dirname(abspath(__file__)))
-        if self.repair_cost_path in os.listdir(os.path.join(rsc_path, 'InputData', 'DataObjectInstances')):
-            rsc_path = os.path.join(rsc_path, 'InputData', 'DataObjectInstances', self.repair_cost_path)
-        else:
-            rsc_path = self.repair_cost_path
-        with open(rsc_path, 'rb') as f:
-            self.repair_cost_dist = pickle.load(f)
 
         new_leaks = lcf.Leak()
         for site_dict in self.sites.values():

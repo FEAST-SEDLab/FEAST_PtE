@@ -248,6 +248,7 @@ def test_npv_calculator():
         name='Fugitive emitters',
         emission_data_path=file_out,
         emission_per_comp=0.1,
+        repair_cost_path=rep_file_out,
         emission_production_rate=0
     )
     n_sites = 100
@@ -263,12 +264,11 @@ def test_npv_calculator():
     timeobj = feast.GeneralClassesFunctions.simulation_classes.Time(delta_t=1, end_time=2)
     initial_leaks = feast.GeneralClassesFunctions.leak_class_functions.Leak(
         flux=np.ones(1000), site_index=np.random.randint(0, n_sites, 1000),
-        comp_index=np.random.randint(0, 100, 1000), endtime=np.infty
+        comp_index=np.random.randint(0, 100, 1000), endtime=np.infty, repair_cost=np.ones(1000) * 2
     )
     gas_field = feast.GeneralClassesFunctions.simulation_classes.GasField(
         sites=site_dict,
         time=timeobj,
-        repair_cost_path=rep_file_out,
         initial_leaks=initial_leaks
     )
     tech_dict = {'TechDetect': feast.DetectionModules.tech_detect.TechDetect(timeobj, gas_field, survey_speed=10000)}
@@ -292,27 +292,27 @@ def test_npv_calculator():
         os.rmdir('ResultsTemp')
 
 
-test_gasfield_leak_maker()
-
-test_null_repair()
-
-test_alvarez_colorado_em_dist()
-
-test_emissions_enforcer_low()
-
-test_emissions_enforcer_high()
-
-test_emissions_enforcer_no_repairable()
-
-test_bootstrap_leak_maker()
-
-test_gasfield_leak_size_maker()
-
-test_field_simulation()
-
-test_leak_obj()
-
-test_results_analysis()
+# test_gasfield_leak_maker()
+#
+# test_null_repair()
+#
+# test_alvarez_colorado_em_dist()
+#
+# test_emissions_enforcer_low()
+#
+# test_emissions_enforcer_high()
+#
+# test_emissions_enforcer_no_repairable()
+#
+# test_bootstrap_leak_maker()
+#
+# test_gasfield_leak_size_maker()
+#
+# test_field_simulation()
+#
+# test_leak_obj()
+#
+# test_results_analysis()
 
 test_npv_calculator()
 
