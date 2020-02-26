@@ -252,6 +252,7 @@ def permitted_emission(n_emit, sizes, duration, time, site, comp_name):
     endtime = time.current_time + duration
     site_indexes = np.random.randint(site.site_inds[0], site.site_inds[1], len(flux))
     comp_indexes = comp_indexes_fcn(site, comp_name, len(flux))
+    repair_cost = np.zeros(len(flux))
     return Leak(flux=flux, leaks_detected=[0]*n_emit,
                 reparable=reparable, endtime=endtime,
-                site_index=site_indexes, comp_index=comp_indexes)
+                site_index=site_indexes, comp_index=comp_indexes, repair_cost=repair_cost)
