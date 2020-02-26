@@ -36,7 +36,8 @@ def test_null_repair():
     np.random.seed(0)
     flux = np.random.uniform(0.1, 1, 100)
     end_time = np.random.exponential(10, 100)
-    gf.initial_leaks = lcf.Leak(flux=flux, endtime=end_time)
+    repair_cost = np.zeros(100)
+    gf.initial_leaks = lcf.Leak(flux=flux, endtime=end_time, repair_cost=repair_cost)
     null = Dm.null.Null(timeobj, gf)
     null.null_detection(timeobj, gf)
     if np.sum(null.leaks.flux > 0) != 39:
@@ -49,50 +50,6 @@ def test_alvarez_colorado_em_dist():
     em_out = feast.GeneralClassesFunctions.site_emission_methods.alvarez_colorado_em_dist(np.array([11, 121]))
     if np.max(np.abs(em_out - np.array([1.77656241, 0.13525278]))) > 1e-6:
         raise ValueError("Unexpected emission from test_alvarez_colorado_em_dist")
-
-
-def test_emissions_enforcer_low():
-    pad = sc.Site(site_em_dist=feast.GeneralClassesFunctions.site_emission_methods.alvarez_colorado_em_dist)
-    gf = sc.GasField(sites={'site0': {'number': 1, 'parameters': pad}})
-    gf.initial_leaks = lcf.Leak(capacity=1)
-    if np.sum(gf.initial_leaks.flux) != 0:
-        raise ValueError("lcf.Leak intializing non-zero emissions")
-    gf.site_emissions_enforcer(gf.sites['site0']['parameters'])
-    if np.sum(gf.initial_leaks.flux) <= 0:
-        raise ValueError("site_emissions_enforcer is not generating emissions when required")
-    if gf.initial_leaks.site_index != 0:
-        raise ValueError("site_emissions_enforcer does not set the site index correctly")
-    if gf.initial_leaks.comp_index != -1:
-        raise ValueError("site_emissions_enforcer does not set the component index correctly")
-
-
-def test_emissions_enforcer_high():
-    pad = sc.Site(site_em_dist=feast.GeneralClassesFunctions.site_emission_methods.alvarez_colorado_em_dist)
-    gf = sc.GasField(sites={'site0': {'number': 1, 'parameters': pad}})
-    gf.initial_leaks = lcf.Leak(capacity=10,
-                                flux=np.array([1000, 100, 10, 1, 0.1]),
-                                site_index=np.array([0, 0, 0, 0, 0]),
-                                comp_index=np.array([1, 2, 3, 4, 5]))
-    if np.sum(gf.initial_leaks.flux) != 1111.1:
-        raise ValueError("lcf.Leak initializing unexpected emissions")
-    np.random.seed(0)
-    gf.site_emissions_enforcer(gf.sites['site0']['parameters'])
-    if np.max(gf.initial_leaks.flux[1:]) > 0 or gf.initial_leaks.flux[0] >= 1000:
-        raise(ValueError("emissions_enforcer is not removing emissions as expected"))
-
-
-def test_emissions_enforcer_no_repairable():
-    pad = sc.Site(site_em_dist=feast.GeneralClassesFunctions.site_emission_methods.alvarez_colorado_em_dist)
-    gf = sc.GasField(sites={'site0': {'number': 1, 'parameters': pad}})
-    gf.initial_leaks = lcf.Leak(capacity=10,
-                                flux=np.array([1000, 100, 10, 1, 0.1]),
-                                site_index=np.array([0, 0, 0, 0, 0]),
-                                comp_index=np.array([1, 2, 3, 4, 5]),
-                                reparable=np.array([False, False, False, False, False]))
-    if np.sum(gf.initial_leaks.flux) != 1111.1:
-        raise ValueError("lcf.Leak initializing unexpected emissions")
-    np.random.seed(0)
-    gf.site_emissions_enforcer(gf.sites['site0']['parameters'])
 
 
 def test_bootstrap_leak_maker():
@@ -292,27 +249,21 @@ def test_npv_calculator():
         os.rmdir('ResultsTemp')
 
 
-# test_gasfield_leak_maker()
-#
-# test_null_repair()
-#
-# test_alvarez_colorado_em_dist()
-#
-# test_emissions_enforcer_low()
-#
-# test_emissions_enforcer_high()
-#
-# test_emissions_enforcer_no_repairable()
-#
-# test_bootstrap_leak_maker()
-#
-# test_gasfield_leak_size_maker()
-#
-# test_field_simulation()
-#
-# test_leak_obj()
-#
-# test_results_analysis()
+test_gasfield_leak_maker()
+
+test_null_repair()
+
+test_alvarez_colorado_em_dist()
+
+test_bootstrap_leak_maker()
+
+test_gasfield_leak_size_maker()
+
+test_field_simulation()
+
+test_leak_obj()
+
+test_results_analysis()
 
 test_npv_calculator()
 

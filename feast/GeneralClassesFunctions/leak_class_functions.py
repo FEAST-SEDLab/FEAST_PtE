@@ -182,12 +182,12 @@ def bootstrap_leak_maker(n_leaks_in, comp_name, site, time, capacity=0, reparabl
     np.random.shuffle(flux)
     site_indexes = np.random.randint(site.site_inds[0], site.site_inds[1], len(flux))
     comp_indexes = comp_indexes_fcn(site, comp_name, len(flux))
-    repair_costs = np.random.choice(comp.repair_cost_dist.repair_costs, len(flux))
     if site.comp_dict[comp_name]['parameters'].null_repair_rate > 0:
         end_times = time.current_time + \
                     np.random.exponential(1 / site.comp_dict[comp_name]['parameters'].null_repair_rate, len(flux))
     else:
         end_times = np.inf
+    repair_costs = np.random.choice(comp.repair_cost_dist.repair_costs, len(flux))
     return Leak(flux=flux, leaks_detected=[0]*len(flux), reparable=reparable, capacity=capacity,
                 site_index=site_indexes, comp_index=comp_indexes, endtime=end_times, repair_cost=repair_costs)
 

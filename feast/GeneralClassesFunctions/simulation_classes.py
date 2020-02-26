@@ -178,7 +178,7 @@ class GasField:
             cond = np.where(start_times == ind)[0]
             input_leaks.append(lcf.Leak(flux=new_leaks.flux[cond], reparable=new_leaks.reparable[cond],
                                         site_index=new_leaks.site_index[cond], comp_index=new_leaks.comp_index[cond],
-                                        endtime=new_leaks.endtime[cond]))
+                                        endtime=new_leaks.endtime[cond], repair_cost=new_leaks.repair_cost[cond]))
         self.input_leaks = input_leaks
 
     # Define functions and parameters related to leaks
@@ -224,28 +224,6 @@ class GasField:
                                        min(1, time.delta_t/comp.vent_period))
         new_leaks.extend(comp.emission_maker(n_vent, comp.vent_sizes, comp.vent_duration, time, site, comp_name))
         return None
-
-    def site_emissions_enforcer(self, site):
-        site_emissions = site.site_em_dist(site.production)
-        for site_ind in range(site.site_inds[0], site.site_inds[1]):
-            site_cond = self.initial_leaks.site_index == site_ind
-            flux = np.sum(self.initial_leaks.flux[site_cond])
-            err = flux - site_emissions[site_ind - site.site_inds[0]]
-            if err < 0:
-                leak_adj = lcf.Leak(flux=-err, leaks_detected=0, capacity=1, reparable=True,
-                                    site_index=site_ind, endtime=site.fug_duration, comp_index=-1)
-                self.initial_leaks.extend(leak_adj)
-            while err > 0:
-                site_rep_cond = site_cond & self.initial_leaks.reparable & (self.initial_leaks.flux > 0)
-                try:
-                    # This try statement breaks the loop in the case where the site has zero reparable emissions.
-                    ind_to_correct = np.random.choice(np.where(site_rep_cond)[0])
-                    flux_to_correct = self.initial_leaks.flux[ind_to_correct]
-                except ValueError:
-                    break
-                err2 = err - flux_to_correct
-                self.initial_leaks.flux[ind_to_correct] = flux_to_correct - np.min([flux_to_correct, err])
-                err = err2
 
 
 # FinanceSettings stores all parameters relating to economic calculations
