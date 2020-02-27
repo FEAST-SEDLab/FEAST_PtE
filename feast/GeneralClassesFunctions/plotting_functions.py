@@ -76,7 +76,7 @@ def display_save(display, save, file_out):
     plt.ioff()
 
 
-def time_series(results_file, display=True, save=False, file_out=None):
+def time_series(results_file, display=True, save=False, file_out=None, line_width=6):
     """
     Display a time series of emissions from each detection method in a results file
     Inputs:
@@ -97,11 +97,11 @@ def time_series(results_file, display=True, save=False, file_out=None):
         counter += 1
         tech_dict[tech].line = ax.plot(np.array(range(0, results.time.n_timesteps)) * results.time.delta_t / 365,
                                        np.array(tech_dict[tech].emissions)/tech_dict[tech].emissions[0], label=lab,
-                                       color=color_set[counter])
+                                       color=color_set[counter], linewidth=line_width)
         avg_emissions = np.mean(np.array(tech_dict[tech].emissions)/tech_dict[tech].emissions[0])
         ax.plot([0, results.time.end_time / 365],
                 [avg_emissions, avg_emissions],
-                '--', label=lab + ' Average', color=color_set[counter])
+                '--', label=lab + ' Average', color=color_set[counter], linewidth=line_width)
     plt.xlabel('Time [years]', fontweight='bold')
     plt.ylabel('Fraction of initial emissions', fontweight='bold')
     plt.legend(bbox_to_anchor=(1, 0.72))
