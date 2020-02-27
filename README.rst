@@ -6,7 +6,7 @@ _________________________________________
 
 Introduction: What is FEAST?
 ----------------------------
-The Fugitive Emissions Abatement Simulation Toolkit or FEAST is a model to evaluate the effectiveness of methane leak detection and repair (LDAR) programs at oil and gas facilities. Recent advances in the development of new fixed and mobile (truck-, drone-, plane-, and satellite-based) methane leak detection technolgoies have led to growing interest in alternative LDAR programs. Thus, FEAST can also be used to compare the relative effectiveness of new technologies and methods as part of LDAR programs. FEAST uses publicly available data-sets on methane emissions and recent data from field tests of new methane leak detection technologies to simulate the performance of LDAR programs. 
+The Fugitive Emissions Abatement Simulation Toolkit or FEAST is a model to evaluate the effectiveness of methane leak detection and repair (LDAR) programs at oil and gas facilities. Recent advances in the development of new fixed and mobile (truck-, drone-, plane-, and satellite-based) methane leak detection technologies have led to growing interest in alternative LDAR programs. Thus, FEAST can also be used to compare the relative effectiveness of new technologies and methods as part of LDAR programs. FEAST uses publicly available data-sets on methane emissions and recent data from field tests of new methane leak detection technologies to simulate the performance of LDAR programs. 
 
 A Brief History of FEAST
 ------------------------
