@@ -21,7 +21,7 @@ color_set = np.array([
 ]) / 255
 
 
-def plot_fixer(fig=None, ax=None, fsize=18, color=(0, 0, 0), tight_layout=True):
+def plot_fixer(fig=None, ax=None, fsize=18, color=(0, 0, 0), tight_layout=True, line_width=4):
     rc('font', weight='bold')
     rcParams['text.latex.preamble'] = [r'\usepackage{sfmath} \boldmath']
     # fig.canvas.draw()
@@ -35,7 +35,7 @@ def plot_fixer(fig=None, ax=None, fsize=18, color=(0, 0, 0), tight_layout=True):
         ax_list = ax
     for ax in ax_list:
         ax.tick_params(axis='both', which='major', labelsize=fsize, color=color)
-        lw = 4
+        lw = line_width
         for ln in ax.lines:
             ln.set_linewidth(lw)
         for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
