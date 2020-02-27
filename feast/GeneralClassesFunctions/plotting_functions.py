@@ -133,7 +133,7 @@ def abatement_cost_plotter(directory, gwp=34, display=True, save=False, file_out
         cost_abate[ind, :] = costs[ind, :] - costs[-1, :]
     abatement_cost = cost_abate / em_abate / gwp
     medianprops = dict(color='k')
-    boxplot = plt.boxplot(np.transpose(abatement_cost), medianprops=medianprops)
+    boxplot = plt.boxplot(np.transpose(abatement_cost), medianprops=medianprops, patch_artist=True)
     ind = 0
     for bx in boxplot['boxes']:
         bx.set(facecolor=color_set[ind])
