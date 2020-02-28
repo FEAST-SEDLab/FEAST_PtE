@@ -26,7 +26,7 @@ Tutorial:
 ---------
 Clicking the link below will direct you to a jupyter notebook server that demonstrates a few basic simulations in FEAST. The server will not support advanced simulations and your results will not be maintained indefinitely, so it should be used as an educational tool rather than an analysis platform. Enter any username and password to access the server. By recording your username and password you will be able to reaccess your work after the server times out.
 
-http://64.225.7.26/
+https://jhubtest.apps.harrisburgu.cloud/
 
 File Structure:
 ---------------
