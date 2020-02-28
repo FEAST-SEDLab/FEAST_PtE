@@ -124,7 +124,7 @@ simulation_classes.py
 simulation_functions.py 
 	defines functions that are necessary for a simulation but are neither part of a LDAR program nor methods of a class. The functions are listed below::
 
-	-save_results	        Generates and saves a Results object.	
+	-save_results	        Generates and saves a Results object.
 	-set_kwargs_attrs	Allows any attribute to be set using key word arguments.
 
 site_emission_methdods.py
@@ -145,3 +145,19 @@ RawData
 	
 RawDataProcessingScripts    
 	Contains the scripts used to produce the objects in DataObjectInstaces from the files in RawData.
+
+Results Files:
+---------------
+Results files can be loaded with the "pickle" package in Python's standard library as shown below:
+    re = pickle.load(open('results_realization0.p', 'rb'))
+
+The resulting object (re) contain the emissions timeseries from every LDAR program in the simulation, as well as all of
+the settings used to run the simulation. The paths to most high level attributes are shown below:
+    re.econ_settings----Defines economic variables, including the discount rate assumed in net present value analyses
+    re.tech_dict----A dictionary of LDAR programs and their associated properties
+        re.tech_dict['tech name'].emissions----list of total emissions at each time step (g/s)
+        re.tech_dict['tech name'].find_cost----list of leak detection costs associated with each time step
+        re.tech_dict['tech name'].repair_cost----list of repair costs associated with each time step
+    re.time----Defines time variables, including simulation duration (endtime) and time step size (delta_t)
+    re.gas_field----Stores all gas field settings and properties
+        re.gas_field.input_leaks----List of emissions added at each time step.

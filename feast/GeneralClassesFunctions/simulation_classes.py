@@ -237,22 +237,18 @@ class Results:
     """
     Class in which to save results
     """
-    def __init__(self, time, gas_field, tech_dict, no_repair_emissions, econ_set, new_leaks):
+    def __init__(self, time, gas_field, tech_dict, econ_set):
         """
         Inputs:
         time                    Time object
         gas_field               GasField object
         tech_dict               dict of detection methods and associated data
-        no_repair_emissions       list of emissions in a scenario with no repairs
         econ_set                Economic settings defined for the simulation
-        new_leaks               List of leaks generated at each time step
         """
         self.time = time
         self.gas_field = gas_field
         self.tech_dict = tech_dict
-        self.no_repair_emissions = no_repair_emissions
         self.econ_settings = econ_set
-        self.new_leaks = new_leaks
 
 
 class Site:

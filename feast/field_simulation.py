@@ -24,8 +24,7 @@ def check_timestep(gas_field, time):
 
 
 def field_simulation(gas_field=None, dir_out='Results', time=None,
-                     econ_set=None, tech_dict=None, detection_techs=None, display_status=True,
-                     save_norepair_scenario=False):
+                     econ_set=None, tech_dict=None, detection_techs=None, display_status=True):
     """
     field_simulation generates a single realization of scenario. The scenario is defined by the input values.
     gas_field           a GasField object
@@ -34,7 +33,6 @@ def field_simulation(gas_field=None, dir_out='Results', time=None,
     econ_set            a FinanceSettings object
     tech_dict           a dict of detection technology objects
     detection_techs     a list of detection technology identifying strings
-    save_norepair_scenario    if True, save the total emissions time series in a no-repair scenario
     """
     # -------------- Define settings --------------
     # time defines parameters related to time in the model. Time units are days.
@@ -51,7 +49,6 @@ def field_simulation(gas_field=None, dir_out='Results', time=None,
     if detection_techs is None:
         detection_techs = ['null.Null', 'tech_detect.TechDetect']
 
-    new_leaks, no_repair_emissions = [], []
     if tech_dict is None:
         tech_dict = dict()
         for tech in detection_techs:
@@ -64,12 +61,6 @@ def field_simulation(gas_field=None, dir_out='Results', time=None,
     for time.time_index in range(0, time.n_timesteps):
         if display_status and time.current_time % int(time.end_time/10) < time.delta_t:
             print("The evaluation is {:0.0f}% complete" .format(100 * time.time_index / time.n_timesteps))
-        if gas_field.input_leaks is None:
-            new_leaks.append(gas_field.leak_size_maker(time))
-        else:
-            new_leaks.append(gas_field.input_leaks[time.time_index])
-        if save_norepair_scenario:
-            no_repair_emissions.append(no_repair_emissions[-1] + np.sum(new_leaks.flux))
         # Loop through each LDAR program:
         for tech_obj in tech_dict.values():
             # The extra factor here accounts for emissions that end part way through a timestep
@@ -83,12 +74,11 @@ def field_simulation(gas_field=None, dir_out='Results', time=None,
                 tech_obj.emissions.append(0)
                 tech_obj.vents.append(0)
             tech_obj.detection(time, gas_field)
-            tech_obj.leaks.extend(new_leaks[-1])
+            tech_obj.leaks.extend(gas_field.input_leaks[time.time_index])
             if time.time_index % 1000 == 0:
                 tech_obj.leaks.clear_zeros()
         time.current_time += time.delta_t
 
     # -------------- Save results --------------
-    results = simulation_classes.Results(time, gas_field, tech_dict, no_repair_emissions, econ_set,
-                                         new_leaks)
+    results = simulation_classes.Results(time, gas_field, tech_dict, econ_set)
     save_results(dir_out, results)
