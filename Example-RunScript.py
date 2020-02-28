@@ -16,8 +16,8 @@ from feast.GeneralClassesFunctions.simulation_classes import Component
 comp_fug = Component(
     name='Fugitive emitters',
     emission_data_path='production_emissions.p',
-    emission_per_comp=0.00231,
-    emission_production_rate=5.4 / 650 / 365
+    emission_per_comp=0.00231,  # Fraction of components expected to be emitting at the beginning of the simulation.
+    emission_production_rate=5.4 / 650 / 365  # number of new emissions per component per day
 )
 
 # Generates miscelaneous emissions that cannot be repaired (many tank emissions and pneumatic controller emissions can
@@ -25,8 +25,8 @@ comp_fug = Component(
 misc_vent = Component(
     name='misc vents',
     emission_data_path='production_emissions.p',
-    emission_per_comp=0.00231,
-    emission_production_rate=5.4 / 650 / 365,
+    emission_per_comp=0.00231,  # Fraction of components expected to be emitting at the beginning of the simulation.
+    emission_production_rate=5.4 / 650 / 365,  # number of new emissions per component per day
     base_reparable=False,
 )
 
@@ -34,25 +34,25 @@ misc_vent = Component(
 # Simulates unloading emissions from a well with a plunger lift
 plunger = feast.GeneralClassesFunctions.simulation_classes.Component(
     name='plunger',
-    emission_production_rate=0,
+    emission_production_rate=0,  # Expected rate of production for fugitive emissions
     episodic_emission_sizes=[50.36],  # gram-per-sec
-    episodic_emission_duration=2059 / 3600 / 24,  # see Zaimes Figure S5
-    episodic_emission_per_day=0.0165  # totals['n_plunger_events'] / totals['n_plunger_wells'] / 365
+    episodic_emission_duration=2059 / 3600 / 24,  # Average length of emission (days)
+    episodic_emission_per_day=0.0165  # Number of events per day per plunger well
 )
 
 # Simulates unloading emissions from a well with out a plunger lift
 noplunger = feast.GeneralClassesFunctions.simulation_classes.Component(
     name='no plunger',
     emission_production_rate=0,
-    episodic_emission_sizes=[76.98],  # [np_methane / np_events / 4973.5 * 1e6], # gram-per-sec
-    episodic_emission_duration=4973.5 / 3600 / 24,  # see Zaimes Figure S3
-    episodic_emission_per_day=0.0002111  # np_events / np_wells / 365
+    episodic_emission_sizes=[76.98],  # gram-per-sec
+    episodic_emission_duration=4973.5 / 3600 / 24,  # Average length of emission (days)
+    episodic_emission_per_day=0.0002111  # Number of events per day for unloading wells without a plunger
 )
 
 
 # Define the number of wells at each site
 # Assign the number of wells per site
-n_sites = 93
+n_sites = 93  # This is the number of "basic pads" to be included in the simulation
 # The well per site distribution was built using data from the Colorado Oil and Gas Conservation Commission
 well_dist = np.cumsum([0.7842, 0.0762, 0.0382, 0.0280, 0.0150, 0.0114, 0.0082, 0.0111, 0.0047, 0.0045, 0.0035, 0.0038,
                       0.0027, 0.0016, 0.0018, 0.0026, 0.0010, 0.0011, 0.0006])
@@ -114,8 +114,11 @@ for ind in range(30):
 
     # Define LDAR programs
     tech = {
-        'ogi': {'survey_interval': 180, 'mu': 0.0018,
-                'lam': 2.23, 'survey_speed': 400},
+        'ogi': {'survey_interval': 180,  # Days between surveys
+                'mu': 0.0018,  # Emission rate with 50% probability of detection (g/s)
+                'lam': 2.23,  # Width parameter for the probability of detection curve
+                'survey_speed': 400  # Components per day
+                },
     }
     tech_dict = {}
     for tech, params in tech.items():
@@ -125,10 +128,14 @@ for ind in range(30):
         )
     tiered_tech = {
         'Plane': {
-            'survey_interval': 180, 'mu': 0.474,
-            'lam': 3.88, 'sites_per_day': 222,
-            'lam2': 2.23, 'mu2': 0.002,
-            'secondary_comps_hr': 400}
+            'survey_interval': 180,  # Days between surveys
+            'mu': 0.474,  # Emission rate with 50% probability of detection (g/s)
+            'lam': 3.88,  # Width parameter for the probability of detection curve
+            'sites_per_day': 222,  # Defines the speed of the primary survey (sites per day)
+            'lam2': 2.23,  # Width parameter for the secondary survey probability of detection curve.
+            'mu2': 0.002,  # Emission size with a 50% probability of detection for the secondary survey (g/s)
+            'secondary_comps_hr': 400  # Defines the speed of the secondary survey (components per hour)
+        }
     }
 
     for tech, params in tiered_tech.items():
