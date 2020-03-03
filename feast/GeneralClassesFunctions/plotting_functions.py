@@ -21,8 +21,8 @@ color_set = np.array([
 ]) / 255
 
 
-def plot_fixer(fig=None, ax=None, fsize=18, color=(0, 0, 0), tight_layout=True, line_width=4):
-    rc('font', weight='bold')
+def plot_fixer(fig=None, ax=None, fsize=18, color=(0, 0, 0), tight_layout=True, line_width=4, fontweight='bold'):
+    rc('font', weight=fontweight)
     rcParams['text.latex.preamble'] = [r'\usepackage{sfmath} \boldmath']
     # fig.canvas.draw()
     if fig is None:
@@ -50,8 +50,8 @@ def plot_fixer(fig=None, ax=None, fsize=18, color=(0, 0, 0), tight_layout=True, 
             pass
         [i.set_linewidth(2) for i in ax.spines.values()]
         [i.set_color(color) for i in ax.spines.values()]
-        ax.xaxis.label.set_fontweight('bold')
-        ax.yaxis.label.set_fontweight('bold')
+        ax.xaxis.label.set_fontweight(fontweight)
+        ax.yaxis.label.set_fontweight(fontweight)
     if tight_layout:
         plt.tight_layout()
 
