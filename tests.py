@@ -249,6 +249,57 @@ def test_npv_calculator():
         os.rmdir('ResultsTemp')
 
 
+def test_tiered_detect_find_cost():
+    comp_fug = sc.Component(
+        name='Fugitive emitters',
+        emission_per_comp=0.1,
+        emission_production_rate=0
+    )
+    n_sites = 100
+    site_dict = {}
+    basicpad = feast.GeneralClassesFunctions.simulation_classes.Site(
+        # Simulates two wells, one tank, total components=11302
+        name='basic pad',
+        comp_dict={
+            'Fugitive ': {'number': 100, 'parameters': comp_fug},
+        }
+    )
+    site_dict['basic pad'] = {'number': n_sites, 'parameters': basicpad}
+    timeobj = feast.GeneralClassesFunctions.simulation_classes.Time(delta_t=1, end_time=2)
+    initial_leaks = feast.GeneralClassesFunctions.leak_class_functions.Leak(
+        flux=np.ones(100), site_index=np.ones(100),
+        comp_index=np.random.randint(0, 100, 100), endtime=np.infty, repair_cost=np.ones(100) * 2
+    )
+    gas_field = feast.GeneralClassesFunctions.simulation_classes.GasField(
+        sites=site_dict,
+        time=timeobj,
+        initial_leaks=initial_leaks
+    )
+    tech_dict = {'TieredDetect': feast.DetectionModules.tiered_detect.TieredDetect(
+                     timeobj,
+                     gas_field,
+                     sites_per_day=100000,
+                     secondary_comps_hr=100,
+                     labor=100,
+                     ophrs={'begin': 800, "end": 1700}
+                 )}
+    feast.field_simulation.field_simulation(
+        time=timeobj, gas_field=gas_field, dir_out='ResultsTemp', display_status=False, tech_dict=tech_dict
+    )
+    npv = feast.GeneralClassesFunctions.results_analysis_functions.npv_calculator('ResultsTemp/realization0.p')
+    for f in os.listdir('ResultsTemp'):
+        os.remove(os.path.join('ResultsTemp', f))
+    try:
+        os.rmdir('ResultsTemp')
+    except PermissionError:
+        # If there is an automated syncing process, a short pause may be necessary before removing "ResultsTemp"
+        ti.sleep(5)
+        os.rmdir('ResultsTemp')
+    if npv['Finding'][0] != 100.9:
+        raise ValueError("Finding costs not calculated correctly for tiered detect method.")
+
+
+
 test_gasfield_leak_maker()
 
 test_null_repair()
@@ -266,5 +317,7 @@ test_leak_obj()
 test_results_analysis()
 
 test_npv_calculator()
+
+test_tiered_detect_find_cost()
 
 print("Successfully completed all tests")

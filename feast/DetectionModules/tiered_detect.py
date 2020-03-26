@@ -147,5 +147,5 @@ class TieredDetect(DetectionMethod):
                     #     np.sum(np.random.choice(gas_field.repair_cost_dist.repair_costs,
                     #                             np.sum(self.leaks.reparable[detect])))
                     self.leaks.endtime[detect[self.leaks.reparable[detect]]] = time.current_time + self.repair_delay
-                self.secondary_survey_cost[time.time_index] = self.labor * secondary_survey_time
+                self.find_cost[time.time_index] += self.labor * secondary_survey_time
         self.null_detection(time, gas_field)
