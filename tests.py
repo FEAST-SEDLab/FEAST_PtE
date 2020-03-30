@@ -8,6 +8,7 @@ import os
 import pickle
 import time as ti
 
+
 def test_gasfield_leak_maker():
     gf = sc.GasField()
     new_leaks = lcf.Leak()
@@ -278,7 +279,8 @@ def test_tiered_detect_find_cost():
     tech_dict = {'TieredDetect': feast.DetectionModules.tiered_detect.TieredDetect(
                      timeobj,
                      gas_field,
-                     sites_per_day=100000,
+                     sites_per_day=1000,
+                     site_cost=1,
                      secondary_comps_hr=100,
                      labor=100,
                      ophrs={'begin': 800, "end": 1700}
@@ -295,9 +297,8 @@ def test_tiered_detect_find_cost():
         # If there is an automated syncing process, a short pause may be necessary before removing "ResultsTemp"
         ti.sleep(5)
         os.rmdir('ResultsTemp')
-    if npv['Finding'][0] != 100.9:
+    if npv['Finding'][0] != 200:
         raise ValueError("Finding costs not calculated correctly for tiered detect method.")
-
 
 
 test_gasfield_leak_maker()

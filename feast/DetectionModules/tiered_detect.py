@@ -23,7 +23,8 @@ class TieredDetect(DetectionMethod):
 
         # -------------- Process Variables --------------
         self.survey_interval = 365*0.5  # days
-        self.sites_per_day = 4  # defines first tier speed...can be a dict for multiple site types
+        self.sites_per_day = 600  # defines first tier speed...can be a dict for multiple site types
+        self.site_cost = 100
         self.labor = 100  # dollars/hour
 
         # -------------- Detection Variables -------------
@@ -65,14 +66,13 @@ class TieredDetect(DetectionMethod):
         # maintenance costs are estimated as 10% of capital per year
         self.maintenance = [self.maintenance_0 * time.delta_t / 365, ] * time.n_timesteps  # $
 
-        # survey_cost is the cost to survey all wells in the natural gas field
-        self.survey_cost = self.labor * self.survey_time
+        # survey_cost is the cost to survey all sites in the natural gas field
+        self.survey_cost = gas_field.n_sites * self.site_cost
 
         # find_cost is the cost of searching for leaks
-        for ind in range(0, time.n_timesteps):
-            curr_time = ind * time.delta_t
-            if curr_time % self.survey_interval < time.delta_t:
-                self.find_cost[ind] = self.survey_cost
+        survey_inds = [int(ind * self.survey_interval / time.delta_t) for ind in
+                       range(int(time.end_time / self.survey_interval) + 1)]
+        self.find_cost[survey_inds] = self.survey_cost
 
     @staticmethod
     def time_in_ophrs(ct, et, op_begin, op_end):
