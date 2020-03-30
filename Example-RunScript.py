@@ -134,7 +134,9 @@ for ind in range(30):
             'sites_per_day': 222,  # Defines the speed of the primary survey (sites per day)
             'lam2': 2.23,  # Width parameter for the secondary survey probability of detection curve.
             'mu2': 0.002,  # Emission size with a 50% probability of detection for the secondary survey (g/s)
-            'secondary_comps_hr': 400  # Defines the speed of the secondary survey (components per hour)
+            'secondary_comps_hr': 400,  # Defines the speed of the secondary survey (components per hour)
+            'site_cost': 100,
+            'labor': 100
         }
     }
 
