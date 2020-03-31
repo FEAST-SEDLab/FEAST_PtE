@@ -56,27 +56,7 @@ def plot_fixer(fig=None, ax=None, fsize=18, color=(0, 0, 0), tight_layout=True, 
         plt.tight_layout()
 
 
-def display_save(display, save, file_out):
-    """
-    display_save can display and/or save a plot
-    Inputs
-        display         choose whether to display the plot or not
-        save            choose whether to save the plot or not
-        file_out        define a path at which to save the file
-    """
-    if save:
-        if file_out is None:
-            file_out = 'Figures/time_series' + str(len(listdir('Figures'))) + '.pdf'
-        plt.savefig(file_out, bbox_inches="tight")
-
-    if display:
-        plt.show()
-    else:
-        plt.close()
-    plt.ioff()
-
-
-def time_series(results_file, display=True, save=False, file_out=None, line_width=6):
+def time_series(results_file, line_width=6):
     """
     Display a time series of emissions from each detection method in a results file
     Inputs:
@@ -105,11 +85,10 @@ def time_series(results_file, display=True, save=False, file_out=None, line_widt
     plt.xlabel('Time [years]', fontweight='bold')
     plt.ylabel('Fraction of initial emissions', fontweight='bold')
     plt.legend(bbox_to_anchor=(1, 0.72))
-    display_save(display, save, file_out)
     return ax
 
 
-def abatement_cost_plotter(directory, gwp=34, display=True, save=False, file_out=None):
+def abatement_cost_plotter(directory, gwp=34):
     """
     Generates a box plot of the cost of abatement
     gwp defaults to 34, which is the value provided in the IPCC 5th assessment report including climate-carbon feedbacks
@@ -143,10 +122,10 @@ def abatement_cost_plotter(directory, gwp=34, display=True, save=False, file_out
     ax.set_ylabel('Mitigation cost\n(\$/metric ton CO$_2$ eq.)')
     ax.set_xlabel('LDAR program')
     plot_fixer()
-    display_save(display, save, file_out)
+    return ax
 
 
-def summary_plotter(directory, display=True, save=False, file_out=None, n_wells=None, ylabel=None):
+def summary_plotter(directory, n_wells=None, ylabel=None):
     """
     The NPV for each realization stored in 'directory is calculated and displayed in a stacked bar chart. Each component
     of the NPV is displayed separately in the chart.
@@ -216,4 +195,3 @@ def summary_plotter(directory, display=True, save=False, file_out=None, n_wells=
     ax = plt.gca()
     ax.legend(bbox_to_anchor=(1.4, 1), fontsize=18)
     plot_fixer()
-    display_save(display, save, file_out)
