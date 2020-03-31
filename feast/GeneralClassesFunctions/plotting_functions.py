@@ -85,7 +85,6 @@ def time_series(results_file, line_width=6):
     plt.xlabel('Time [years]', fontweight='bold')
     plt.ylabel('Fraction of initial emissions', fontweight='bold')
     plt.legend(bbox_to_anchor=(1, 0.72))
-    return ax
 
 
 def abatement_cost_plotter(directory, gwp=34):
@@ -122,7 +121,6 @@ def abatement_cost_plotter(directory, gwp=34):
     ax.set_ylabel('Mitigation cost\n(\$/metric ton CO$_2$ eq.)')
     ax.set_xlabel('LDAR program')
     plot_fixer()
-    return ax
 
 
 def summary_plotter(directory, n_wells=None, ylabel=None):
