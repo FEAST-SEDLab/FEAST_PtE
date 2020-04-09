@@ -106,14 +106,6 @@ class GasField:
         self.max_count = 6000
         # Driving distance between wells
         self.site_spacing = 700  # m
-        # Concentration of wells
-        self.well_density = 2  # wells per km^2
-        # Square root of the area over which a leak may be found per well. Based on satellite imagery.
-        self.well_length = 10  # m
-        # Maximum leak height
-        self.h0_max = 5  # m
-        # Plume temperature
-        self.t_plume = 300  # K
         # Initial leaks defined for the gas field
         self.initial_leaks = None
         # Update any attributes defined by kwargs
