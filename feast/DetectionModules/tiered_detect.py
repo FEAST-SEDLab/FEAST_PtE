@@ -28,10 +28,10 @@ class TieredDetect(DetectionMethod):
         self.labor = 100  # dollars/hour
 
         # -------------- Detection Variables -------------
-        self.mu = 0.474
-        self.lam = 3.88
-        self.mu2 = 0.00185
-        self.lam2 = 2.23
+        self.mu = 0.474  # g/s
+        self.lam = 3.88  # g/s
+        self.mu2 = 0.00185  # g/s
+        self.lam2 = 2.23  # g/s
         self.ophrs = {'begin': 800, "end": 1700}
         self.insurvey = False
         self.surveyed_index = 0

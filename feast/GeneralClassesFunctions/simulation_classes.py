@@ -11,11 +11,6 @@ from os.path import dirname, abspath
 import os
 
 
-# Constants:
-GROUND_TEMP = 300  # K
-PRESSURE = 101325  # Pa
-
-
 class Time:
     """
     Instances of the time class store all time related information during a simulation
