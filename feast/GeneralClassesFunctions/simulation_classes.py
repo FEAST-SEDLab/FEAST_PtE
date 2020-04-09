@@ -48,7 +48,7 @@ class Component:
         # emission specifications may or may not be reparable before the null repair process
         self.dist_type = 'bootstrap'
         self.emission_data_path = 'production_emissions.p'
-        self.emission_production_rate = 1e-5  # new leaks per component per day
+        self.emission_production_rate = 1e-5  # new emissions per component per day
         self.emission_per_comp = 'default'
         self.base_reparable = True
         # Permitted events with a constant probability of occurring and known duration NOT REPARABLE
