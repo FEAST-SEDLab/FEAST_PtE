@@ -270,7 +270,6 @@ class Site:
             self.prod_dat = self.prod_dat[self.prod_dat > 0]
         else:
             self.prod_dat = prod_dat
-        self.fug_duration = 100  # days
         set_kwargs_attrs(self, kwargs)
 
         # Calculated parameters
