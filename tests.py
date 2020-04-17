@@ -301,6 +301,98 @@ def test_tiered_detect_find_cost():
         raise ValueError("Finding costs not calculated correctly for tiered detect method.")
 
 
+def test_leak_class():
+    fl = [1, 2, 3, 4, 0, 3, 2]
+    si = [1, 2, 3, 4, 1, 2, 0]
+    ci = [1, 356, 20, 478, 233, 5, 530]
+    rc = [1000, 1000, 1000, 1000, 1000, 1000, 30]
+    ld = [0, 0, 0, 1, 0, 0, 1]
+    rep = [True, False, True, True, True, True, False]
+    et = [100, np.inf, 1000, 300, 456, 762, 3]
+    leak = feast.GeneralClassesFunctions.leak_class_functions.Leak(
+        flux=fl,
+        site_index=si,
+        comp_index=ci,
+        repair_cost=rc,
+        leaks_detected=ld,
+        reparable=rep,
+        endtime=et,
+        capacity=100,
+    )
+    if leak.n_leaks != 7:
+        raise ValueError("leak_class_function.Leak is not initializing the number of leaks correctly")
+    leak2 = feast.GeneralClassesFunctions.leak_class_functions.Leak(
+        flux=np.ones(100),
+        site_index=np.ones(100),
+        comp_index=np.ones(100),
+        repair_cost=np.ones(100),
+        reparable=True,
+    )
+    if len(leak2.flux) != 100:
+        raise ValueError("leak_class_function.Leak is not initializing the array capacity correctly")
+    leak.extend(leak2)
+    if leak.n_leaks != 107:
+        raise ValueError("leak_class_function.Leak.extend is not updating n_leaks correctly")
+    if np.min(leak.flux) != 0:
+        raise ValueError("leak_class_function.Leak.extend is not preserving the minimum leak flux")
+    if np.sum(leak.flux == 0) > 1:
+        raise ValueError("leak_class_function.Leak.extend is leaving too many zero values")
+    if np.any(leak.flux != np.append(fl, leak2.flux)):
+        raise ValueError("leak_class_function.Leak.extend is not updating flux correctly")
+    if np.any(leak.site_index != np.append(si, leak2.site_index)):
+        raise ValueError("leak_class_function.Leak.extend is not updating site index correctly")
+    if np.any(leak.comp_index != np.append(ci, leak2.comp_index)):
+        raise ValueError("leak_class_function.Leak.extend is not updating component index correctly")
+    if np.any(leak.repair_cost != np.append(rc, leak2.repair_cost)):
+        raise ValueError("leak_class_function.Leak.extend is not updating repair cost correctly")
+    if np.any(leak.leaks_detected != np.append(ld, leak2.leaks_detected)):
+        raise ValueError("leak_class_function.Leak.extend is not updating leaks detected correctly")
+    if np.any(leak.reparable != np.append(rep, leak2.reparable)):
+        raise ValueError("leak_class_function.Leak.extend is not updating reparable correctly")
+    if np.any(leak.endtime != np.append(et, leak2.endtime)):
+        raise ValueError("leak_class_function.Leak.extend is not updating end time correctly")
+    leak.delete_leaks(2)
+    if leak.flux[2] != 0:
+        raise ValueError("leak_class_function.Leak.delete is not setting flux to zero")
+    if leak.site_index[2] != si[2]:
+        raise ValueError("leak_class_function.Leak.delete is changing the site index of an emission when it should not")
+    if leak.n_leaks != 107:
+        raise ValueError("leak_class_function.Leak.delete is changing n_leaks when it should not")
+    leak.clear_zeros()
+    if leak.n_leaks != 105:  # Started with 107, but one with 0 flux, then removed one with leak.delete
+        raise ValueError("leak_class_function.Leak.clear_zeros is not updating n_leaks correctly")
+    if len(leak.flux) != 105:
+        raise ValueError("leak_class_function.Leak.clear_zeros is not deleting elements correctly")
+    if np.min(leak.flux[:leak.n_leaks]) <= 0:
+        raise ValueError("leak_class_function.Leak.clear_zeros is not removing the correct elements flux")
+    if len(leak.flux) != len(leak.site_index):
+        raise ValueError("leak_class_function.Leak.clear_zeros is not removing the correct elements from site_index")
+    if len(leak.flux) != len(leak.comp_index):
+        raise ValueError("leak_class_function.Leak.clear_zeros is not removing the correct elements from comp_index")
+    if len(leak.flux) != len(leak.reparable):
+        raise ValueError("leak_class_function.Leak.clear_zeros is not removing the correct elements from reparable")
+    if len(leak.flux) != len(leak.endtime):
+        raise ValueError("leak_class_function.Leak.clear_zeros is not removing the correct elements from endtime")
+    if len(leak.flux) != len(leak.repair_cost):
+        raise ValueError("leak_class_function.Leak.clear_zeros is not removing the correct elements from repair_cost")
+    if len(leak.flux) != len(leak.leaks_detected):
+        raise ValueError("leak_class_function.Leak.clear_zeros is not removing the correct elements from "
+                         "leaks_detected")
+    leak.sort_by_site()
+    if leak.flux[0] != 2:
+        raise ValueError("leak_class_function.Leak.sort_by_site is not sorting flux values correctly")
+    if leak.comp_index[0] != ci[-1]:
+        raise ValueError("leak_class_function.Leak.sort_by_site is not sorting component index values correctly")
+    if leak.repair_cost[0] != rc[-1]:
+        raise ValueError("leak_class_function.Leak.sort_by_site is not sorting repair cost values correctly")
+    if leak.reparable[0] != rep[-1]:
+        raise ValueError("leak_class_function.Leak.sort_by_site is not sorting reparable values correctly")
+    if leak.leaks_detected[0] != ld[-1]:
+        raise ValueError("leak_class_function.Leak.sort_by_site is not sorting leaks_detected values correctly")
+    if leak.endtime[0] != et[-1]:
+        raise ValueError("leak_class_function.Leak.sort_by_site is not sorting end time values correctly")
+
+
 test_gasfield_leak_maker()
 
 test_null_repair()
@@ -320,5 +412,7 @@ test_results_analysis()
 test_npv_calculator()
 
 test_tiered_detect_find_cost()
+
+test_leak_class()
 
 print("Successfully completed all tests")

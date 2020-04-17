@@ -15,4 +15,6 @@ pandas
 pysal
 geopy
 
-#
+########## Packages required for advanced simulations (parallel processing)
+multiprocess == 0.70.9
+psutil == 5.7.0

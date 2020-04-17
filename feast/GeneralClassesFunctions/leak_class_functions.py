@@ -21,7 +21,7 @@ class Leak:
         """
         Inputs:
         flux                leak size (g/s)
-        leaks_detected      Binary value to save whether the leak has been detected or not (1 if detected, 0 otherwise)
+        leaks_detectcaed      Binary value to save whether the leak has been detected or not (1 if detected, 0 otherwise)
         capacity            Expected total number of leaks to be stored in this instance of Leak (allows for faster
                             extend method)
         reparable           Indicates whether an emission is reparable leak or a permanent vent
@@ -84,13 +84,13 @@ class Leak:
             self.comp_index[self.n_leaks: self.n_leaks + leak_obj_in.n_leaks] = leak_obj_in.comp_index
             self.repair_cost[self.n_leaks: self.n_leaks + leak_obj_in.n_leaks] = leak_obj_in.repair_cost
         else:
-            self.flux = np.append(self.flux, leak_obj_in.flux)
-            self.leaks_detected = np.append(self.leaks_detected, leak_obj_in.leaks_detected)
-            self.reparable = np.append(self.reparable, leak_obj_in.reparable)
-            self.endtime = np.append(self.endtime, leak_obj_in.endtime)
-            self.site_index = np.append(self.site_index, leak_obj_in.site_index)
-            self.comp_index = np.append(self.comp_index, leak_obj_in.comp_index)
-            self.repair_cost = np.append(self.repair_cost, leak_obj_in.repair_cost)
+            self.flux = np.append(self.flux[:self.n_leaks], leak_obj_in.flux)
+            self.leaks_detected = np.append(self.leaks_detected[:self.n_leaks], leak_obj_in.leaks_detected)
+            self.reparable = np.append(self.reparable[:self.n_leaks], leak_obj_in.reparable)
+            self.endtime = np.append(self.endtime[:self.n_leaks], leak_obj_in.endtime)
+            self.site_index = np.append(self.site_index[:self.n_leaks], leak_obj_in.site_index)
+            self.comp_index = np.append(self.comp_index[:self.n_leaks], leak_obj_in.comp_index)
+            self.repair_cost = np.append(self.repair_cost[:self.n_leaks], leak_obj_in.repair_cost)
 
         self.n_leaks += leak_obj_in.n_leaks
 
