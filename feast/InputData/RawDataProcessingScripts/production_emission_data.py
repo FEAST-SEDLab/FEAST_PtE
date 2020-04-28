@@ -27,6 +27,7 @@ for study in dat:
 em_array = np.array(em_array)
 em_array = em_array[np.invert(np.isnan(em_array))]
 em_array = em_array * 1000 / 24 / 3600  # convert from kg/day to g/s
+em_array = em_array[em_array > 0]
 
 notes = \
     """

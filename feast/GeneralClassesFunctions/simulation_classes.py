@@ -45,6 +45,7 @@ class Component:
         self.emission_data_path = 'production_emissions.p'
         self.emission_production_rate = 1e-5  # new emissions per component per day
         self.emission_per_comp = 'default'
+        self.custom_leak_maker = None
         self.base_reparable = True
         # Permitted events with a constant probability of occurring and known duration NOT REPARABLE
         self.episodic_emission_sizes = [0]  # g/s
@@ -66,7 +67,7 @@ class Component:
         with open(rsc_path, 'rb') as f:
             self.repair_cost_dist = pickle.load(f)
         self.leak_size_maker, self.leak_params, self.emission_per_well, emission_per_comp \
-            = leak_obj_gen(self.dist_type, self.emission_data_path)
+            = leak_obj_gen(self.dist_type, self.emission_data_path, self.custom_leak_maker)
         if self.emission_per_comp == 'default':
             self.emission_per_comp = emission_per_comp
         if null_repair_rate is None:

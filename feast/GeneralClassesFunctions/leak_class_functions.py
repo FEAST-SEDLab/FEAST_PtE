@@ -205,7 +205,7 @@ def comp_indexes_fcn(site, comp_name, n_inds):
     return np.random.randint(low_ind, high_ind, n_inds)
 
 
-def leak_objects_generator(dist_type, leak_data_path):
+def leak_objects_generator(dist_type, leak_data_path, custom_leak_maker=None):
     """
     leak_objects is a parent function that will be called to initialize gas fields
     Inputs:
@@ -224,6 +224,11 @@ def leak_objects_generator(dist_type, leak_data_path):
     if dist_type == 'bootstrap':
         leak_params = leak_data
         leak_size_maker = bootstrap_leak_maker
+    elif dist_type.lower() == 'custom':
+        if custom_leak_maker is None:
+            raise ValueError("custom_leak_maker must be defined for a custom emission distribution type")
+        leak_params = leak_data
+        leak_size_maker = custom_leak_maker
     else:
         raise NameError('Leak distribution type unsupported in GasField')
 
