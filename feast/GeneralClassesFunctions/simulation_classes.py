@@ -104,6 +104,10 @@ class GasField:
         self.site_spacing = 700  # m
         # Initial leaks defined for the gas field
         self.initial_leaks = None
+        # emissions to be created during the simulation
+        self.new_leaks = None
+        # emissions to be created during the simulation
+        self.start_times = None
         # Update any attributes defined by kwargs
         set_kwargs_attrs(self, kwargs)
 
@@ -150,23 +154,26 @@ class GasField:
                 if site.site_em_dist:
                     self.site_emissions_enforcer(site)
         self.n_sites = site_ind
-
-        new_leaks = lcf.Leak()
-        for site_dict in self.sites.values():
-            site = site_dict['parameters']
-            for compname, comp in site.comp_dict.items():
-                n_comp = site_dict['number'] * comp['number']
-                n_leaks = np.random.poisson(n_comp * comp['parameters'].emission_production_rate * time.end_time)
-                n_episodic = np.random.poisson(n_comp * comp['parameters'].episodic_emission_per_day * time.end_time)
-                self.leak_maker(n_leaks, new_leaks, compname, n_comp, time, site, n_episodic=n_episodic)
-        start_times = np.random.randint(0, time.n_timesteps, new_leaks.n_leaks, dtype=int)
-        new_leaks.endtime += start_times * time.delta_t
+        if self.new_leaks is None:
+            self.new_leaks = lcf.Leak()
+            for site_dict in self.sites.values():
+                site = site_dict['parameters']
+                for compname, comp in site.comp_dict.items():
+                    n_comp = site_dict['number'] * comp['number']
+                    n_leaks = np.random.poisson(n_comp * comp['parameters'].emission_production_rate * time.end_time)
+                    n_episodic = np.random.poisson(n_comp * comp['parameters'].episodic_emission_per_day * time.end_time)
+                    self.leak_maker(n_leaks, self.new_leaks, compname, n_comp, time, site, n_episodic=n_episodic)
+            self.start_times = np.random.randint(0, time.n_timesteps, self.new_leaks.n_leaks, dtype=int)
+            self.new_leaks.endtime += self.start_times * time.delta_t
         input_leaks = []
         for ind in range(time.n_timesteps):
-            cond = np.where(start_times == ind)[0]
-            input_leaks.append(lcf.Leak(flux=new_leaks.flux[cond], reparable=new_leaks.reparable[cond],
-                                        site_index=new_leaks.site_index[cond], comp_index=new_leaks.comp_index[cond],
-                                        endtime=new_leaks.endtime[cond], repair_cost=new_leaks.repair_cost[cond]))
+            cond = np.where(self.start_times == ind)[0]
+            input_leaks.append(lcf.Leak(flux=self.new_leaks.flux[cond],
+                                        reparable=self.new_leaks.reparable[cond],
+                                        site_index=self.new_leaks.site_index[cond],
+                                        comp_index=self.new_leaks.comp_index[cond],
+                                        endtime=self.new_leaks.endtime[cond],
+                                        repair_cost=self.new_leaks.repair_cost[cond]))
         self.input_leaks = input_leaks
 
     # Define functions and parameters related to leaks
