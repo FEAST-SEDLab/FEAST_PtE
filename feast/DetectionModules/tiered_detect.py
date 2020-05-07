@@ -146,6 +146,12 @@ class TieredDetect(DetectionMethod):
                     # self.repair_cost[time.time_index] += \
                     #     np.sum(np.random.choice(gas_field.repair_cost_dist.repair_costs,
                     #                             np.sum(self.leaks.reparable[detect])))
-                    self.leaks.endtime[detect[self.leaks.reparable[detect]]] = time.current_time + self.repair_delay
+                    # Secondary_survey_time is updated after every site
+                    # This takes into account the work times for the method
+                    hrs_per_day = (self.ophrs['end'] - self.ophrs['begin']) / 100
+                    n_days = int(secondary_survey_time / hrs_per_day)
+                    remaining_time = secondary_survey_time - hrs_per_day * n_days
+                    self.leaks.endtime[detect[self.leaks.reparable[detect]]] = time.current_time + self.repair_delay \
+                                                                                + n_days + remaining_time / 24
                 self.find_cost[time.time_index] += self.labor * secondary_survey_time
         self.null_detection(time, gas_field)

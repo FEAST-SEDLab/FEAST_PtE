@@ -25,7 +25,7 @@ class Leak:
         capacity            Expected total number of leaks to be stored in this instance of Leak (allows for faster
                             extend method)
         reparable           Indicates whether an emission is reparable leak or a permanent vent
-        endtime             time index when emission will stop if not repaired
+        endtime             time when emission will stop if not repaired
         """
 
         if leaks_detected == () and flux != ():
