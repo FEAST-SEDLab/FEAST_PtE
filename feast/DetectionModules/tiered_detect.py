@@ -25,6 +25,7 @@ class TieredDetect(DetectionMethod):
         self.survey_interval = 365*0.5  # days
         self.sites_per_day = 600  # defines first tier speed...can be a dict for multiple site types
         self.site_cost = 100
+        self.capital_0 = 0  # dollars (defaults to zero)
         self.labor = 100  # dollars/hour
 
         # -------------- Detection Variables -------------
@@ -38,6 +39,7 @@ class TieredDetect(DetectionMethod):
         self.prelim_survey_time = 0
         self.secondary_survey_time = 0
         self.secondary_comps_hr = 150
+        self.repair_delay = 0  # days
         set_kwargs_attrs(self, kwargs)
         # -------------- Set calculated parameters --------------
         self.work_time = (self.ophrs['end'] - self.ophrs['begin']) / 100  # hours/day on average
@@ -46,6 +48,7 @@ class TieredDetect(DetectionMethod):
         # reduced in the simulation based on the ratio of the sites in the
         # simulation to the number of sites that could be surveyed if there were enough wells to use the tech every day.
         self.time_factor = self.survey_time / (self.survey_interval * self.work_time)
+        self.capital_0 = self.capital_0 * self.time_factor
         self.secondary_survey_cost = np.zeros(time.n_timesteps)
         # leaks_per_timestep is calculated based on the survey speed and number of leaks at the beginning of each survey
         self.leaks_per_timestep = 0
@@ -55,9 +58,8 @@ class TieredDetect(DetectionMethod):
         self.logmu2 = np.log(self.mu2)
         self.site_survey_index = 0
         self.comp_survey_index = 0
-        self.repair_delay = 0  # days
+        self.secondary_time_booked = 0
         # -------------- Financial Properties --------------
-        self.capital_0 = 0 * self.time_factor  # dollars (defaults to zero)
         self.maintenance_0 = self.capital_0 * 0.1  # dollars/year
 
         self.capital = np.zeros(time.n_timesteps)
@@ -109,6 +111,7 @@ class TieredDetect(DetectionMethod):
             gas_field   an object of type GasField (defined in feast_classes)
         """
         if time.current_time % self.survey_interval < time.delta_t:
+            self.secondary_time_booked = 0
             self.insurvey = True
         if self.insurvey:
             end_survey = False
@@ -132,11 +135,10 @@ class TieredDetect(DetectionMethod):
                     self.insurvey = False
                     self.site_survey_index = 0
                 self.site_survey_index += n_sites_surveyed
-                secondary_survey_time = 0
                 for site_ind in sites_flagged:
                     site_name = self.find_site_name(gas_field, site_ind)
                     n_comps = gas_field.sites[site_name]['parameters'].max_comp_ind
-                    secondary_survey_time += n_comps / self.secondary_comps_hr
+                    self.secondary_time_booked += n_comps / self.secondary_comps_hr
                     cond = np.where((self.leaks.site_index == site_ind) &
                                     (self.leaks.flux > 0))[0]
                     scores = np.random.uniform(0, 1, len(cond))
@@ -149,9 +151,12 @@ class TieredDetect(DetectionMethod):
                     # Secondary_survey_time is updated after every site
                     # This takes into account the work times for the method
                     hrs_per_day = (self.ophrs['end'] - self.ophrs['begin']) / 100
-                    n_days = int(secondary_survey_time / hrs_per_day)
-                    remaining_time = secondary_survey_time - hrs_per_day * n_days
-                    self.leaks.endtime[detect[self.leaks.reparable[detect]]] = time.current_time + self.repair_delay \
-                                                                                + n_days + remaining_time / 24
-                self.find_cost[time.time_index] += self.labor * secondary_survey_time
+                    n_days = int(self.secondary_time_booked / hrs_per_day)
+                    remaining_time = self.secondary_time_booked - hrs_per_day * n_days
+                    n_detect = np.sum(self.leaks.reparable[detect])
+                    update_endtime = np.ones(n_detect) * (time.current_time + self.repair_delay +
+                                     n_days + remaining_time / 24)
+                    self.leaks.endtime[detect[self.leaks.reparable[detect]]] = \
+                        np.min([update_endtime, self.leaks.endtime[detect[self.leaks.reparable[detect]]]], axis=0)
+                    self.find_cost[time.time_index] += self.labor * n_comps / self.secondary_comps_hr
         self.null_detection(time, gas_field)
