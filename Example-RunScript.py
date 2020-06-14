@@ -64,6 +64,11 @@ for ind in range(n_sites):
 counts, n_wells_bin = np.histogram(n_wells_samp,
                                    bins=np.linspace(0.5, np.max(n_wells_samp) + 0.5, np.max(n_wells_samp) + 1))
 
+try:
+    for f in os.listdir('ExampleRunScriptResults'):
+        os.remove(os.path.join('ExampleRunScriptResults', f))
+except FileNotFoundError:
+    pass
 
 # ------Each iteration of this for loop generates one realization of the simulation
 for ind in range(30):
