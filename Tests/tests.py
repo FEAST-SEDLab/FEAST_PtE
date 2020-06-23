@@ -1,7 +1,7 @@
 import numpy as np
 import feast
 from feast.GeneralClassesFunctions import simulation_classes as sc
-import feast.GeneralClassesFunctions.leak_class_functions as lcf
+import feast.GeneralClassesFunctions.emission_class_functions as lcf
 import feast.GeneralClassesFunctions.results_analysis_functions as raf
 from feast import DetectionModules as Dm
 import os
@@ -11,7 +11,7 @@ import time as ti
 
 def test_gasfield_leak_maker():
     gf = sc.GasField()
-    new_leaks = lcf.Leak()
+    new_leaks = lcf.Emission()
     time = sc.Time()
     time.current_time = 10
     np.random.seed(0)
@@ -38,7 +38,7 @@ def test_null_repair():
     flux = np.random.uniform(0.1, 1, 100)
     end_time = np.random.exponential(10, 100)
     repair_cost = np.zeros(100)
-    gf.initial_leaks = lcf.Leak(flux=flux, endtime=end_time, repair_cost=repair_cost)
+    gf.initial_emissions = lcf.Emission(flux=flux, endtime=end_time, repair_cost=repair_cost)
     null = Dm.null.Null(timeobj, gf)
     null.null_detection(timeobj, gf)
     if np.sum(null.leaks.flux > 0) != 39:
@@ -151,7 +151,7 @@ def test_leak_obj():
         emission_per_comp=0.00231,
         emission_production_rate=5.4 / 650 / 365
     )
-    lsm, _, _, _ = feast.GeneralClassesFunctions.leak_class_functions.leak_objects_generator('bootstrap', file_out)
+    lsm, _, _, _ = feast.GeneralClassesFunctions.emission_class_functions.leak_objects_generator('bootstrap', file_out)
     basicpad = feast.GeneralClassesFunctions.simulation_classes.Site(
         name='basic pad',
         comp_dict={
@@ -220,7 +220,7 @@ def test_npv_calculator():
     )
     site_dict['basic pad'] = {'number': n_sites, 'parameters': basicpad}
     timeobj = feast.GeneralClassesFunctions.simulation_classes.Time(delta_t=1, end_time=2)
-    initial_leaks = feast.GeneralClassesFunctions.leak_class_functions.Leak(
+    initial_leaks = feast.GeneralClassesFunctions.emission_class_functions.Emission(
         flux=np.ones(1000), site_index=np.random.randint(0, n_sites, 1000),
         comp_index=np.random.randint(0, 100, 1000), endtime=np.infty, repair_cost=np.ones(1000) * 2
     )
@@ -267,7 +267,7 @@ def test_tiered_detect_find_cost():
     )
     site_dict['basic pad'] = {'number': n_sites, 'parameters': basicpad}
     timeobj = feast.GeneralClassesFunctions.simulation_classes.Time(delta_t=1, end_time=2)
-    initial_leaks = feast.GeneralClassesFunctions.leak_class_functions.Leak(
+    initial_leaks = feast.GeneralClassesFunctions.emission_class_functions.Emission(
         flux=np.ones(100), site_index=np.ones(100),
         comp_index=np.random.randint(0, 100, 100), endtime=np.infty, repair_cost=np.ones(100) * 2
     )
@@ -309,7 +309,7 @@ def test_leak_class():
     ld = [0, 0, 0, 1, 0, 0, 1]
     rep = [True, False, True, True, True, True, False]
     et = [100, np.inf, 1000, 300, 456, 762, 3]
-    leak = feast.GeneralClassesFunctions.leak_class_functions.Leak(
+    leak = feast.GeneralClassesFunctions.emission_class_functions.Emission(
         flux=fl,
         site_index=si,
         comp_index=ci,
@@ -321,7 +321,7 @@ def test_leak_class():
     )
     if leak.n_leaks != 7:
         raise ValueError("leak_class_function.Leak is not initializing the number of leaks correctly")
-    leak2 = feast.GeneralClassesFunctions.leak_class_functions.Leak(
+    leak2 = feast.GeneralClassesFunctions.emission_class_functions.Emission(
         flux=np.ones(100),
         site_index=np.ones(100),
         comp_index=np.ones(100),

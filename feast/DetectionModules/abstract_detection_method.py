@@ -25,7 +25,7 @@ class DetectionMethod:
         self.capital = np.zeros(time.n_timesteps)
         self.find_cost = np.zeros(time.n_timesteps)
         # leaks will be updated throughout simulations. initial_leaks should remain constant, so a copy is needed.
-        self.leaks = copy.deepcopy(gas_field.initial_leaks)
+        self.leaks = copy.deepcopy(gas_field.initial_emissions)
         self.insurvey = False
         self.site_survey_index = 0
         self.comp_survey_index = 0

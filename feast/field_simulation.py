@@ -17,8 +17,7 @@ def check_timestep(gas_field, time):
             comp = comp_temp['parameters']
             if 0 < comp.episodic_emission_duration < time.delta_t:
                 print("Warning: Episodic emission duration in site '{}', component '{}' is less than the simulation "
-                      "time "
-                      "step.\n"
+                      "time step.\n"
                       "Episodic emissions will be treated as though they have a duration of one time step.".format(
                           site.name, comp.name))
 
@@ -64,17 +63,18 @@ def field_simulation(gas_field=None, dir_out='Results', time=None,
         # Loop through each LDAR program:
         for tech_obj in tech_dict.values():
             # The extra factor here accounts for emissions that end part way through a timestep
-            if len(tech_obj.leaks.flux) > 0:
-                timestep_fraction = (tech_obj.leaks.endtime - time.current_time + time.delta_t) / time.delta_t
-                emissions = tech_obj.leaks.flux * np.min([np.ones(len(tech_obj.leaks.endtime)),
-                                                          timestep_fraction], axis=0)
-                tech_obj.emissions.append(np.sum(emissions))
-                tech_obj.vents.append(np.sum(emissions[np.invert(tech_obj.leaks.reparable)]))
+            if len(tech_obj.emissions.flux) > 0:
+                timestep_fraction = (tech_obj.emissions.endtime - time.current_time + time.delta_t) / time.delta_t
+                emissions = tech_obj.emissions.flux[:tech_obj.emissions.n_leaks] * \
+                    np.min([np.ones(tech_obj.emissions.n_leaks), timestep_fraction], axis=0)
+                tech_obj.emissions_timeseries.append(np.sum(emissions))
+                tech_obj.vents_timeseries.append(np.sum(emissions[np.invert(tech_obj.emissions.reparable
+                                                                            [tech_obj.emissions.n_leaks])]))
             else:
                 tech_obj.emissions.append(0)
                 tech_obj.vents.append(0)
-            tech_obj.detection(time, gas_field)
-            tech_obj.leaks.extend(gas_field.input_leaks[time.time_index])
+            tech_obj.action(time, gas_field)
+            tech_obj.emissions.extend(gas_field.input_leaks[time.time_index])
             if time.time_index % 1000 == 0:
                 tech_obj.leaks.clear_zeros()
         time.current_time += time.delta_t

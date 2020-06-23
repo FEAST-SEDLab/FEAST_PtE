@@ -3,8 +3,8 @@
     Additional classes are stored in DetectionModules directory and leak_objects.
 """
 import numpy as np
-from .leak_class_functions import leak_objects_generator as leak_obj_gen
-from . import leak_class_functions as lcf
+from .emission_class_functions import leak_objects_generator as leak_obj_gen
+from . import emission_class_functions as lcf
 import pickle
 from .simulation_functions import set_kwargs_attrs
 from os.path import dirname, abspath
@@ -103,7 +103,7 @@ class GasField:
         # Driving distance between wells
         self.site_spacing = 700  # m
         # Initial leaks defined for the gas field
-        self.initial_leaks = None
+        self.initial_emissions = None
         # emissions to be created during the simulation
         self.new_leaks = None
         # emissions to be created during the simulation
@@ -138,8 +138,8 @@ class GasField:
         cap_est = 0
         for site_dict in self.sites.values():
             cap_est += site_dict['number'] * 10
-        if self.initial_leaks is None:
-            self.initial_leaks = lcf.Leak(capacity=cap_est)
+        if self.initial_emissions is None:
+            self.initial_emissions = lcf.Emission(capacity=cap_est)
             # This generates new leaks for each component type in each site type
             for sitedict in self.sites.values():
                 site = sitedict['parameters']
@@ -150,12 +150,12 @@ class GasField:
                         n_leaks = np.random.binomial(n_comp, compobj.emission_per_comp)
                     else:
                         n_leaks = 0
-                    self.leak_maker(n_leaks, self.initial_leaks, comp_name, n_comp, time, site)
+                    self.leak_maker(n_leaks, self.initial_emissions, comp_name, n_comp, time, site)
                 if site.site_em_dist:
                     self.site_emissions_enforcer(site)
         self.n_sites = site_ind
         if self.new_leaks is None:
-            self.new_leaks = lcf.Leak()
+            self.new_leaks = lcf.Emission()
             for site_dict in self.sites.values():
                 site = site_dict['parameters']
                 for compname, comp in site.comp_dict.items():
@@ -168,12 +168,12 @@ class GasField:
         input_leaks = []
         for ind in range(time.n_timesteps):
             cond = np.where(self.start_times == ind)[0]
-            input_leaks.append(lcf.Leak(flux=self.new_leaks.flux[cond],
-                                        reparable=self.new_leaks.reparable[cond],
-                                        site_index=self.new_leaks.site_index[cond],
-                                        comp_index=self.new_leaks.comp_index[cond],
-                                        endtime=self.new_leaks.endtime[cond],
-                                        repair_cost=self.new_leaks.repair_cost[cond]))
+            input_leaks.append(lcf.Emission(flux=self.new_leaks.flux[cond],
+                                            reparable=self.new_leaks.reparable[cond],
+                                            site_index=self.new_leaks.site_index[cond],
+                                            comp_index=self.new_leaks.comp_index[cond],
+                                            endtime=self.new_leaks.endtime[cond],
+                                            repair_cost=self.new_leaks.repair_cost[cond]))
         self.input_leaks = input_leaks
 
     # Define functions and parameters related to leaks
@@ -183,7 +183,7 @@ class GasField:
         :param time: a time object (the parameter delta_t is used)
         :return new_leaks: the new leak object
         """
-        new_leaks = lcf.Leak()
+        new_leaks = lcf.Emission()
         for site_dict in self.sites.values():
             site = site_dict['parameters']
             for compname, comp in site.comp_dict.items():
