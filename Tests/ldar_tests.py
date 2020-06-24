@@ -21,7 +21,7 @@ def test_repair():
     endtime = np.linspace(0, 9, n_em)
     emission = ecf.Emission(flux, capacity, reparable, site_index, comp_index, repair_cost=repair_cost, endtime=endtime)
     time = sc.Time()
-    time.time_index=3
+    time.time_index = 3
     time.current_time = 4.5
     detected = np.array([3, 4, 5, 6, 7, 8, 9], dtype=int)
     repair_proc = Dm.repair.Repair(repair_delay=1)

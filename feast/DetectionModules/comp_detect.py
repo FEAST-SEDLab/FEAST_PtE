@@ -30,11 +30,11 @@ class CompDetect:
         # --------------- Detection Variables -----------------
         self.mu = 0.02  # g/s (median detection threshold)
         self.sigma = 0.80  # ln(g/s) (standard deviation of emission detection probability curve in log space)
-        self.sites_to_survey = []
+        self.sites_to_survey = []  # queue of sites to survey
         self.comp_survey_index = 0
         self.site_survey_index = None
 
-        # Set all attributes defined in kwargs, regardless of whether they already exist
+        # Set all attributes defined in kwargs
         set_kwargs_attrs(self, kwargs, only_existing=True)
 
         # -------------- Set calculated parameters --------------
@@ -125,7 +125,7 @@ class CompDetect:
 
             if len(cond) > 0:
                 detect = self.detect_prob_curve(np.array(cond), emissions)
-                # Delete found leaks that are reparable
+                # Deploy follow up action
                 self.dispatch_object.action(None, detect)
             if end_survey:
                 self.insurvey = False
@@ -133,4 +133,10 @@ class CompDetect:
                 self.comp_survey_index = 0
 
     def action(self, site_inds=[], emit_inds=[]):
+        """
+        Action to add sites to queue. Expected to be called by another detection method or by an LDAR program
+        :param site_inds: List of sites to add to the queue
+        :param emit_inds: Not used.
+        :return:
+        """
         self.sites_to_survey.extend(site_inds)
