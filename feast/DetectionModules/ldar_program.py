@@ -12,16 +12,14 @@ class LDARProgram:
     """
     An LDAR program contains any detection methods that will be applied as well as the repair method
     """
-    def __init__(self, time, gas_field, tech_list=[], repair=Repair()):
+    def __init__(self, time, gas_field, tech_dict={}, repair=Repair()):
         self.find_cost = np.zeros(time.n_timesteps)
         self.repair_cost = np.zeros(time.n_timesteps)
         self.emissions = copy.deepcopy(gas_field.initial_emissions)
         self.emissions_timeseries = []
         self.vents_timeseries = []
-        self.tech_list = tech_list
+        self.tech_dict = tech_dict
         self.repair = repair
-        if not self.tech_list:
-            self.tech_list.append(CompDetect(time, gas_field))
 
     def end_emissions(self, time):
         """
@@ -30,9 +28,9 @@ class LDARProgram:
         :return repair_costs:
         """
         nem = self.emissions.n_leaks
-        null_repair_cond = (self.emissions.flux[:nem] > 0) & \
-            self.emissions.reparable[:nem] & \
-            (self.emissions.endtime[:nem] <= time.current_time)
+        null_repair_cond = np.where((self.emissions.flux[:nem] > 0) &
+                                    self.emissions.reparable[:nem] &
+                                    (self.emissions.endtime[:nem] <= time.current_time))[0]
         self.repair_cost[time.time_index] += np.sum(self.emissions.repair_cost[null_repair_cond])
 
         cond = np.where(self.emissions.endtime[:self.emissions.n_leaks] <= time.current_time)[0]
@@ -46,7 +44,9 @@ class LDARProgram:
         :param gas_field: the simulation gas_field object
         :return:
         """
-        for tech in self.tech_list:
+        for tech in self.tech_dict.values():
+            if tech.survey_interval and np.mod(time.current_time, tech.survey_interval) < time.delta_t:
+                tech.action(list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)))
             tech.detect(time, gas_field, self.emissions, self.find_cost)
         self.repair.repair(time, self.emissions)
         self.end_emissions(time)

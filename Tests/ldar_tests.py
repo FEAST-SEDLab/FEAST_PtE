@@ -40,20 +40,18 @@ def test_comp_detect_check_time():
     rep = Dm.repair.Repair(repair_delay=0)
     tech = Dm.comp_detect.CompDetect(
         time,
-        gas_field,
         survey_interval=50,
         dispatch_object=rep
     )
-    if not tech.check_time(time, gas_field):
+    if not tech.check_time(time):
         raise ValueError("Check time returning False when it should be true at time 0")
     time = sc.Time(delta_t=0.1, end_time=10, current_time=0)
     tech = Dm.comp_detect.CompDetect(
         time,
-        gas_field,
         survey_interval=50,
         dispatch_object=rep
     )
-    if tech.check_time(time, gas_field):
+    if tech.check_time(time):
         raise ValueError("check_time returning True when it should return False at time 0")
 
 
@@ -64,7 +62,6 @@ def test_comp_detect():
     rep = Dm.repair.Repair(repair_delay=0)
     tech = Dm.comp_detect.CompDetect(
         time,
-        gas_field,
         survey_interval=50,
         survey_speed=150,
         ophrs={'begin': 800, 'end': 1700},
@@ -72,6 +69,7 @@ def test_comp_detect():
         dispatch_object=rep
     )
     emissions = gas_field.initial_emissions
+    tech.action(list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)))
     tech.detect(time, gas_field, emissions, find_cost)
     if np.max(emissions.site_index[rep.to_repair]) != 13:
         raise ValueError("tech.detect repairing emissions at incorrect sites")
@@ -93,7 +91,6 @@ def test_ldar_program():
     rep = Dm.repair.Repair(repair_delay=0)
     ogi = Dm.comp_detect.CompDetect(
         time,
-        gas_field,
         survey_interval=50,
         survey_speed=150,
         ophrs={'begin': 800, 'end': 1700},
@@ -115,11 +112,13 @@ def test_ldar_program():
     if np.sum(ogi_survey.emissions.flux) != 85:
         raise ValueError("Unexpected emission rate after LDAR program action")
 
-feast.field_simulation.field_simulation()
+# feast.field_simulation.field_simulation()
 
 # test_repair()
 # test_comp_detect()
 # test_comp_detect_check_time()
-test_ldar_program()
+# test_ldar_program()
+
+feast.field_simulation.field_simulation()
 
 print("Successfully completed LDAR tests.")

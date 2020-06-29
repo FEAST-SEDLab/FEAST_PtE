@@ -22,8 +22,8 @@ def check_timestep(gas_field, time):
                           site.name, comp.name))
 
 
-def field_simulation(gas_field=None, dir_out='Results', time=None,
-                     econ_set=None, tech_dict=None, detection_techs=None, display_status=True):
+def field_simulation(gas_field=None, dir_out='Results', time=None, ldar_program_dict=None,
+                     econ_set=None, display_status=True):
     """
     field_simulation generates a single realization of scenario. The scenario is defined by the input values.
     gas_field           a GasField object
@@ -45,40 +45,36 @@ def field_simulation(gas_field=None, dir_out='Results', time=None,
     if econ_set is None:
         econ_set = simulation_classes.FinanceSettings()
 
-    if detection_techs is None:
-        detection_techs = ['null.Null', 'tech_detect.TechDetect']
+    if ldar_program_dict is None:
+        ldar_program_dict = {'Null': Dm.ldar_program.LDARProgram(time, gas_field)}
 
-    if tech_dict is None:
-        tech_dict = dict()
-        for tech in detection_techs:
-            [tech_mod, tech_class] = tech.split(sep='.')
-            tech_dict[tech_class] = eval('Dm.' + tech_mod.lower() + '.' + tech_class + '(time, gas_field)')
-    elif 'Null' not in tech_dict:
-        tech_dict['Null'] = Dm.null.Null(time, gas_field)
+    elif 'Null' not in ldar_program_dict:
+        ldar_program_dict['Null'] = Dm.ldar_program.LDARProgram(time, gas_field)
     # -------------- Run the simulation --------------
     # check_timestep(gas_field, time)
     for time.time_index in range(0, time.n_timesteps):
         if display_status and time.current_time % int(time.end_time/10) < time.delta_t:
             print("The evaluation is {:0.0f}% complete" .format(100 * time.time_index / time.n_timesteps))
         # Loop through each LDAR program:
-        for tech_obj in tech_dict.values():
+        for tech_obj in ldar_program_dict.values():
             # The extra factor here accounts for emissions that end part way through a timestep
             if len(tech_obj.emissions.flux) > 0:
-                timestep_fraction = (tech_obj.emissions.endtime - time.current_time + time.delta_t) / time.delta_t
+                timestep_fraction = (tech_obj.emissions.endtime[:tech_obj.emissions.n_leaks] -
+                                     time.current_time + time.delta_t) / time.delta_t
                 emissions = tech_obj.emissions.flux[:tech_obj.emissions.n_leaks] * \
                     np.min([np.ones(tech_obj.emissions.n_leaks), timestep_fraction], axis=0)
                 tech_obj.emissions_timeseries.append(np.sum(emissions))
                 tech_obj.vents_timeseries.append(np.sum(emissions[np.invert(tech_obj.emissions.reparable
-                                                                            [tech_obj.emissions.n_leaks])]))
+                                                                            [:tech_obj.emissions.n_leaks])]))
             else:
                 tech_obj.emissions.append(0)
                 tech_obj.vents.append(0)
             tech_obj.action(time, gas_field)
             tech_obj.emissions.extend(gas_field.input_leaks[time.time_index])
             if time.time_index % 1000 == 0:
-                tech_obj.leaks.clear_zeros()
+                tech_obj.emissions.clear_zeros()
         time.current_time += time.delta_t
 
     # -------------- Save results --------------
-    results = simulation_classes.Results(time, gas_field, tech_dict, econ_set)
+    results = simulation_classes.Results(time, gas_field, ldar_program_dict, econ_set)
     save_results(dir_out, results)
