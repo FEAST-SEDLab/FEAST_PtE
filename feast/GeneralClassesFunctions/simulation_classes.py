@@ -3,6 +3,7 @@
     Additional classes are stored in DetectionModules directory and leak_objects.
 """
 import numpy as np
+import pandas as pd
 from .emission_class_functions import leak_objects_generator as leak_obj_gen
 from . import emission_class_functions as lcf
 import pickle
@@ -108,6 +109,8 @@ class GasField:
         self.new_leaks = None
         # emissions to be created during the simulation
         self.start_times = None
+        # path to TMY data
+        self.met_data_path = None
         # Update any attributes defined by kwargs
         set_kwargs_attrs(self, kwargs)
 
@@ -116,6 +119,13 @@ class GasField:
         site_ind = 0
         self.avg_vent = 0
         self.comp_dict = {}
+        # dict to store met data
+        self.met = {}
+
+        # Define met data
+        if self.met_data_path:
+            self.met_data_maker(time)
+
         # This loop counts components for each site
         for site_dict in self.sites.values():
             site = site_dict['parameters']
@@ -192,6 +202,57 @@ class GasField:
                 self.leak_maker(n_leaks, new_leaks, compname, n_comp, time, site)
         return new_leaks
 
+    def met_data_maker(self, time):
+        if self.met_data_path:
+            met_dat = pd.read_csv(self.met_data_path, header=1)
+            self.met['wind speed'] = met_dat['Wspd (m/s)']
+            self.met['wind direction'] = met_dat['Wdir (degrees)']
+            self.met['temperature'] = met_dat['Dry-bulb (C)']
+            self.met['relative humidity'] = met_dat['RHum (%)']
+            self.met['precipitation'] = met_dat['Lprecip depth (mm)']
+            self.met['albedo'] = met_dat['Alb (unitless)']
+            self.met['ceiling height'] = met_dat['CeilHgt (m)']
+            self.met['cloud cover'] = met_dat['OpqCld (tenths)']
+            self.met['solar intensity'] = met_dat['DNI (W/m^2)']
+
+    def get_met(self, time, parameter_names, interp_modes='mean', op_hrs = {'begin': 0, 'end': 2400}):
+        """
+        Return the relevant meteorological condition, accounting for discrepancies between simulation time resolution
+        and data time resolution
+        :param time: time object
+        :param parameter_names: specify a list of meteorological conditions to return
+        :param interp_mode: can be a list of strings: mean, median, max or min
+        :return met_conds: dict of meteorological coditions
+        """
+        hour_index = int(np.mod(time.current_time * 24, 8760))
+        # if a string is passed, put it in a list with one entry
+        if type(parameter_names) is str:
+            parameter_names = [parameter_names]
+        if type(interp_modes) is str:
+            interp_modes = [interp_modes for _ in range(len(parameter_names))]
+        met_conds = {}
+        for ind in range(len(parameter_names)):
+            parameter_name = parameter_names[ind].lower()
+            interp_mode = interp_modes[ind]
+            if time.delta_t <= 1/24:
+                met_conds[parameter_name] = self.met[parameter_name][hour_index]
+            else:
+                hr = np.mod(hour_index, 24)
+                start_index = hour_index - hr + int(np.max([hr, op_hrs['begin'] / 100]))
+                end_index = hour_index - hr + int(np.min([hr + time.delta_t * 24, hour_index + op_hrs['end'] / 100]))
+                relevant_metdat = self.met[parameter_name][start_index:end_index]
+                if interp_mode.lower() == 'mean':
+                    met_conds[parameter_name] = np.mean(relevant_metdat)
+                elif interp_mode.lower() == 'max':
+                    met_conds[parameter_name] = np.max(relevant_metdat)
+                elif interp_mode.lower() == 'min':
+                    met_conds[parameter_name] = np.min(relevant_metdat)
+                elif interp_mode.lower() == 'median':
+                    met_conds[parameter_name] = np.median(relevant_metdat)
+                else:
+                    raise ValueError("Invalid meteorological data type.")
+        return met_conds
+
     @staticmethod
     def leak_maker(n_leaks, new_leaks, comp_name, n_comp, time, site, n_episodic=None):
         """
@@ -232,17 +293,17 @@ class Results:
     """
     Class in which to save results
     """
-    def __init__(self, time, gas_field, tech_dict, econ_set):
+    def __init__(self, time, gas_field, ldar_program_dict, econ_set):
         """
         Inputs:
         time                    Time object
         gas_field               GasField object
-        tech_dict               dict of detection methods and associated data
+        ldar_program_dict       dict of detection methods and associated data
         econ_set                Economic settings defined for the simulation
         """
         self.time = time
         self.gas_field = gas_field
-        self.tech_dict = tech_dict
+        self.ldar_program_dict = ldar_program_dict
         self.econ_settings = econ_set
 
 

@@ -2,12 +2,12 @@
 This module defines the component level survey based detection class, CompDetect.
 """
 import numpy as np
-import copy
+from .abstract_detection_method import DetectionMethod
 from .repair import Repair
 from ..GeneralClassesFunctions.simulation_functions import set_kwargs_attrs
 
 
-class CompDetect:
+class CompDetect(DetectionMethod):
     """
     This class specifies a component level, survey based detection method.
     The class has three essential attributes:
@@ -16,8 +16,6 @@ class CompDetect:
     3.) The ability to call a follow up action
     """
     def __init__(self, time, **kwargs):
-        self.find_cost = np.zeros(time.n_timesteps)
-        self.repair_cost = np.zeros(time.n_timesteps)
         self.dispatch_object = Repair()
 
         # --------------- Process Variables -------------------
@@ -74,18 +72,6 @@ class CompDetect:
                 return compname
         return -1
 
-    def check_time(self, time):
-        """
-        Determines whether or not the detection method is active during the present time step
-        :param time:
-        :param gas_field:
-        :return:
-        """
-        oktime = self.ophrs['begin'] <= np.mod(time.current_time, 1) * 2400 < self.ophrs['end']
-        # accounts for a delta_t that is greater than the daily working hours
-        timesize = time.delta_t * 2400 > self.ophrs['end'] - self.ophrs['begin']
-        return oktime or timesize
-
     def emitters_surveyed(self, time, gas_field, emissions, find_cost):
         """
         Determines which emitters are surveyed during the current time step.
@@ -95,7 +81,7 @@ class CompDetect:
         :param gas_field:
         :param emissions: emissions object
         :param find_cost: the find_cost array associated with the ldar program
-        :return emitter_inds: indexes of emissions to re-evaluate
+        :return emitter_inds: indexes of emissions to evaluate at this timestep
         """
         remaining_comps = self.comps_per_timestep
         find_cost[time.time_index] += self.comps_per_timestep / self.survey_speed * self.labor

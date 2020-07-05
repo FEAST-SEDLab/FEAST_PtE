@@ -39,7 +39,7 @@ class LDARProgram:
 
     def action(self, time, gas_field):
         """
-        Runs the detect method for every tech in tech_list and runs the repair method
+        Runs the detect method for every tech in tech_dict and runs the repair method
         :param time: the simulation time object
         :param gas_field: the simulation gas_field object
         :return:

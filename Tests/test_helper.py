@@ -22,7 +22,7 @@ def basic_gas_field():
         # Simulates two wells, one tank, total components=11302
         name='basic pad',
         comp_dict={
-            'Fugitive ': {'number': 100, 'parameters': comp_fug},
+            'Fugitive': {'number': 100, 'parameters': comp_fug},
         }
     )
     site_dict['basic pad'] = {'number': n_sites, 'parameters': basicpad}

@@ -1,15 +1,13 @@
 import numpy as np
+import copy
 import feast
-from feast.GeneralClassesFunctions import simulation_classes as sc
-import feast.GeneralClassesFunctions.emission_class_functions as ecf
-import feast.GeneralClassesFunctions.results_analysis_functions as raf
-from feast import DetectionModules as Dm
 import os
 import pickle
 import time as ti
-
-with open('test_helper.py', 'r') as f:
-    exec(f.read())
+from feast.GeneralClassesFunctions import simulation_classes as sc
+import feast.GeneralClassesFunctions.emission_class_functions as ecf
+from feast import DetectionModules as Dm
+from Tests.test_helper import basic_gas_field
 
 
 def test_repair():
@@ -34,8 +32,7 @@ def test_repair():
                              "emission endtimes correctly at index {:0.0f}".format(ind))
 
 
-def test_comp_detect_check_time():
-    gas_field = basic_gas_field()
+def test_check_time():
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
     rep = Dm.repair.Repair(repair_delay=0)
     tech = Dm.comp_detect.CompDetect(
@@ -83,11 +80,52 @@ def test_comp_detect():
     if np.max(emissions.endtime[np.array(expected_detected_inds)]) != 0:
         raise ValueError("rep.repair not adjusting the end times correctly")
 
+def test_site_detect():
+    gas_field = basic_gas_field()
+    time = sc.Time(delta_t=1, end_time=10, current_time=0)
+    find_cost = np.zeros(time.n_timesteps)
+    # Test __init__
+    tech = Dm.site_detect.SiteDetect(
+        time,
+        survey_interval=50,
+        sites_per_day=100,
+        ophrs={'begin': 800, 'end': 1700},
+        site_cost=100,
+        dispatch_object=Dm.comp_detect.CompDetect(time)
+    )
+    emissions = gas_field.initial_emissions
+    np.random.seed(0)
+    # test detect_prob_curve
+    detect = tech.detect_prob_curve([0, 1, 2], emissions)
+    if detect != np.array([0]):
+        raise ValueError("site_detect.detect_prob_curve not returning expected sites.")
+    # test sites_surveyed with empty queue
+    sites_surveyed = tech.sites_surveyed(time, find_cost)
+    if sites_surveyed != []:
+        raise ValueError("sites_surveyed returning sites when it should not")
+    if find_cost[0] > 0:
+        raise ValueError("sites_surveyed updating find_cost when it should not")
+    # test detect
+    np.random.seed(0)
+    tech.sites_to_survey = [0, 1, 2]
+    tech.detect(time, gas_field, emissions, np.zeros(time.n_timesteps))
+    if tech.dispatch_object.sites_to_survey != [0]:
+        raise ValueError("site_detect.detect not updating dispatch object sites to survey correctly")
+    # test action and sites_surveyed with
+    tech.action(list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)))
+    if tech.sites_to_survey != list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)):
+        raise ValueError("action is not updating sites_to_survey as expected")
+    # test sites_surveyed with full queue
+    sites_surveyed = tech.sites_surveyed(time, find_cost)
+    if (sites_surveyed != np.linspace(0, 99, 100, dtype=int)).any():
+        raise ValueError("sites_surveyed not identifying the correct sites")
+    if find_cost[0] != 10000:
+        raise ValueError("sites_surveyed not updating find_cost as expected.")
+
 
 def test_ldar_program():
     gas_field = basic_gas_field()
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
-    find_cost = np.zeros(time.n_timesteps)
     rep = Dm.repair.Repair(repair_delay=0)
     ogi = Dm.comp_detect.CompDetect(
         time,
@@ -97,28 +135,122 @@ def test_ldar_program():
         labor=100,
         dispatch_object=rep
     )
-    ogi_survey = Dm.ldar_program.LDARProgram(
-        time, gas_field, [ogi], rep
+    ogi_no_survey = Dm.comp_detect.CompDetect(
+        time,
+        survey_interval=None,
+        survey_speed=150,
+        ophrs={'begin': 800, 'end': 1700},
+        labor=100,
+        dispatch_object=rep
     )
-
+    plane_survey = Dm.site_detect.SiteDetect(
+        time,
+        survey_interval=50,
+        sites_per_day=200,
+        site_cost=100,
+        mu=0.1,
+        dispatch_object=ogi_no_survey
+    )
+    # test __init__
+    ogi_survey = Dm.ldar_program.LDARProgram(
+        time, copy.deepcopy(gas_field), {'ogi': ogi}, rep
+    )
     if len(ogi_survey.find_cost) != 11:
         raise ValueError("find_cost not set to the correct length")
-
     if np.sum(ogi_survey.emissions.flux) != 100:
         raise ValueError("Unexpected emission rate in LDAR program initialization")
 
+    # test end_emissions
+    ogi_survey.emissions.endtime[0] = 0
+    ogi_survey.end_emissions(time)
+    if ogi_survey.emissions.flux[0] != 0:
+        raise ValueError("ldar_program.end_emissions not zeroing emissions as expected")
+    # test action
     ogi_survey.action(time, gas_field)
-
-    if np.sum(ogi_survey.emissions.flux) != 85:
+    if np.sum(ogi_survey.emissions.flux) != 84:
         raise ValueError("Unexpected emission rate after LDAR program action")
+    # test combined program
+    tech_dict = {
+        'plane': plane_survey,
+        'ogi': ogi_no_survey
+    }
+    tiered_survey = Dm.ldar_program.LDARProgram(
+        time, gas_field, tech_dict, rep
+    )
+    # test action
+    tiered_survey.action(time, gas_field)
+    if np.sum(tiered_survey.emissions.flux) != 80:
+        raise ValueError("Unexpected emission rate after LDAR program action with tiered survey")
 
-# feast.field_simulation.field_simulation()
 
-# test_repair()
-# test_comp_detect()
-# test_comp_detect_check_time()
-# test_ldar_program()
+def test_field_simulation():
+    gas_field = basic_gas_field()
+    timeobj = feast.GeneralClassesFunctions.simulation_classes.Time(delta_t=1, end_time=2)
+    rep = Dm.repair.Repair(repair_delay=0)
+    ogi = Dm.comp_detect.CompDetect(
+        timeobj,
+        survey_interval=50,
+        survey_speed=150,
+        ophrs={'begin': 800, 'end': 1700},
+        labor=100,
+        dispatch_object=rep
+    )
+    ogi_no_survey = Dm.comp_detect.CompDetect(
+        timeobj,
+        survey_interval=None,
+        survey_speed=150,
+        ophrs={'begin': 800, 'end': 1700},
+        labor=100,
+        dispatch_object=rep
+    )
+    plane_survey = Dm.site_detect.SiteDetect(
+        timeobj,
+        survey_interval=50,
+        sites_per_day=200,
+        site_cost=100,
+        mu=0.1,
+        dispatch_object=ogi_no_survey
+    )
+    ogi_survey = Dm.ldar_program.LDARProgram(
+        timeobj, copy.deepcopy(gas_field), {'ogi': ogi}, rep
+    )
+    tech_dict = {
+        'plane': plane_survey,
+        'ogi': ogi_no_survey
+    }
+    tiered_survey = Dm.ldar_program.LDARProgram(
+        timeobj, gas_field, tech_dict, rep
+    )
+    feast.field_simulation.field_simulation(
+            time=timeobj, gas_field=gas_field,
+            ldar_program_dict={'tiered': tiered_survey, 'ogi': ogi_survey},
+            dir_out='ResultsTemp', display_status=False
+        )
 
-feast.field_simulation.field_simulation()
+    with open('ResultsTemp/realization0.p', 'rb') as f:
+        res = pickle.load(f)
+    if res.ldar_program_dict['tiered'].emissions_timeseries[-1] >= \
+            res.ldar_program_dict['ogi'].emissions_timeseries[-1]:
+        raise ValueError("field_simulation is not returning emission reductions as expected")
+    if res.ldar_program_dict['ogi'].emissions_timeseries[-1] >= res.ldar_program_dict['Null'].emissions_timeseries[-1]:
+        raise ValueError("field_simulation is not returning emission reductions as expected")
+
+    for f in os.listdir('ResultsTemp'):
+        os.remove(os.path.join('ResultsTemp', f))
+    try:
+        os.rmdir('ResultsTemp')
+    except PermissionError:
+        # If there is an automated syncing process, a short pause may be necessary before removing "ResultsTemp"
+        ti.sleep(5)
+        os.rmdir('ResultsTemp')
+
+
+test_repair()
+test_comp_detect()
+test_check_time()
+test_site_detect()
+test_ldar_program()
+test_field_simulation()
+
 
 print("Successfully completed LDAR tests.")
