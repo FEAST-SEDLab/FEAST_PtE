@@ -61,7 +61,7 @@ def test_gas_field():
     timeobj.delta_t = 1
     met_dat = gas_field.get_met(timeobj, ['wind speed', 'solar Intensity'],
                                 interp_modes=['max', 'min'],
-                                op_hrs={'begin': 900, 'end': 1700})
+                                op_hrs={'begin': 9, 'end': 17})
     if met_dat['solar intensity'] != 0:
         raise ValueError("gas_field.get_met not returning the correct values when interp mode is min")
 
@@ -69,6 +69,6 @@ def test_gas_field():
         raise ValueError("gas_field.get_met not returning the correct values when max is specified")
 
 
-
-
 test_gas_field()
+
+print("Successfully completed gas field tests.")

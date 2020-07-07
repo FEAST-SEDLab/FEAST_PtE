@@ -25,7 +25,7 @@ class DetectionMethod:
         :param gas_field:
         :return:
         """
-        oktime = self.ophrs['begin'] <= np.mod(time.current_time, 1) * 2400 < self.ophrs['end']
+        oktime = self.ophrs['begin'] <= np.mod(time.current_time, 1) * 24 < self.ophrs['end']
         # accounts for a delta_t that is greater than the daily working hours
-        timesize = time.delta_t * 2400 > self.ophrs['end'] - self.ophrs['begin']
+        timesize = time.delta_t * 24 > self.ophrs['end'] - self.ophrs['begin']
         return oktime or timesize

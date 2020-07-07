@@ -33,7 +33,7 @@ class TieredDetect(DetectionMethod):
         self.lam = 3.88  # g/s
         self.mu2 = 0.00185  # g/s
         self.lam2 = 2.23  # g/s
-        self.ophrs = {'begin': 800, "end": 1700}
+        self.ophrs = {'begin': 8, "end": 17}
         self.insurvey = False
         self.surveyed_index = 0
         self.prelim_survey_time = 0
@@ -42,7 +42,7 @@ class TieredDetect(DetectionMethod):
         self.repair_delay = 0  # days
         set_kwargs_attrs(self, kwargs)
         # -------------- Set calculated parameters --------------
-        self.work_time = (self.ophrs['end'] - self.ophrs['begin']) / 100  # hours/day on average
+        self.work_time = self.ophrs['end'] - self.ophrs['begin']  # hours/day on average
         self.survey_time = gas_field.n_sites / self.sites_per_day * self.work_time  # hours
         # time_factor accounts for the finite simulation size. The effective capital cost is
         # reduced in the simulation based on the ratio of the sites in the
@@ -78,7 +78,7 @@ class TieredDetect(DetectionMethod):
 
     @staticmethod
     def time_in_ophrs(ct, et, op_begin, op_end):
-        return max(min(et, op_end) - max(ct, op_begin), 0) / 100
+        return max(min(et, op_end) - max(ct, op_begin), 0)
 
     def sites_surveyed(self, time):
         """
@@ -150,7 +150,7 @@ class TieredDetect(DetectionMethod):
                     #                             np.sum(self.leaks.reparable[detect])))
                     # Secondary_survey_time is updated after every site
                     # This takes into account the work times for the method
-                    hrs_per_day = (self.ophrs['end'] - self.ophrs['begin']) / 100
+                    hrs_per_day = self.ophrs['end'] - self.ophrs['begin']
                     n_days = int(self.secondary_time_booked / hrs_per_day)
                     remaining_time = self.secondary_time_booked - hrs_per_day * n_days
                     n_detect = np.sum(self.leaks.reparable[detect])

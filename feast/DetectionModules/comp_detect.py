@@ -19,7 +19,7 @@ class CompDetect(DetectionMethod):
         self.dispatch_object = Repair()
 
         # --------------- Process Variables -------------------
-        self.ophrs = {'begin': 800, 'end': 1700}
+        self.ophrs = {'begin': 8, 'end': 17}
         self.survey_interval = None
         self.survey_speed = 150  # components/hr
         self.labor = 100  # $/hr
@@ -35,7 +35,7 @@ class CompDetect(DetectionMethod):
         set_kwargs_attrs(self, kwargs, only_existing=True)
 
         # -------------- Set calculated parameters --------------
-        work_time = (self.ophrs['end'] - self.ophrs['begin']) / 2400
+        work_time = (self.ophrs['end'] - self.ophrs['begin']) / 24
         self.comps_per_timestep = self.survey_speed * 24 * time.delta_t * np.min([1, work_time / time.delta_t])
         self.logmu = np.log(self.mu)
 

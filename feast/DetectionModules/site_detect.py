@@ -20,7 +20,7 @@ class SiteDetect(DetectionMethod):
         self.dispatch_object = CompDetect(time)
 
         # --------------- Process Variables -------------------
-        self.ophrs = {'begin': 800, 'end': 1700}
+        self.ophrs = {'begin': 8, 'end': 17}
         self.survey_interval = None
         self.sites_per_day = 200  # sites_per_day
         self.site_cost = 100  # $/site
@@ -35,7 +35,7 @@ class SiteDetect(DetectionMethod):
         set_kwargs_attrs(self, kwargs, only_existing=True)
 
         # -------------- Set calculated parameters --------------
-        work_time = (self.ophrs['end'] - self.ophrs['begin']) / 2400
+        work_time = (self.ophrs['end'] - self.ophrs['begin']) / 24
         self.sites_per_timestep = int(self.sites_per_day * time.delta_t * np.min([1, time.delta_t / work_time]))
         if self.sites_per_timestep < 1 and self.sites_per_Day > 0:
             print("WARNING: expecting less than 1 site surveyed per timestep. May lead to unexpected behavior.")

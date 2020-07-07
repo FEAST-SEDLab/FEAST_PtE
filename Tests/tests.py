@@ -283,7 +283,7 @@ def test_tiered_detect_find_cost():
                      site_cost=1,
                      secondary_comps_hr=100,
                      labor=100,
-                     ophrs={'begin': 800, "end": 1700}
+                     ophrs={'begin': 8, "end": 17}
                  )}
     feast.field_simulation.field_simulation(
         time=timeobj, gas_field=gas_field, dir_out='ResultsTemp', display_status=False, tech_dict=tech_dict

@@ -205,17 +205,17 @@ class GasField:
     def met_data_maker(self, time):
         if self.met_data_path:
             met_dat = pd.read_csv(self.met_data_path, header=1)
-            self.met['wind speed'] = met_dat['Wspd (m/s)']
-            self.met['wind direction'] = met_dat['Wdir (degrees)']
-            self.met['temperature'] = met_dat['Dry-bulb (C)']
-            self.met['relative humidity'] = met_dat['RHum (%)']
-            self.met['precipitation'] = met_dat['Lprecip depth (mm)']
-            self.met['albedo'] = met_dat['Alb (unitless)']
-            self.met['ceiling height'] = met_dat['CeilHgt (m)']
-            self.met['cloud cover'] = met_dat['OpqCld (tenths)']
-            self.met['solar intensity'] = met_dat['DNI (W/m^2)']
+            self.met['wind speed'] = met_dat['wind speed (m/s)']
+            self.met['wind direction'] = met_dat['wind direction (degrees clockwise from North)']
+            self.met['temperature'] = met_dat['temperature (Celsius)']
+            self.met['relative humidity'] = met_dat['relative humidity (%)']
+            self.met['precipitation'] = met_dat['precipitation (mm)']
+            self.met['albedo'] = met_dat['albedo (-)']
+            self.met['ceiling height'] = met_dat['ceiling height (m)']
+            self.met['cloud cover'] = met_dat['cloud cover (%)']
+            self.met['solar intensity'] = met_dat['solar intensity (direct normal irradiance--W/m^2)']
 
-    def get_met(self, time, parameter_names, interp_modes='mean', op_hrs = {'begin': 0, 'end': 2400}):
+    def get_met(self, time, parameter_names, interp_modes='mean', op_hrs={'begin': 0, 'end': 24}):
         """
         Return the relevant meteorological condition, accounting for discrepancies between simulation time resolution
         and data time resolution
@@ -238,8 +238,8 @@ class GasField:
                 met_conds[parameter_name] = self.met[parameter_name][hour_index]
             else:
                 hr = np.mod(hour_index, 24)
-                start_index = hour_index - hr + int(np.max([hr, op_hrs['begin'] / 100]))
-                end_index = hour_index - hr + int(np.min([hr + time.delta_t * 24, hour_index + op_hrs['end'] / 100]))
+                start_index = hour_index - hr + int(np.max([hr, op_hrs['begin']]))
+                end_index = hour_index - hr + int(np.min([hr + time.delta_t * 24, hour_index + op_hrs['end']]))
                 relevant_metdat = self.met[parameter_name][start_index:end_index]
                 if interp_mode.lower() == 'mean':
                     met_conds[parameter_name] = np.mean(relevant_metdat)

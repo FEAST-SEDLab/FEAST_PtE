@@ -30,7 +30,7 @@ class TechDetect(DetectionMethod):
         # -------------- Detection Variables -------------
         self.mu = 0.0185  # g/s
         self.lam = 2.23
-        self.ophrs = {'begin': 800, "end": 1700}
+        self.ophrs = {'begin': 8, "end": 17}
         self.insurvey = False
         self.site_survey_index = 0
         self.comp_survey_index = 0
@@ -39,7 +39,7 @@ class TechDetect(DetectionMethod):
         self.survey_time = (gas_field.n_comps / self.survey_speed +
                             gas_field.site_spacing / self.drive_speed / 3600 * gas_field.n_sites + self.setup_time *
                             gas_field.n_sites)  # Time per survey
-        work_time = (self.ophrs['end'] - self.ophrs['begin']) / 2400
+        work_time = (self.ophrs['end'] - self.ophrs['begin']) / 24
         self.comps_per_timestep = self.survey_speed * 24 * time.delta_t * np.min([1, work_time / time.delta_t])
         # hours per site
         # time_factor accounts for the finite simulation size. The effective capital cost is

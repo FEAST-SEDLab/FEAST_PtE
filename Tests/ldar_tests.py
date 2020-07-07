@@ -61,7 +61,7 @@ def test_comp_detect():
         time,
         survey_interval=50,
         survey_speed=150,
-        ophrs={'begin': 800, 'end': 1700},
+        ophrs={'begin': 8, 'end': 17},
         labor=100,
         dispatch_object=rep
     )
@@ -89,7 +89,7 @@ def test_site_detect():
         time,
         survey_interval=50,
         sites_per_day=100,
-        ophrs={'begin': 800, 'end': 1700},
+        ophrs={'begin': 8, 'end': 17},
         site_cost=100,
         dispatch_object=Dm.comp_detect.CompDetect(time)
     )
@@ -131,7 +131,7 @@ def test_ldar_program():
         time,
         survey_interval=50,
         survey_speed=150,
-        ophrs={'begin': 800, 'end': 1700},
+        ophrs={'begin': 8, 'end': 17},
         labor=100,
         dispatch_object=rep
     )
@@ -139,7 +139,7 @@ def test_ldar_program():
         time,
         survey_interval=None,
         survey_speed=150,
-        ophrs={'begin': 800, 'end': 1700},
+        ophrs={'begin': 8, 'end': 17},
         labor=100,
         dispatch_object=rep
     )
@@ -191,7 +191,7 @@ def test_field_simulation():
         timeobj,
         survey_interval=50,
         survey_speed=150,
-        ophrs={'begin': 800, 'end': 1700},
+        ophrs={'begin': 8, 'end': 17},
         labor=100,
         dispatch_object=rep
     )
@@ -199,7 +199,7 @@ def test_field_simulation():
         timeobj,
         survey_interval=None,
         survey_speed=150,
-        ophrs={'begin': 800, 'end': 1700},
+        ophrs={'begin': 8, 'end': 17},
         labor=100,
         dispatch_object=rep
     )
