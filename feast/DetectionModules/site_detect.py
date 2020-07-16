@@ -21,6 +21,7 @@ class SiteDetect(DetectionMethod):
 
         # --------------- Process Variables -------------------
         self.ophrs = {'begin': 8, 'end': 17}
+        self.op_envelope = {}
         self.survey_interval = None
         self.sites_per_day = 200  # sites_per_day
         self.site_cost = 100  # $/site
@@ -64,19 +65,18 @@ class SiteDetect(DetectionMethod):
         detect = np.array(site_inds)[scores <= probs]
         return detect
 
-    def sites_surveyed(self, time, find_cost):
+    def sites_surveyed(self, gas_field, time, find_cost):
         """
         Determines which sites are surveyed during the current time step.
         Accounts for the number of sites surveyed per timestep
+        :param gas_field:
         :param time:
         :param find_cost: the find_cost array associated with the ldar program
-        :return site_inds: indexes of sites scanned at this timestep
         """
         n_sites = np.min([self.sites_per_timestep, len(self.sites_to_survey)])
-        find_cost[time.time_index] += n_sites * self.site_cost
-        site_inds = []
-        for ind in range(n_sites):
-            site_inds.append(self.sites_to_survey.pop(0))
+        # Determines the operating envelope status
+        site_inds = self.choose_sites(gas_field, time, n_sites)
+        find_cost[time.time_index] += len(site_inds) * self.site_cost
         return site_inds
 
     def detect(self, time, gas_field, emissions, find_cost):
@@ -88,7 +88,7 @@ class SiteDetect(DetectionMethod):
         """
         # enforces the operating hours
         if self.check_time(time):
-            site_inds = self.sites_surveyed(time, find_cost)
+            site_inds = self.sites_surveyed(gas_field, time, find_cost)
             if len(site_inds) > 0:
                 detect = self.detect_prob_curve(site_inds, emissions)
                 # Deploy follow up action

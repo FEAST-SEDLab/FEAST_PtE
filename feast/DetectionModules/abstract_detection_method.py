@@ -15,6 +15,7 @@ class DetectionMethod:
         """
         self.find_cost = np.zeros(time.n_timesteps)
         self.repair_cost = np.zeros(time.n_timesteps)
+        self.op_envelope = {}
         # Set all attributes defined in kwargs, regardless of whether they already exist
         set_kwargs_attrs(self, kwargs, only_existing=True)
 
@@ -29,3 +30,138 @@ class DetectionMethod:
         # accounts for a delta_t that is greater than the daily working hours
         timesize = time.delta_t * 24 > self.ophrs['end'] - self.ophrs['begin']
         return oktime or timesize
+
+    def check_op_envelope(self, gas_field, time, site_index=None):
+        """
+        Returns false if an operating envelope condition fails
+        The method supports 8 classes of operating envelope conditions:
+        1.) A meteorological condition based on min-max values that apply to the whole field (eg. temperature)
+        2.) A meteorological condition based on min-max values that are site-specific (eg. wind direction)
+        3.) A meteorological condition based on a fail list that applies to the whole field (eg. precipitation type)
+        4.) A meteorological condition based on a fail list that is site specific (possible but not expected)
+        5.) A site condition based on min-max values that apply to the whole field (eg site production)
+        6.) A site condition based on min-max values that are site-specific (possible but not expected)
+        7.) A site condition based on a fail list that applies to the whole field (eg. site type)
+        8.) A site condition based on a fail list that is site specific (possible but not expected).
+        :param gas_field:
+        :param time:
+        :param site_index:
+        :return:
+        """
+        status = 'field pass'
+        # iterate across all operating envelope conditions
+        for name, params in self.op_envelope.items():
+            # Load a meteorological condition or a site attribute, depending on the class of envelope parameter
+            if params['class'] in [1, 2, 3, 4]:
+                if 'interp_mode' in params:
+                    im = params['interp_mode']
+                else:
+                    im = 'mean'
+                condition = gas_field.get_met(time, name, interp_modes=im, ophrs=self.ophrs)[name]
+            else:
+                site = gas_field.sites[self.find_site_name(gas_field, site_index)]
+                condition = site.op_env_params[name]
+            if params['class'] == 1 and not self.check_min_max_condition(condition, params):
+                    return 'field fail'
+            elif params['class'] in [2, 6]:
+                status = 'site pass'
+                site_params = {'min': params['min'][site_index], 'max': params['max'][site_index]}
+                if not self.check_min_max_condition(condition, site_params):
+                    status = 'site fail'
+            elif params['class'] == 3 and condition in params['enum_fail_list']:
+                return 'field fail'
+            elif params['class'] in [4, 8]:
+                status = 'site pass'
+                if condition in params['enum_fail_list'][site_index]:
+                    status = 'site fail'
+            elif params['class'] == 5:
+                status = 'site pass'
+                if self.check_min_max_condition(condition, params):
+                    status = 'site fail'
+            elif params['class'] == 7:
+                status = 'site pass'
+                if condition in params['enum_fail_list']:
+                    status = 'site fail'
+        return status
+
+    def choose_sites(self, gas_field, time, n_sites):
+        """
+        Identifies sites to survey at this time step
+        :param gas_field:
+        :param time:
+        :param n_sites: Max number of sites to survey at this time step
+        :return:
+        """
+        site_inds = []
+        queue_ind = 0
+        while len(site_inds) < n_sites:
+            op_env = self.check_op_envelope(gas_field, time, self.sites_to_survey[queue_ind])
+            if op_env == 'field pass':
+                # This case applies if there are no site-specific operating envelope conditions.
+                site_inds = self.sites_to_survey[:n_sites]
+                del self.sites_to_survey[:n_sites]
+            elif op_env == 'site pass':
+                # This case applies if the operating envelope is satisifed for this site,
+                # but may fail for a different site.
+                site_inds.append(self.sites_to_survey.pop(queue_ind))
+            elif op_env == 'field fail':
+                # This case applies if the operating envelope fails for the entire field at this time step.
+                return site_inds
+            else:
+                # This condition applies if the site fails the operating envelope but other sites may pass.
+                queue_ind += 1
+            if queue_ind == len(self.sites_to_survey):
+                # This applies if the end of the queue is reached before n_sites is reached
+                break
+        return site_inds
+
+
+    @staticmethod
+    def check_min_max_condition(condition, params):
+        """
+        Checks a min-max condition defined by params. Supports float, integer, list and array based min max conditions.
+        If the min-max condition is specified as a min float/integer and max float/integer, the numbers are placed in
+        min and max lists each with length 1. The function returns True if the condition is between the min and max
+        values, False otherwise. If the min and max values are array-like, the function returns true if the condition is
+        between any pair of min-max values.
+        :param condition: condition to check (must be a number)
+        :param params: a dict with 'min' and 'max' keys. The min and max values can be numbers or array-like.
+        :return:
+        """
+        try:
+            _ = len(params['min'])
+        except TypeError:
+            params['min'] = [params['min']]
+            params['max'] = [params['max']]
+        condition_allowed = False
+        for ind in range(len(params['min'])):
+            if params['min'][ind] <= condition <= params['max'][ind]:
+                condition_allowed = True
+        return condition_allowed
+
+    @staticmethod
+    def find_site_name(gas_field, site_index):
+        """
+        Determines the key for a site based on  its index
+        :param gas_field:
+        :param site_index:
+        :return:
+        """
+        for sitename, site in gas_field.sites.items():
+            if site['parameters'].site_inds[0] <= site_index < site['parameters'].site_inds[1]:
+                return sitename
+        return -1
+
+    @staticmethod
+    def find_comp_name(gas_field, sitename, comp_index):
+        """
+        Determines the key for a component based on its index and site
+        :param gas_field:
+        :param sitename:
+        :param comp_index
+        :return:
+        """
+        for compname, comp in gas_field.sites[sitename]['parameters'].comp_dict.items():
+            if comp.comp_inds[0] <= comp_index < comp.comp_inds[1]:
+                return compname
+        return -1

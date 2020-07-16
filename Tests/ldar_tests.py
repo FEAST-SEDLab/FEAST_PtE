@@ -80,6 +80,41 @@ def test_comp_detect():
     if np.max(emissions.endtime[np.array(expected_detected_inds)]) != 0:
         raise ValueError("rep.repair not adjusting the end times correctly")
 
+
+def test_comp_detect_emitters_surveyed():
+    gas_field = basic_gas_field()
+    gas_field.met_data_path = 'TMY-DataExample.csv'
+    time = sc.Time(delta_t=1, end_time=10, current_time=0)
+    gas_field.met_data_maker(time)
+    find_cost = np.zeros(time.n_timesteps)
+    rep = Dm.repair.Repair(repair_delay=0)
+    wind_dirs_mins = np.zeros(gas_field.n_sites)
+    wind_dirs_maxs = np.ones(gas_field.n_sites) * 90
+    tech = Dm.comp_detect.CompDetect(
+        time,
+        survey_interval=50,
+        survey_speed=150,
+        ophrs={'begin': 8, 'end': 17},
+        labor=100,
+        dispatch_object=rep,
+        op_envelope={
+            'wind speed': {'class': 1, 'min': 1, 'max': 10},
+            'wind direction': {'class': 2, 'min': wind_dirs_mins, 'max': wind_dirs_maxs}
+        }
+    )
+    tech.action(list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)))
+    emissions = gas_field.initial_emissions
+    emitter_inds = tech.emitters_surveyed(time, gas_field, emissions, find_cost)
+    if emitter_inds:
+        # emitter_inds is expected to be []
+        raise ValueError("CompDetect.emitters_surveyed is not returning expected emitter inedexes")
+    wind_dirs_maxs[11] = 200
+    emitter_inds = tech.emitters_surveyed(time, gas_field, emissions, find_cost)
+    if emitter_inds != [71]:
+        # The wind direction op envelope was updated to pass at site 11 only. Site 11 has one emission at index 71.
+        raise ValueError("CompDetect.emitters_surveyed is not returning expected indexes")
+
+
 def test_site_detect():
     gas_field = basic_gas_field()
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
@@ -100,7 +135,7 @@ def test_site_detect():
     if detect != np.array([0]):
         raise ValueError("site_detect.detect_prob_curve not returning expected sites.")
     # test sites_surveyed with empty queue
-    sites_surveyed = tech.sites_surveyed(time, find_cost)
+    sites_surveyed = tech.sites_surveyed(gas_field, time, find_cost)
     if sites_surveyed != []:
         raise ValueError("sites_surveyed returning sites when it should not")
     if find_cost[0] > 0:
@@ -116,11 +151,41 @@ def test_site_detect():
     if tech.sites_to_survey != list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)):
         raise ValueError("action is not updating sites_to_survey as expected")
     # test sites_surveyed with full queue
-    sites_surveyed = tech.sites_surveyed(time, find_cost)
+    sites_surveyed = tech.sites_surveyed(gas_field, time, find_cost)
     if (sites_surveyed != np.linspace(0, 99, 100, dtype=int)).any():
         raise ValueError("sites_surveyed not identifying the correct sites")
     if find_cost[0] != 10000:
         raise ValueError("sites_surveyed not updating find_cost as expected.")
+
+
+def test_sitedetect_sites_surveyed():
+    gas_field = basic_gas_field()
+    gas_field.met_data_path = 'TMY-DataExample.csv'
+    time = sc.Time(delta_t=1, end_time=10, current_time=0)
+    gas_field.met_data_maker(time)
+    find_cost = np.zeros(time.n_timesteps)
+    wind_dirs_mins = np.zeros(gas_field.n_sites)
+    wind_dirs_maxs = np.ones(gas_field.n_sites) * 90
+    wind_dirs_maxs[50] = 270
+    tech = Dm.site_detect.SiteDetect(
+        time,
+        survey_interval=50,
+        sites_per_day=100,
+        ophrs={'begin': 8, 'end': 17},
+        site_cost=100,
+        dispatch_object=Dm.comp_detect.CompDetect(time),
+        op_envelope={
+            'wind speed': {'class': 1, 'min': 1, 'max': 10},
+            'wind direction': {'class': 2, 'min': wind_dirs_mins, 'max': wind_dirs_maxs}
+        }
+    )
+    tech.sites_to_survey = list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int))
+    np.random.seed(0)
+    sites_surveyed = tech.sites_surveyed(gas_field, time, find_cost)
+    if sites_surveyed != [50]:
+        raise ValueError("sites_surveyed is not returning sites correctly")
+    if find_cost[0] != 100:
+        raise ValueError("sites_surveyed incorrectly updating find_cost")
 
 
 def test_ldar_program():
@@ -245,12 +310,51 @@ def test_field_simulation():
         os.rmdir('ResultsTemp')
 
 
-test_repair()
-test_comp_detect()
-test_check_time()
-test_site_detect()
-test_ldar_program()
-test_field_simulation()
+def test_check_op_envelope():
+    gas_field = basic_gas_field()
+    gas_field.met_data_path = 'TMY-DataExample.csv'
+    time = sc.Time(delta_t=1, end_time=10, current_time=0)
+    gas_field.met_data_maker(time)
+    rep = Dm.repair.Repair(repair_delay=0)
+    wind_dirs_mins = np.zeros(gas_field.n_sites)
+    wind_dirs_maxs = np.ones(gas_field.n_sites) * 90
+    tech = Dm.comp_detect.CompDetect(
+        time,
+        survey_interval=50,
+        survey_speed=150,
+        ophrs={'begin': 8, 'end': 17},
+        labor=100,
+        dispatch_object=rep,
+        op_envelope={
+            'wind speed': {'class': 1, 'min': 1, 'max': 10},
+            'wind direction': {'class': 2, 'min': wind_dirs_mins, 'max': wind_dirs_maxs}
+        }
+    )
+    op_env = tech.check_op_envelope(gas_field, time, 0)
+    if op_env != 'site fail':
+        raise ValueError("check_op_envelope is not returning 'site fail' as expected")
+    wind_dirs_mins = np.zeros([gas_field.n_sites, 2])
+    wind_dirs_mins[:, 1] = 145
+    wind_dirs_maxs = np.ones([gas_field.n_sites, 2]) * 90
+    wind_dirs_maxs[:, 1] += 145
+    tech.op_envelope['wind direction'] = {'class': 2, 'min': wind_dirs_mins, 'max': wind_dirs_maxs}
+    op_env = tech.check_op_envelope(gas_field, time, 0)
+    if op_env != 'site pass':
+        raise ValueError("check_op_envelope is not passing as expected")
+    tech.op_envelope['wind speed']['max'] = [2]
+    op_env = tech.check_op_envelope(gas_field, time, 0)
+    if op_env != 'field fail':
+        raise ValueError("check_op_envelope is no retruning 'field fail' as expected")
 
+
+# test_repair()
+# test_comp_detect()
+# test_check_time()
+# test_site_detect()
+# test_ldar_program()
+# test_field_simulation()
+# test_check_op_envelope()
+# test_sitedetect_sites_surveyed()
+test_comp_detect_emitters_surveyed()
 
 print("Successfully completed LDAR tests.")

@@ -215,7 +215,7 @@ class GasField:
             self.met['cloud cover'] = met_dat['cloud cover (%)']
             self.met['solar intensity'] = met_dat['solar intensity (direct normal irradiance--W/m^2)']
 
-    def get_met(self, time, parameter_names, interp_modes='mean', op_hrs={'begin': 0, 'end': 24}):
+    def get_met(self, time, parameter_names, interp_modes='mean', ophrs={'begin': 0, 'end': 24}):
         """
         Return the relevant meteorological condition, accounting for discrepancies between simulation time resolution
         and data time resolution
@@ -238,8 +238,8 @@ class GasField:
                 met_conds[parameter_name] = self.met[parameter_name][hour_index]
             else:
                 hr = np.mod(hour_index, 24)
-                start_index = hour_index - hr + int(np.max([hr, op_hrs['begin']]))
-                end_index = hour_index - hr + int(np.min([hr + time.delta_t * 24, hour_index + op_hrs['end']]))
+                start_index = hour_index - hr + int(np.max([hr, ophrs['begin']]))
+                end_index = hour_index - hr + int(np.min([hr + time.delta_t * 24, hour_index + ophrs['end']]))
                 relevant_metdat = self.met[parameter_name][start_index:end_index]
                 if interp_mode.lower() == 'mean':
                     met_conds[parameter_name] = np.mean(relevant_metdat)
@@ -314,6 +314,7 @@ class Site:
     def __init__(self, prod_dat=None, **kwargs):
         self.name = 'default'
         self.comp_dict = {'default': {'number': 650, 'parameters': Component()}}  # Based on Fort Worth data
+        self.op_env_params = {}
         self.site_em_dist = False
         if prod_dat is None:
             # By default, load the production distribution from Colorado

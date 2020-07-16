@@ -16,6 +16,7 @@ class CompDetect(DetectionMethod):
     3.) The ability to call a follow up action
     """
     def __init__(self, time, **kwargs):
+        DetectionMethod.__init__(self, time)
         self.dispatch_object = Repair()
 
         # --------------- Process Variables -------------------
@@ -23,6 +24,8 @@ class CompDetect(DetectionMethod):
         self.survey_interval = None
         self.survey_speed = 150  # components/hr
         self.labor = 100  # $/hr
+        self.op_env_wait_time = 7  # days (amount of time to wait for operating envelope conditions at a partly surveyed
+                                   # site)
 
         # --------------- Detection Variables -----------------
         self.mu = 0.02  # g/s (median detection threshold)
@@ -30,6 +33,9 @@ class CompDetect(DetectionMethod):
         self.sites_to_survey = []  # queue of sites to survey
         self.comp_survey_index = 0
         self.site_survey_index = None
+
+        # -------------- Internal variables -----------------
+        self.mid_site_fail_time = np.infty
 
         # Set all attributes defined in kwargs
         set_kwargs_attrs(self, kwargs, only_existing=True)
@@ -58,20 +64,6 @@ class CompDetect(DetectionMethod):
         detect = cond[scores <= probs]
         return detect
 
-    @staticmethod
-    def find_site_name(gas_field, site_index):
-        for sitename, site in gas_field.sites.items():
-            if site['parameters'].site_inds[0] <= site_index < site['parameters'].site_inds[1]:
-                return sitename
-        return -1
-
-    @staticmethod
-    def find_comp_name(gas_field, sitename, comp_index):
-        for compname, comp in gas_field.sites[sitename]['parameters'].comp_dict.items():
-            if comp.comp_inds[0] <= comp_index < comp.comp_inds[1]:
-                return compname
-        return -1
-
     def emitters_surveyed(self, time, gas_field, emissions, find_cost):
         """
         Determines which emitters are surveyed during the current time step.
@@ -89,8 +81,23 @@ class CompDetect(DetectionMethod):
         # set happens periodically in the simulation and would otherwise cause indexing errors
         emitter_inds = []
         while remaining_comps > 0:
-            if self.site_survey_index is None:
-                self.site_survey_index = self.sites_to_survey.pop(0)
+            if (time.current_time - self.mid_site_fail_time) > self.op_env_wait_time:
+                # if the survey has been stuck part way through a site for seven days due to operating envelope
+                # conditions, move on to the next valid site.
+                self.comp_survey_index = 0
+            if self.comp_survey_index == 0:
+                site_inds = self.choose_sites(gas_field, time, 1)
+                if len(site_inds) > 0:
+                    self.site_survey_index = site_inds[0]
+                else:
+                    self.site_survey_index = None
+                    break
+            else:
+                op_env = self.check_op_envelope(gas_field, time, self.site_survey_index)
+                if 'fail' in op_env:
+                    if self.mid_site_fail_time > time.current_time:
+                        self.mid_site_fail_time = time.current_time
+                    break
             # site_name is used to flag all sites with the same properties
             # One site name can refer to multiple sites
             site_name = self.find_site_name(gas_field, self.site_survey_index)
@@ -100,11 +107,6 @@ class CompDetect(DetectionMethod):
             if remaining_comps + self.comp_survey_index > gas_field.sites[site_name]['parameters'].max_comp_ind:
                 remaining_comps -= (gas_field.sites[site_name]['parameters'].max_comp_ind - self.comp_survey_index)
                 self.comp_survey_index = 0
-                if len(self.sites_to_survey) > 0:
-                    self.site_survey_index = self.sites_to_survey.pop(0)
-                else:
-                    self.site_survey_index = None
-                    self.comp_survey_index = 0
             else:
                 self.comp_survey_index += remaining_comps
                 remaining_comps = 0
