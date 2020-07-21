@@ -59,6 +59,8 @@ class TieredDetect(DetectionMethod):
         self.site_survey_index = 0
         self.comp_survey_index = 0
         self.secondary_time_booked = 0
+        self.secondary_comps_surveyed = 0
+        self.secondary_sites_surveyed = 0
         # -------------- Financial Properties --------------
         self.maintenance_0 = self.capital_0 * 0.1  # dollars/year
 
@@ -111,6 +113,7 @@ class TieredDetect(DetectionMethod):
             gas_field   an object of type GasField (defined in feast_classes)
         """
         if time.current_time % self.survey_interval < time.delta_t:
+            self.secondary_comps_surveyed += self.secondary_time_booked / self.secondary_comps_hr
             self.secondary_time_booked = 0
             self.insurvey = True
         if self.insurvey:
@@ -130,6 +133,7 @@ class TieredDetect(DetectionMethod):
                 probs[cond] = 0.5 + 0.5 * scipy.special.erf((np.log(site_flux[cond]) - self.logmu) /
                                                             (self.loglam * np.sqrt(2)))
                 sites_flagged = np.where(scores < probs)[0] + self.site_survey_index
+                self.secondary_sites_surveyed += len(sites_flagged)
                 self.prelim_survey_time += n_sites_surveyed / self.sites_per_day * self.work_time
                 if end_survey:
                     self.insurvey = False

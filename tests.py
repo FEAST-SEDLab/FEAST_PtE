@@ -16,17 +16,13 @@ def test_gasfield_leak_maker():
     time.current_time = 10
     np.random.seed(0)
     gf.leak_maker(10, new_leaks, 'default', 0, time, gf.sites['default']['parameters'])
-    expected = np.array([0.02689507, 0.00775865, 0.00228167, 0.01050579, 0.00157465,
-                         0.0149844, 0.04953858, 0.49138137, 0.09214868, 0.04406508])
-    if np.max(np.abs(expected - new_leaks.flux)) > 1e-8:
-        raise ValueError("unexpected flux value")
-    expected_endtimes = np.array([
-        391.04863847, 165.94777145, 225.15696612, 14.85666044,
-        256.14930494, 252.46640114, 255.67999985, 746.85338952,
-        303.1982008, 124.06931841
-    ])
-    if np.max(np.abs(expected_endtimes - new_leaks.endtime)) > 1e-6:
-        raise ValueError("unexpected endtime")
+    if np.sum(new_leaks.flux > 0) != 10:
+        raise ValueError("Leak maker returning the wrong number of leaks")
+    for f in new_leaks.flux:
+        if f not in gf.sites['default']['parameters'].comp_dict['default']['parameters'].leak_params.leak_sizes['All']:
+            raise ValueError("Leak maker returning invalid emission rates")
+    if np.sum(new_leaks.endtime > 0) != 10:
+        raise ValueError("Leak maker returning the wrong number of end times")
     return None
 
 
@@ -238,15 +234,19 @@ def test_npv_calculator():
         raise ValueError("npv_calculator not returning the expected repair cost")
     if np.abs(npv['Gas'] - 34560) > 100:  # 34560 = gas_value * 1000 g/s * 2 days * 3600 * 24 sec/day--no discount rate.
         raise ValueError("npv_calculator not returning the expected value of gas saved")
-    os.remove(file_out)
-    os.remove(rep_file_out)
-    for f in os.listdir('ResultsTemp'):
-        os.remove(os.path.join('ResultsTemp', f))
     try:
+        os.remove(file_out)
+        os.remove(rep_file_out)
+        for f in os.listdir('ResultsTemp'):
+            os.remove(os.path.join('ResultsTemp', f))
         os.rmdir('ResultsTemp')
     except PermissionError:
         # If there is an automated syncing process, a short pause may be necessary before removing "ResultsTemp"
         ti.sleep(5)
+        os.remove(file_out)
+        os.remove(rep_file_out)
+        for f in os.listdir('ResultsTemp'):
+            os.remove(os.path.join('ResultsTemp', f))
         os.rmdir('ResultsTemp')
 
 
