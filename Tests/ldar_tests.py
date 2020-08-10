@@ -107,7 +107,7 @@ def test_comp_detect_emitters_surveyed():
     emitter_inds = tech.emitters_surveyed(time, gas_field, emissions, find_cost)
     if emitter_inds:
         # emitter_inds is expected to be []
-        raise ValueError("CompDetect.emitters_surveyed is not returning expected emitter inedexes")
+        raise ValueError("CompDetect.emitters_surveyed is not returning expected emitter indexes")
     wind_dirs_maxs[11] = 200
     emitter_inds = tech.emitters_surveyed(time, gas_field, emissions, find_cost)
     if emitter_inds != [71]:
@@ -347,14 +347,14 @@ def test_check_op_envelope():
         raise ValueError("check_op_envelope is no retruning 'field fail' as expected")
 
 
-# test_repair()
-# test_comp_detect()
-# test_check_time()
-# test_site_detect()
-# test_ldar_program()
-# test_field_simulation()
-# test_check_op_envelope()
-# test_sitedetect_sites_surveyed()
+test_repair()
+test_comp_detect()
+test_check_time()
+test_site_detect()
+test_ldar_program()
+test_field_simulation()
+test_check_op_envelope()
+test_sitedetect_sites_surveyed()
 test_comp_detect_emitters_surveyed()
 
 print("Successfully completed LDAR tests.")

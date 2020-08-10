@@ -48,7 +48,7 @@ class CompDetect(DetectionMethod):
     def detect_prob_curve(self, cond, emissions):
         """
         This function determines which leaks are found given an array of indexes defined by "cond"
-        In this case, the detect leaks are determined using a probability of detection curve
+        In this case, the detected leaks are determined using a probability of detection curve
         :param cond: The set of indexes to be considered
         :param emissions: an object storing all emissions in the simulation
         :return detect: the indexes of detected leaks
