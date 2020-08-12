@@ -37,3 +37,19 @@ def basic_gas_field():
         initial_emissions=initial_leaks
     )
     return gas_field
+
+
+def ex_prob_detect_arrays():
+    """
+    returns an example 2D array of detection probabilities for testing purposes
+    :return:
+    """
+    x = np.array([0.01, 0.05, 0.1, 0.5, 1, 5])
+    y = np.linspace(1, 10, 10)
+    x, y = np.meshgrid(x, y)
+    x = np.ndarray.flatten(x)
+    y = np.ndarray.flatten(y)
+    xy = np.transpose(np.array([x, y]))
+    prob_detect = (0.5 + 0.5 * np.array([np.math.erf((xy[ind, 0] - 0.7) / (1 * np.sqrt(2))) for ind
+                                         in range(xy.shape[0])])) * (11 - y) / 10
+    return xy, prob_detect

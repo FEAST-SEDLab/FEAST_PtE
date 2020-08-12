@@ -222,7 +222,7 @@ class GasField:
         :param time: time object
         :param parameter_names: specify a list of meteorological conditions to return
         :param interp_mode: can be a list of strings: mean, median, max or min
-        :return met_conds: dict of meteorological coditions
+        :return met_conds: dict of meteorological conditions
         """
         hour_index = int(np.mod(time.current_time * 24, 8760))
         # if a string is passed, put it in a list with one entry

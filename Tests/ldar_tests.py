@@ -8,6 +8,7 @@ from feast.GeneralClassesFunctions import simulation_classes as sc
 import feast.GeneralClassesFunctions.emission_class_functions as ecf
 from feast import DetectionModules as Dm
 from Tests.test_helper import basic_gas_field
+from Tests.test_helper import ex_prob_detect_arrays
 
 
 def test_repair():
@@ -57,13 +58,19 @@ def test_comp_detect():
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
     find_cost = np.zeros(time.n_timesteps)
     rep = Dm.repair.Repair(repair_delay=0)
+    points = np.logspace(-3, 1, 100)
+    probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.02)) / (0.8 * np.sqrt(2))) for f
+                                  in points])
     tech = Dm.comp_detect.CompDetect(
         time,
         survey_interval=50,
         survey_speed=150,
         ophrs={'begin': 8, 'end': 17},
         labor=100,
-        dispatch_object=rep
+        dispatch_object=rep,
+        detection_variables={'flux': 'mean'},
+        detection_probability_points=points,
+        detection_probabilities=probs
     )
     emissions = gas_field.initial_emissions
     tech.action(list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)))
@@ -90,6 +97,9 @@ def test_comp_detect_emitters_surveyed():
     rep = Dm.repair.Repair(repair_delay=0)
     wind_dirs_mins = np.zeros(gas_field.n_sites)
     wind_dirs_maxs = np.ones(gas_field.n_sites) * 90
+    points = np.logspace(-3, 1, 100)
+    probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.02)) / (0.8 * np.sqrt(2))) for f
+                                  in points])
     tech = Dm.comp_detect.CompDetect(
         time,
         survey_interval=50,
@@ -100,7 +110,10 @@ def test_comp_detect_emitters_surveyed():
         op_envelope={
             'wind speed': {'class': 1, 'min': 1, 'max': 10},
             'wind direction': {'class': 2, 'min': wind_dirs_mins, 'max': wind_dirs_maxs}
-        }
+        },
+        detection_variables={'flux': 'mean'},
+        detection_probability_points=points,
+        detection_probabilities=probs
     )
     tech.action(list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)))
     emissions = gas_field.initial_emissions
@@ -120,18 +133,24 @@ def test_site_detect():
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
     find_cost = np.zeros(time.n_timesteps)
     # Test __init__
+    points = np.logspace(-3, 1, 100)
+    probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.474)) / (1.36 * np.sqrt(2))) for f
+                                  in points])
     tech = Dm.site_detect.SiteDetect(
         time,
         survey_interval=50,
         sites_per_day=100,
         ophrs={'begin': 8, 'end': 17},
         site_cost=100,
-        dispatch_object=Dm.comp_detect.CompDetect(time)
+        dispatch_object=Dm.comp_detect.CompDetect(time),
+        detection_variables={'flux': 'mean'},
+        detection_probability_points=points,
+        detection_probabilities=probs
     )
     emissions = gas_field.initial_emissions
     np.random.seed(0)
     # test detect_prob_curve
-    detect = tech.detect_prob_curve([0, 1, 2], emissions)
+    detect = tech.detect_prob_curve(time, gas_field, [0, 1, 2], emissions)
     if detect != np.array([0]):
         raise ValueError("site_detect.detect_prob_curve not returning expected sites.")
     # test sites_surveyed with empty queue
@@ -192,13 +211,20 @@ def test_ldar_program():
     gas_field = basic_gas_field()
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
     rep = Dm.repair.Repair(repair_delay=0)
+    points = np.logspace(-3, 1, 100)
+    probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.02)) / (0.8 * np.sqrt(2))) for f
+                                  in points])
+    probs[0] = 0
     ogi = Dm.comp_detect.CompDetect(
         time,
         survey_interval=50,
         survey_speed=150,
         ophrs={'begin': 8, 'end': 17},
         labor=100,
-        dispatch_object=rep
+        dispatch_object=rep,
+        detection_variables={'flux': 'mean'},
+        detection_probability_points=points,
+        detection_probabilities=probs
     )
     ogi_no_survey = Dm.comp_detect.CompDetect(
         time,
@@ -206,15 +232,25 @@ def test_ldar_program():
         survey_speed=150,
         ophrs={'begin': 8, 'end': 17},
         labor=100,
-        dispatch_object=rep
+        dispatch_object=rep,
+        detection_variables={'flux': 'mean'},
+        detection_probability_points=points,
+        detection_probabilities=probs
     )
+    points = np.logspace(-3, 1, 100)
+    probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.474)) / (1.36 * np.sqrt(2))) for f
+                                  in points])
+    probs[0] = 0
     plane_survey = Dm.site_detect.SiteDetect(
         time,
         survey_interval=50,
         sites_per_day=200,
         site_cost=100,
         mu=0.1,
-        dispatch_object=ogi_no_survey
+        dispatch_object=ogi_no_survey,
+        detection_variables={'flux': 'mean'},
+        detection_probability_points=points,
+        detection_probabilities=probs
     )
     # test __init__
     ogi_survey = Dm.ldar_program.LDARProgram(
@@ -244,7 +280,7 @@ def test_ldar_program():
     )
     # test action
     tiered_survey.action(time, gas_field)
-    if np.sum(tiered_survey.emissions.flux) != 80:
+    if np.sum(tiered_survey.emissions.flux) != 79:
         raise ValueError("Unexpected emission rate after LDAR program action with tiered survey")
 
 
@@ -252,13 +288,19 @@ def test_field_simulation():
     gas_field = basic_gas_field()
     timeobj = feast.GeneralClassesFunctions.simulation_classes.Time(delta_t=1, end_time=2)
     rep = Dm.repair.Repair(repair_delay=0)
+    points = np.logspace(-3, 1, 100)
+    probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.02)) / (0.8 * np.sqrt(2))) for f
+                                  in points])
     ogi = Dm.comp_detect.CompDetect(
         timeobj,
         survey_interval=50,
         survey_speed=150,
         ophrs={'begin': 8, 'end': 17},
         labor=100,
-        dispatch_object=rep
+        dispatch_object=rep,
+        detection_variables={'flux': 'mean'},
+        detection_probability_points=points,
+        detection_probabilities=probs
     )
     ogi_no_survey = Dm.comp_detect.CompDetect(
         timeobj,
@@ -266,15 +308,24 @@ def test_field_simulation():
         survey_speed=150,
         ophrs={'begin': 8, 'end': 17},
         labor=100,
-        dispatch_object=rep
+        dispatch_object=rep,
+        detection_variables={'flux': 'mean'},
+        detection_probability_points=points,
+        detection_probabilities=probs
     )
+    points = np.logspace(-3, 1, 100)
+    probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.474)) / (1.36 * np.sqrt(2))) for f
+                                  in points])
     plane_survey = Dm.site_detect.SiteDetect(
         timeobj,
         survey_interval=50,
         sites_per_day=200,
         site_cost=100,
         mu=0.1,
-        dispatch_object=ogi_no_survey
+        dispatch_object=ogi_no_survey,
+        detection_variables={'flux': 'mean'},
+        detection_probability_points=points,
+        detection_probabilities=probs
     )
     ogi_survey = Dm.ldar_program.LDARProgram(
         timeobj, copy.deepcopy(gas_field), {'ogi': ogi}, rep
@@ -347,6 +398,57 @@ def test_check_op_envelope():
         raise ValueError("check_op_envelope is no retruning 'field fail' as expected")
 
 
+def test_get_current_conditions():
+    gas_field = basic_gas_field()
+    gas_field.met_data_path = 'TMY-DataExample.csv'
+    time = sc.Time(delta_t=1, end_time=10, current_time=0)
+    gas_field.met_data_maker(time)
+    rep = Dm.repair.Repair(repair_delay=0)
+    prob_points, detect_probs = ex_prob_detect_arrays()
+    tech = Dm.comp_detect.CompDetect(
+        time,
+        survey_interval=50,
+        survey_speed=150,
+        ophrs={'begin': 8, 'end': 17},
+        labor=100,
+        dispatch_object=rep,
+        detection_variables={'flux': 'mean', 'wind speed': 'mean'},
+        detection_probability_points=prob_points,
+        detection_probabilities=detect_probs
+    )
+    emissions = gas_field.initial_emissions
+    emissions.flux = np.linspace(0.1, 10, 100)
+    em_indexes = np.linspace(0, emissions.n_leaks - 1, emissions.n_leaks, dtype=int)
+    ret = tech.get_current_conditions(time, gas_field, emissions, em_indexes)
+    if np.any(ret[:, 0] != emissions.flux[:emissions.n_leaks]):
+        raise ValueError("get_current_conditions not returning the correct values")
+    if np.any(ret[:, 1] != np.mean(gas_field.met['wind speed'][8:17])):
+        raise ValueError("get_current_conditions not returning the correct values")
+
+
+def test_empirical_pod():
+    time = sc.Time(delta_t=1, end_time=10, current_time=0)
+    rep = Dm.repair.Repair(repair_delay=0)
+    prob_points, detect_probs = ex_prob_detect_arrays()
+    tech = Dm.comp_detect.CompDetect(
+        time,
+        survey_interval=50,
+        survey_speed=150,
+        ophrs={'begin': 8, 'end': 17},
+        labor=100,
+        dispatch_object=rep,
+        detection_variables={'flux': 'mean', 'wind speed': 'mean'},
+        detection_probability_points=prob_points,
+        detection_probabilities=detect_probs
+    )
+    probs = tech.empirical_pod(np.array([[0.01, 1], [0.05, 1]]))
+    if np.abs(probs[0] - 0.24509709) > 1e-5 or np.abs(probs[1] - 0.25784611) > 1e-5:
+        raise ValueError("empirical_pod is not returning the correct probabilities")
+    probs = tech.empirical_pod(np.array([0.03, 1]))
+    if not min(tech.detection_probabilities[:2]) <= probs[0] <= max(tech.detection_probabilities[:2]):
+        raise ValueError("empirical_pod is not interpolating correctly")
+
+
 test_repair()
 test_comp_detect()
 test_check_time()
@@ -356,5 +458,7 @@ test_field_simulation()
 test_check_op_envelope()
 test_sitedetect_sites_surveyed()
 test_comp_detect_emitters_surveyed()
+test_get_current_conditions()
+test_empirical_pod()
 
 print("Successfully completed LDAR tests.")

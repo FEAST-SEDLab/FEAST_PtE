@@ -1,6 +1,7 @@
 import copy
 import numpy as np
 from ..GeneralClassesFunctions.simulation_functions import set_kwargs_attrs
+from scipy import interpolate as interp
 
 
 class DetectionMethod:
@@ -16,8 +17,13 @@ class DetectionMethod:
         self.find_cost = np.zeros(time.n_timesteps)
         self.repair_cost = np.zeros(time.n_timesteps)
         self.op_envelope = {}
+        self.detection_variables = {}  # Dict with format {name: interpolation mode}
+        self.detection_probability_points = None
+        self.detection_probabilities = None
+        self.hull = None
         # Set all attributes defined in kwargs, regardless of whether they already exist
         set_kwargs_attrs(self, kwargs, only_existing=True)
+
 
     def check_time(self, time):
         """
@@ -165,3 +171,38 @@ class DetectionMethod:
             if comp.comp_inds[0] <= comp_index < comp.comp_inds[1]:
                 return compname
         return -1
+
+    def get_current_conditions(self, time, gas_field, emissions, em_indexes):
+        """
+        Extracts conditions specified in self.detection_variables
+        :param time: simulation time object
+        :param gas_field: simulation gas field object
+        :param emissions: emissions object
+        :param em_indexes: indexes of emissions to consider
+        :return conditions: an array (n_emissions, n_variables) of conditions for use in the PoD calculation
+        """
+        conditions = np.zeros([len(em_indexes), len(self.detection_variables)])
+        index = 0
+        for v, im in self.detection_variables.items():
+            if v in gas_field.met:
+                conditions[:, index] = gas_field.get_met(time, v, interp_modes=im, ophrs=self.ophrs)[v]
+            else:
+                conditions[:, index] = emissions.__getattribute__(v)[em_indexes]
+            index += 1
+        return conditions
+
+    def empirical_pod(self, vars):
+        """
+        calculates the probabiity of detection analytically
+        :param vars: Nxk array of current conditions, where N is the number of emissions to consider, and k is the
+                    number of conditions
+        :return:
+        """
+        probs = interp.griddata(self.detection_probability_points,
+                                self.detection_probabilities,
+                                vars)
+        cond = np.where(np.isnan(probs))[0]
+        probs[cond] = interp.griddata(self.detection_probability_points,
+                                      self.detection_probabilities,
+                                      vars[cond], method='nearest')
+        return np.ndarray.flatten(probs)

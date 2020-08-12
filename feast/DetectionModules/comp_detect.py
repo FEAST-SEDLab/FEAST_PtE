@@ -2,6 +2,7 @@
 This module defines the component level survey based detection class, CompDetect.
 """
 import numpy as np
+from scipy import spatial
 from .abstract_detection_method import DetectionMethod
 from .repair import Repair
 from ..GeneralClassesFunctions.simulation_functions import set_kwargs_attrs
@@ -28,8 +29,6 @@ class CompDetect(DetectionMethod):
                                    # site)
 
         # --------------- Detection Variables -----------------
-        self.mu = 0.02  # g/s (median detection threshold)
-        self.sigma = 0.80  # ln(g/s) (standard deviation of emission detection probability curve in log space)
         self.sites_to_survey = []  # queue of sites to survey
         self.comp_survey_index = 0
         self.site_survey_index = None
@@ -43,9 +42,8 @@ class CompDetect(DetectionMethod):
         # -------------- Set calculated parameters --------------
         work_time = (self.ophrs['end'] - self.ophrs['begin']) / 24
         self.comps_per_timestep = self.survey_speed * 24 * time.delta_t * np.min([1, work_time / time.delta_t])
-        self.logmu = np.log(self.mu)
 
-    def detect_prob_curve(self, cond, emissions):
+    def detect_prob_curve(self, time, gas_field, cond, emissions):
         """
         This function determines which leaks are found given an array of indexes defined by "cond"
         In this case, the detected leaks are determined using a probability of detection curve
@@ -59,8 +57,8 @@ class CompDetect(DetectionMethod):
         cond = cond[emissions.flux[cond] > 0]
         n_scores = len(cond)
         scores = np.random.uniform(0, 1, n_scores)
-        probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - self.logmu) / (self.sigma * np.sqrt(2))) for f
-                                      in emissions.flux[cond]])
+        vals = self.get_current_conditions(time, gas_field, emissions, cond)
+        probs = self.empirical_pod(vals)
         detect = cond[scores <= probs]
         return detect
 
@@ -123,7 +121,7 @@ class CompDetect(DetectionMethod):
         if self.check_time(time):
             emitter_inds = self.emitters_surveyed(time, gas_field, emissions, find_cost)
             if len(emitter_inds) > 0:
-                detect = self.detect_prob_curve(np.array(emitter_inds), emissions)
+                detect = self.detect_prob_curve(time, gas_field, np.array(emitter_inds), emissions)
                 # Deploy follow up action
                 self.dispatch_object.action(None, detect)
 
