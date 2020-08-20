@@ -100,7 +100,7 @@ class DetectionMethod:
         """
         site_inds = []
         queue_ind = 0
-        while len(site_inds) < n_sites:
+        while len(site_inds) < n_sites and len(self.sites_to_survey) > 0:
             op_env = self.check_op_envelope(gas_field, time, self.sites_to_survey[queue_ind])
             if op_env == 'field pass':
                 # This case applies if there are no site-specific operating envelope conditions.

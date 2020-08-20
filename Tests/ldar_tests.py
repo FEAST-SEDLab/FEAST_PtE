@@ -448,6 +448,36 @@ def test_empirical_pod():
     if not min(tech.detection_probabilities[:2]) <= probs[0] <= max(tech.detection_probabilities[:2]):
         raise ValueError("empirical_pod is not interpolating correctly")
 
+def test_choose_sites():
+    gas_field = basic_gas_field()
+    gas_field.met_data_path = 'TMY-DataExample.csv'
+    time = sc.Time(delta_t=1, end_time=10, current_time=0)
+    gas_field.met_data_maker(time)
+    rep = Dm.repair.Repair(repair_delay=0)
+    # wind_dirs_mins = np.zeros(gas_field.n_sites)
+    # wind_dirs_maxs = np.ones(gas_field.n_sites) * 90
+    tech = Dm.comp_detect.CompDetect(
+        time,
+        survey_interval=50,
+        survey_speed=150,
+        ophrs={'begin': 8, 'end': 17},
+        labor=100,
+        dispatch_object=rep,
+        op_envelope={
+            # 'wind speed': {'class': 1, 'min': 1, 'max': 10},
+            # 'wind direction': {'class': 2, 'min': wind_dirs_mins, 'max': wind_dirs_maxs}
+        }
+    )
+    tech.sites_to_survey = list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int))
+    siteinds = tech.choose_sites(gas_field, time, 10)
+    if not (siteinds == np.linspace(0, 9, 10, dtype=int)).all():
+        raise ValueError("choose_sites() is not selecting the correcting sites")
+
+    tech.sites_to_survey = []
+    siteinds = tech.choose_sites(gas_field, time, 10)
+    if siteinds != []:
+        raise ValueError("choose_sites() fails for empty sites_to_survey queue")
+
 
 test_repair()
 test_comp_detect()
@@ -460,5 +490,7 @@ test_sitedetect_sites_surveyed()
 test_comp_detect_emitters_surveyed()
 test_get_current_conditions()
 test_empirical_pod()
+test_choose_sites()
+
 
 print("Successfully completed LDAR tests.")
