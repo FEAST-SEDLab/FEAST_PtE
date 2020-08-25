@@ -24,7 +24,6 @@ class DetectionMethod:
         # Set all attributes defined in kwargs, regardless of whether they already exist
         set_kwargs_attrs(self, kwargs, only_existing=True)
 
-
     def check_time(self, time):
         """
         Determines whether or not the detection method is active during the present time step
@@ -201,6 +200,9 @@ class DetectionMethod:
         probs = interp.griddata(self.detection_probability_points,
                                 self.detection_probabilities,
                                 vars)
+        # griddata returns NaN for vars outside the convex hull of the interpolation data points when using default
+        # linear interpolation. The following code sets those NaN values (outside the convex hull)
+        # to the nearest interpolation point.
         cond = np.where(np.isnan(probs))[0]
         probs[cond] = interp.griddata(self.detection_probability_points,
                                       self.detection_probabilities,

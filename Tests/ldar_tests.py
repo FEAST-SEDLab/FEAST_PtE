@@ -254,7 +254,7 @@ def test_ldar_program():
     )
     # test __init__
     ogi_survey = Dm.ldar_program.LDARProgram(
-        time, copy.deepcopy(gas_field), {'ogi': ogi}, rep
+        time, copy.deepcopy(gas_field), {'ogi': ogi}
     )
     if len(ogi_survey.find_cost) != 11:
         raise ValueError("find_cost not set to the correct length")
@@ -276,7 +276,7 @@ def test_ldar_program():
         'ogi': ogi_no_survey
     }
     tiered_survey = Dm.ldar_program.LDARProgram(
-        time, gas_field, tech_dict, rep
+        time, gas_field, tech_dict
     )
     # test action
     tiered_survey.action(time, gas_field)
@@ -328,14 +328,14 @@ def test_field_simulation():
         detection_probabilities=probs
     )
     ogi_survey = Dm.ldar_program.LDARProgram(
-        timeobj, copy.deepcopy(gas_field), {'ogi': ogi}, rep
+        timeobj, copy.deepcopy(gas_field), {'ogi': ogi}
     )
     tech_dict = {
         'plane': plane_survey,
         'ogi': ogi_no_survey
     }
     tiered_survey = Dm.ldar_program.LDARProgram(
-        timeobj, gas_field, tech_dict, rep
+        timeobj, gas_field, tech_dict
     )
     feast.field_simulation.field_simulation(
             time=timeobj, gas_field=gas_field,
@@ -446,6 +446,9 @@ def test_empirical_pod():
         raise ValueError("empirical_pod is not returning the correct probabilities")
     probs = tech.empirical_pod(np.array([0.03, 1]))
     if not min(tech.detection_probabilities[:2]) <= probs[0] <= max(tech.detection_probabilities[:2]):
+        raise ValueError("empirical_pod is not interpolating correctly")
+    probs = tech.empirical_pod(np.array([0.01, 1.5]))
+    if not tech.detection_probabilities[0] >= probs[0] >= tech.detection_probabilities[6]:
         raise ValueError("empirical_pod is not interpolating correctly")
 
 def test_choose_sites():

@@ -18,7 +18,7 @@ class CompDetect(DetectionMethod):
     """
     def __init__(self, time, **kwargs):
         DetectionMethod.__init__(self, time)
-        self.dispatch_object = Repair()
+        self.dispatch_object = None
 
         # --------------- Process Variables -------------------
         self.ophrs = {'begin': 8, 'end': 17}
@@ -58,7 +58,7 @@ class CompDetect(DetectionMethod):
         n_scores = len(cond)
         scores = np.random.uniform(0, 1, n_scores)
         vals = self.get_current_conditions(time, gas_field, emissions, cond)
-        probs = self.empirical_pod(vals)
+        probs = self.empirical_pod(self.detection_probabilities, self.detection_probability_points, vals)
         detect = cond[scores <= probs]
         return detect
 
@@ -99,9 +99,10 @@ class CompDetect(DetectionMethod):
             # site_name is used to flag all sites with the same properties
             # One site name can refer to multiple sites
             site_name = self.find_site_name(gas_field, self.site_survey_index)
-            emitter_inds.extend(np.where((emissions.site_index == self.site_survey_index) &
-                                (emissions.comp_index >= self.comp_survey_index) &
-                                (emissions.comp_index < self.comp_survey_index + remaining_comps))[0])
+            site_cond = emissions.site_index == self.site_survey_index
+            comp_cond = (emissions.comp_index >= self.comp_survey_index) & \
+                        (emissions.comp_index < self.comp_survey_index + remaining_comps)
+            emitter_inds.extend(np.where(site_cond & comp_cond)[0])
             if remaining_comps + self.comp_survey_index > gas_field.sites[site_name]['parameters'].max_comp_ind:
                 remaining_comps -= (gas_field.sites[site_name]['parameters'].max_comp_ind - self.comp_survey_index)
                 self.comp_survey_index = 0

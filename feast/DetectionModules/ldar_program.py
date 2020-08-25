@@ -12,14 +12,17 @@ class LDARProgram:
     """
     An LDAR program contains any detection methods that will be applied as well as the repair method
     """
-    def __init__(self, time, gas_field, tech_dict={}, repair=Repair()):
+    def __init__(self, time, gas_field, tech_dict={}):
         self.find_cost = np.zeros(time.n_timesteps)
         self.repair_cost = np.zeros(time.n_timesteps)
         self.emissions = copy.deepcopy(gas_field.initial_emissions)
         self.emissions_timeseries = []
         self.vents_timeseries = []
         self.tech_dict = tech_dict
-        self.repair = repair
+        self.repair = []
+        for tech in tech_dict.values():
+            if type(tech.dispatch_object) is Repair:
+                self.repair.append(tech.dispatch_object)
 
     def end_emissions(self, time):
         """
@@ -48,5 +51,6 @@ class LDARProgram:
             if tech.survey_interval and np.mod(time.current_time, tech.survey_interval) < time.delta_t:
                 tech.action(list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)))
             tech.detect(time, gas_field, self.emissions, self.find_cost)
-        self.repair.repair(time, self.emissions)
+        for rep in self.repair:
+            rep.repair(time, self.emissions)
         self.end_emissions(time)
