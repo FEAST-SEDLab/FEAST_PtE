@@ -4,7 +4,7 @@ This module defines the LDARProgram class.
 
 import numpy as np
 import copy
-from .comp_detect import CompDetect
+from .comp_survey import CompSurvey
 from .repair import Repair
 
 

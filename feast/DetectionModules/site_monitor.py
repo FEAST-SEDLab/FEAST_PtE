@@ -1,52 +1,58 @@
-"""
-This module defines the component level survey based detection class, CompDetect.
-"""
 import numpy as np
-from scipy import spatial
 from .abstract_detection_method import DetectionMethod
-from .comp_detect import CompDetect
-from .repair import Repair
 from ..GeneralClassesFunctions.simulation_functions import set_kwargs_attrs
 
 
-class SiteDetect(DetectionMethod):
+class SiteMonitor(DetectionMethod):
     """
-    This class specifies a site level, survey based detection method.
-    The class has three essential attributes:
-    1.) An operating envelope function to determine if the detection method can be applied
-    2.) A probability of detection surface function to determine which emissions are detected
-    3.) The ability to dispatch a follow up action
+    This class specifies a site level continuous monitoring method
+    The method has three essential characteristics:
+    1.) A list of the sites where the method applies
+    2.) A time-to-detect surface specified as a list of conditions and associated mean detection times.
+    3.) A dict of the variables used to define the time-to-detect surface (the attribute is specified in the
+    DetectionMethod class inherited here)
     """
     def __init__(self, time, **kwargs):
+
         DetectionMethod.__init__(self, time)
-        self.dispatch_object = CompDetect(time)
+        self.dispatch_object = None
 
         # --------------- Process Variables -------------------
-        self.ophrs = {'begin': 8, 'end': 17}
-        self.op_envelope = {}
-        self.survey_interval = None
-        self.sites_per_day = 200  # sites_per_day
-        self.site_cost = 100  # $/site
+        self.ophrs = {'begin': 0, 'end': 24}
+        self.capital = 0
+        self.site_queue = []  # list of sites where this method applies
 
         # --------------- Detection Variables -----------------
-        self.mu = 0.474  # g/s (emission size with 50% probability of detection)
-        self.sigma = 1.36  # ln(g/s) (standard deviation of emission detection probability curve in log space)
-        self.sites_to_survey = []  # queue of sites to survey
-        self.site_survey_index = None
+        self.time_to_detect_points = None  # conditions for which the mean time to detect is specified
+        self.time_to_detect_days = None  # Mean detection times given the conditions listed in _points
+
+        # -------------- Internal variables -----------------
 
         # Set all attributes defined in kwargs
         set_kwargs_attrs(self, kwargs, only_existing=True)
-
+        self.time_to_detect_points = np.array(self.time_to_detect_points)
+        self.time_to_detect_days = np.array(self.time_to_detect_days)
         # -------------- Set calculated parameters --------------
-        work_time = (self.ophrs['end'] - self.ophrs['begin']) / 24
-        self.sites_per_timestep = int(self.sites_per_day * time.delta_t * np.min([1, time.delta_t / work_time]))
-        if self.sites_per_timestep < 1 and self.sites_per_Day > 0:
-            print("WARNING: expecting less than 1 site surveyed per timestep. May lead to unexpected behavior.")
+
+    @staticmethod
+    def prob_detection(time, ttd):
+        """
+        Calculates the probability of detection during a timestep of length time.delta_t and a mean time to detection
+        ttd
+        :param time: Simulation time object
+        :param ttd: mean time to detection (days)
+        :return: the probability of detection during this timestep
+        """
+        if ttd == 0:
+            return 1
+        else:
+            return 1 - np.exp(-time.delta_t / ttd)
 
     def detect_prob_curve(self, time, gas_field, site_inds, emissions):
         """
-        This function determines which leaks are found given an array of indexes defined by "cond"
-        In this case, the detect leaks are determined using a probability of detection curve
+        Determines which sites are passed to the dispatch method
+        In this case, the sites to pass are determined by calculating a probability of detection based on the
+        simulation time resolution delta_t and the mean time to detection
         :param time: Simulation time object
         :param gas_field: Simulation gas_field object
         :param site_inds: The set of sites to be considered
@@ -69,37 +75,24 @@ class SiteDetect(DetectionMethod):
                     # sum all emission variables needed for detection
                     vals[ind] = np.sum(emissions.__getattribute__(v)[cond])
                 ind += 1
-            prob = self.empirical_pod(vals)
-            probs[counter] = prob
+            ttd = self.empirical_interpolator(self.time_to_detect_points, self.time_to_detect_days, vals)
+            probs[counter] = self.prob_detection(time, ttd)
             counter += 1
         scores = np.random.uniform(0, 1, n_scores)
         detect = np.array(site_inds)[scores <= probs]
         return detect
 
-    def sites_surveyed(self, gas_field, time, find_cost):
-        """
-        Determines which sites are surveyed during the current time step.
-        Accounts for the number of sites surveyed per timestep
-        :param gas_field:
-        :param time:
-        :param find_cost: the find_cost array associated with the ldar program
-        """
-        n_sites = np.min([self.sites_per_timestep, len(self.sites_to_survey)])
-        # Determines the operating envelope status
-        site_inds = self.choose_sites(gas_field, time, n_sites)
-        find_cost[time.time_index] += len(site_inds) * self.site_cost
-        return site_inds
-
     def detect(self, time, gas_field, emissions, find_cost):
         """
-        The detection method implements a survey-based detection method model
+        The detection method implements a continuous monitor detection method model
         Inputs:
             time        an object of type Time (defined in feast_classes)
             gas_field   an object of type GasField (defined in feast_classes)
         """
         # enforces the operating hours
         if self.check_time(time):
-            site_inds = self.sites_surveyed(gas_field, time, find_cost)
+            # choose sites accounts for the operating envelope
+            site_inds = self.choose_sites(gas_field, time, len(self.site_queue))
             if len(site_inds) > 0:
                 detect = self.detect_prob_curve(time, gas_field, site_inds, emissions)
                 # Deploy follow up action
@@ -112,4 +105,4 @@ class SiteDetect(DetectionMethod):
         :param emit_inds: Not used.
         :return:
         """
-        self.sites_to_survey.extend(site_inds)
+        self.site_queue.extend(site_inds)

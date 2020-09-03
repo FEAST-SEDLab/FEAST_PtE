@@ -2,13 +2,11 @@
 This module defines the component level survey based detection class, CompDetect.
 """
 import numpy as np
-from scipy import spatial
 from .abstract_detection_method import DetectionMethod
-from .repair import Repair
 from ..GeneralClassesFunctions.simulation_functions import set_kwargs_attrs
 
 
-class CompDetect(DetectionMethod):
+class CompSurvey(DetectionMethod):
     """
     This class specifies a component level, survey based detection method.
     The class has three essential attributes:
@@ -29,9 +27,11 @@ class CompDetect(DetectionMethod):
                                    # site)
 
         # --------------- Detection Variables -----------------
-        self.sites_to_survey = []  # queue of sites to survey
+        self.site_queue = []  # queue of sites to survey
         self.comp_survey_index = 0
         self.site_survey_index = None
+        self.detection_probability_points = None
+        self.detection_probabilities = None
 
         # -------------- Internal variables -----------------
         self.mid_site_fail_time = np.infty
@@ -58,7 +58,7 @@ class CompDetect(DetectionMethod):
         n_scores = len(cond)
         scores = np.random.uniform(0, 1, n_scores)
         vals = self.get_current_conditions(time, gas_field, emissions, cond)
-        probs = self.empirical_pod(self.detection_probabilities, self.detection_probability_points, vals)
+        probs = self.empirical_interpolator(self.detection_probabilities, self.detection_probability_points, vals)
         detect = cond[scores <= probs]
         return detect
 
@@ -133,4 +133,4 @@ class CompDetect(DetectionMethod):
         :param emit_inds: Not used.
         :return:
         """
-        self.sites_to_survey.extend(site_inds)
+        self.site_queue.extend(site_inds)

@@ -18,12 +18,11 @@ class DetectionMethod:
         self.repair_cost = np.zeros(time.n_timesteps)
         self.op_envelope = {}
         self.detection_variables = {}  # Dict with format {name: interpolation mode}
-        self.detection_probability_points = None
-        self.detection_probabilities = None
         self.hull = None
         # Set all attributes defined in kwargs, regardless of whether they already exist
         set_kwargs_attrs(self, kwargs, only_existing=True)
-
+        if type(self.detection_variables) is not dict:
+            raise TypeError("Detection_variables must be a dict of form {name: interpolation mode,}")
     def check_time(self, time):
         """
         Determines whether or not the detection method is active during the present time step
@@ -99,23 +98,23 @@ class DetectionMethod:
         """
         site_inds = []
         queue_ind = 0
-        while len(site_inds) < n_sites and len(self.sites_to_survey) > 0:
-            op_env = self.check_op_envelope(gas_field, time, self.sites_to_survey[queue_ind])
+        while len(site_inds) < n_sites and len(self.site_queue) > 0:
+            op_env = self.check_op_envelope(gas_field, time, self.site_queue[queue_ind])
             if op_env == 'field pass':
                 # This case applies if there are no site-specific operating envelope conditions.
-                site_inds = self.sites_to_survey[:n_sites]
-                del self.sites_to_survey[:n_sites]
+                site_inds = self.site_queue[:n_sites]
+                del self.site_queue[:n_sites]
             elif op_env == 'site pass':
                 # This case applies if the operating envelope is satisifed for this site,
                 # but may fail for a different site.
-                site_inds.append(self.sites_to_survey.pop(queue_ind))
+                site_inds.append(self.site_queue.pop(queue_ind))
             elif op_env == 'field fail':
                 # This case applies if the operating envelope fails for the entire field at this time step.
                 return site_inds
             else:
                 # This condition applies if the site fails the operating envelope but other sites may pass.
                 queue_ind += 1
-            if queue_ind == len(self.sites_to_survey):
+            if queue_ind == len(self.site_queue):
                 # This applies if the end of the queue is reached before n_sites is reached
                 break
         return site_inds
@@ -190,21 +189,20 @@ class DetectionMethod:
             index += 1
         return conditions
 
-    def empirical_pod(self, vars):
+    @staticmethod
+    def empirical_interpolator(test_conditions, test_results, sim_conditions):
         """
         calculates the probabiity of detection analytically
-        :param vars: Nxk array of current conditions, where N is the number of emissions to consider, and k is the
+        :param test_conditions: conditions to be interpolated from
+        :param test_results: results associated with each condition listed in test_conditions
+        :param sim_conditions: Nxk array of current conditions, where N is the number of emissions to consider, and k is the
                     number of conditions
         :return:
         """
-        probs = interp.griddata(self.detection_probability_points,
-                                self.detection_probabilities,
-                                vars)
+        probs = interp.griddata(test_conditions, test_results, sim_conditions)
         # griddata returns NaN for vars outside the convex hull of the interpolation data points when using default
         # linear interpolation. The following code sets those NaN values (outside the convex hull)
         # to the nearest interpolation point.
         cond = np.where(np.isnan(probs))[0]
-        probs[cond] = interp.griddata(self.detection_probability_points,
-                                      self.detection_probabilities,
-                                      vars[cond], method='nearest')
+        probs[cond] = interp.griddata(test_conditions, test_results, sim_conditions[cond], method='nearest')
         return np.ndarray.flatten(probs)
