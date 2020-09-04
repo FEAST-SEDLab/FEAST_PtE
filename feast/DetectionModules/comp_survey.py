@@ -3,7 +3,7 @@ This module defines the component level survey based detection class, CompDetect
 """
 import numpy as np
 from .abstract_detection_method import DetectionMethod
-from ..GeneralClassesFunctions.simulation_functions import set_kwargs_attrs
+from ..EmissionSimModules.simulation_functions import set_kwargs_attrs
 
 
 class CompSurvey(DetectionMethod):

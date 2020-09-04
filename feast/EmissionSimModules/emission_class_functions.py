@@ -132,7 +132,7 @@ class Emission:
         self.repair_cost[:self.n_leaks] = self.repair_cost[:self.n_leaks][sortorder]
 
 
-def bootstrap_leak_maker(n_leaks_in, comp_name, site, time, capacity=0, reparable=True):
+def bootstrap_emission_maker(n_leaks_in, comp_name, site, time, capacity=0, reparable=True):
     """
     Create leaks using a bootstrap method
     n_leaks_in      number of leaks to generate
@@ -142,7 +142,7 @@ def bootstrap_leak_maker(n_leaks_in, comp_name, site, time, capacity=0, reparabl
     capacity        the size of array to make to store leaks (if zero, the arrays are given a size equal to n_leaks_in).
     """
     comp = site.comp_dict[comp_name]['parameters']
-    leak_params = comp.leak_params
+    leak_params = comp.emission_params
     detection_methods = list(leak_params.leak_sizes.keys())
     flux = []
     round_err, leaks_per_well, counter = [], [], -1
@@ -184,7 +184,7 @@ def bootstrap_leak_maker(n_leaks_in, comp_name, site, time, capacity=0, reparabl
 def comp_indexes_fcn(site, comp_name, n_inds):
     """
     Returns an array of indexes to associate with new emissions
-    :param site: a GeneralClassesFunctions.simulation_classes.Site object
+    :param site: a EmissionSimModules.simulation_classes.Site object
     :param comp_name: name of a component contained in Site.comp_dict
     :param n_inds: Integer of indexes to generate
     :return: An array of indexes in the range specified for the relevant component
@@ -194,7 +194,7 @@ def comp_indexes_fcn(site, comp_name, n_inds):
     return np.random.randint(low_ind, high_ind, n_inds)
 
 
-def leak_objects_generator(dist_type, leak_data_path, custom_leak_maker=None):
+def emission_objects_generator(dist_type, emission_data_path, custom_emission_maker=None):
     """
     leak_objects is a parent function that will be called to initialize gas fields
     Inputs:
@@ -202,32 +202,31 @@ def leak_objects_generator(dist_type, leak_data_path, custom_leak_maker=None):
         leak_data_path      Path to a leak data file
     """
     rsc_path, _ = os.path.split(dirname(abspath(__file__)))
-    if leak_data_path in os.listdir(os.path.join(rsc_path, 'InputData', 'DataObjectInstances')):
-        rsc_path = os.path.join(rsc_path, 'InputData', 'DataObjectInstances', leak_data_path)
+    if emission_data_path in os.listdir(os.path.join(rsc_path, 'InputData', 'DataObjectInstances')):
+        rsc_path = os.path.join(rsc_path, 'InputData', 'DataObjectInstances', emission_data_path)
     else:
-        rsc_path = leak_data_path
+        rsc_path = emission_data_path
     with open(rsc_path, 'rb') as f:
-        leak_data = pickle.load(f)
+        emission_params = pickle.load(f)
 
-    # Define leak params and leak_size_maker based on the leak distribution type
+    # Define leak params and emission_size_maker based on the leak distribution type
     if dist_type == 'bootstrap':
-        leak_params = leak_data
-        leak_size_maker = bootstrap_leak_maker
+        emission_size_maker = bootstrap_emission_maker
     elif dist_type.lower() == 'custom':
-        if custom_leak_maker is None:
-            raise ValueError("custom_leak_maker must be defined for a custom emission distribution type")
-        leak_params = leak_data
-        leak_size_maker = custom_leak_maker
+        if custom_emission_maker is None:
+            raise ValueError("custom_emission_maker must be defined for a custom emission distribution type")
+        emission_size_maker = custom_emission_maker
     else:
-        raise NameError('Leak distribution type unsupported in GasField')
+        raise NameError('emission distribution type unsupported in GasField')
 
     # Number of leaking components at each well (Poisson distribution)
-    detection_types, leaks_per_well, leaks_per_comp = leak_data.leak_sizes.keys(), 0, 0
-    # This sums the leaks found per well by every method in leak_data
+    detection_types, em_per_well, em_per_comp = emission_params.leak_sizes.keys(), 0, 0
+    # This sums the leaks found per well by every method in emission_data
     for key in detection_types:
-        leaks_per_well += len(leak_data.leak_sizes[key]) / leak_data.well_counts[key]
-        leaks_per_comp += len(leak_data.leak_sizes[key]) / (leak_data.comp_counts[key] * leak_data.well_counts[key])
-    return leak_size_maker, leak_params, leaks_per_well, leaks_per_comp
+        em_per_well += len(emission_params.leak_sizes[key]) / emission_params.well_counts[key]
+        em_per_comp += len(emission_params.leak_sizes[key]) / \
+            (emission_params.comp_counts[key] * emission_params.well_counts[key])
+    return emission_size_maker, emission_params, em_per_well, em_per_comp
 
 
 def permitted_emission(n_emit, sizes, duration, time, site, comp_name):

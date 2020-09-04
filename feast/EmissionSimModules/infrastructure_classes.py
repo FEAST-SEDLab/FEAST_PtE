@@ -1,33 +1,18 @@
 """
-    feast_classes stores the basic classes used by FEAST.
-    Additional classes are stored in DetectionModules directory and leak_objects.
+This module stores component, gasfield and site classes to represent infrastructure in a simulation
 """
+
+import os
+import pickle
+from os.path import dirname, abspath
+
 import numpy as np
 import pandas as pd
-from .emission_class_functions import leak_objects_generator as leak_obj_gen
-from . import emission_class_functions as lcf
-import pickle
-from .simulation_functions import set_kwargs_attrs
-from os.path import dirname, abspath
-import os
 
-
-class Time:
-    """
-    Instances of the time class store all time related information during a simulation
-    """
-    def __init__(self, delta_t=3650/4000, end_time=10 * 365, current_time=0):
-        """
-        Inputs:
-        delta_t                 length of one timestep (days)
-        end_time                length of the simulation (days)
-        current_time            current time in a simulation (days)
-        """
-        self.n_timesteps = int(end_time/delta_t+1)
-        self.end_time = end_time
-        self.delta_t = delta_t
-        self.current_time = current_time
-        self.time_index = 0
+from feast.EmissionSimModules import emission_class_functions as ecf
+from feast.EmissionSimModules.emission_class_functions import emission_objects_generator as leak_obj_gen
+from feast.EmissionSimModules.simulation_classes import Time
+from feast.EmissionSimModules.simulation_functions import set_kwargs_attrs
 
 
 class Component:
@@ -38,38 +23,40 @@ class Component:
     def __init__(self, null_repair_rate=None, **kwargs):
         self.name = 'default'
         self.component_type = "fugitive leak source"
+
         # Repair cost data file path
         self.repair_cost_path = 'fernandez_leak_repair_costs_2006.p'
-        # Events with a constant probability of occurring and duration determined by the null repair rate
-        # emission specifications may or may not be reparable before the null repair process
+        # ---- Emissions with a constant probability of occurring and duration determined by the null repair rate
         self.dist_type = 'bootstrap'
         self.emission_data_path = 'production_emissions.p'
-        self.emission_production_rate = 1e-5  # new emissions per component per day
-        self.emission_per_comp = 'default'
-        self.custom_leak_maker = None
+        # new emissions per component per day (typically on the order of 1e-5)
+        self.emission_production_rate = 0
+        # if emission_per_comp is left as None, FEAST uses the # of emissions/# of components in the emission_data file
+        self.emission_per_comp = None
+        self.custom_emission_maker = None  # Optional custom method for creating new emissions
         self.base_reparable = True
-        # Permitted events with a constant probability of occurring and known duration NOT REPARABLE
+        # ---- Permitted events with a constant probability of occurring and known duration NOT REPARABLE
         self.episodic_emission_sizes = [0]  # g/s
         self.episodic_emission_per_day = 0
         self.episodic_emission_duration = 0
-        # Periodic vents: repetitive events with a known period between emissions and known duration NOT REPARABLE
+        # ---- Periodic vents: repetitive events with a known period between emissions and known duration NOT REPARABLE
         self.vent_sizes = [0]  # g/s
         self.vent_period = np.infty  # days
         self.vent_duration = 0  # days
         self.vent_starts = np.array([])
-        # Update any attributes defined by kwargs
+        # ---- Update any attributes defined by kwargs
         set_kwargs_attrs(self, kwargs)
-        # Distribution of leak repair costs
         rsc_path, _ = os.path.split(dirname(abspath(__file__)))
+        # ---- Distribution of leak repair costs
         if self.repair_cost_path in os.listdir(os.path.join(rsc_path, 'InputData', 'DataObjectInstances')):
             rsc_path = os.path.join(rsc_path, 'InputData', 'DataObjectInstances', self.repair_cost_path)
         else:
             rsc_path = self.repair_cost_path
         with open(rsc_path, 'rb') as f:
             self.repair_cost_dist = pickle.load(f)
-        self.leak_size_maker, self.leak_params, self.emission_per_well, emission_per_comp \
-            = leak_obj_gen(self.dist_type, self.emission_data_path, self.custom_leak_maker)
-        if self.emission_per_comp == 'default':
+        self.emission_size_maker, self.emission_params, self.emission_per_well, emission_per_comp \
+            = leak_obj_gen(self.dist_type, self.emission_data_path, self.custom_emission_maker)
+        if self.emission_per_comp is None:
             self.emission_per_comp = emission_per_comp
         if null_repair_rate is None:
             if self.emission_per_comp == 0:
@@ -78,7 +65,7 @@ class Component:
                 self.null_repair_rate = self.emission_production_rate / self.emission_per_comp
         else:
             self.null_repair_rate = null_repair_rate
-        self.emission_maker = lcf.permitted_emission
+        self.intermittent_emission_maker = ecf.permitted_emission
 
 
 class GasField:
@@ -94,19 +81,18 @@ class GasField:
         """
 
         # -------------- Attributes that can be defined with kwargs --------------
-        # Number of wells to be simulated
+        # sites should be a dict of the form demonstrated below.
+        # 'name' can be changed to any string that indicates the type of site represented here
+        # the key 'number' should not be changed. Its value represents the number of identical sites to include in
+        # the simulation.
+        # the key 'parameters' should not be changed. Its value should be an object of type Site.
         self.sites = {
-            'default': {'number': 100, 'parameters': Site()}
+            'name': {'number': 0, 'parameters': Site()}
         }
-
-        # Maximum number of wells to be surveyed with a single capital investment
-        self.max_count = 6000
-        # Driving distance between wells
-        self.site_spacing = 700  # m
-        # Initial leaks defined for the gas field
+        # Initial emissions defined for the gas field
         self.initial_emissions = None
         # emissions to be created during the simulation
-        self.new_leaks = None
+        self.new_emissions = None
         # emissions to be created during the simulation
         self.start_times = None
         # path to TMY data
@@ -116,17 +102,57 @@ class GasField:
 
         # -------------- Calculated parameters --------------
         self.n_comps, self.n_sites = 0, 0
-        site_ind = 0
-        self.avg_vent = 0
         self.comp_dict = {}
         # dict to store met data
         self.met = {}
 
-        # Define met data
+        # Define indexes and initialize emissions
+        self.set_indexes()
         if self.met_data_path:
             self.met_data_maker(time)
+        if self.initial_emissions is None:
+            self.initialize_emissions(time)
+        if self.new_emissions is None:
+            self.emerging_emissions(time)
+        self.input_emissions = []
+        for ind in range(time.n_timesteps):
+            cond = np.where(self.start_times == ind)[0]
+            self.input_emissions.append(ecf.Emission(flux=self.new_emissions.flux[cond],
+                                                     reparable=self.new_emissions.reparable[cond],
+                                                     site_index=self.new_emissions.site_index[cond],
+                                                     comp_index=self.new_emissions.comp_index[cond],
+                                                     endtime=self.new_emissions.endtime[cond],
+                                                     repair_cost=self.new_emissions.repair_cost[cond]))
 
-        # This loop counts components for each site
+    def initialize_emissions(self, time):
+        """
+        Create emissions that exist at the beginning of the simulation
+        :param time:
+        :return:
+        """
+        cap_est = 0
+        for site_dict in self.sites.values():
+            cap_est += site_dict['number'] * 10
+        self.initial_emissions = ecf.Emission(capacity=cap_est)
+        # This generates new leaks for each component type in each site type
+        for sitedict in self.sites.values():
+            site = sitedict['parameters']
+            for comp_name in site.comp_dict:
+                compobj = site.comp_dict[comp_name]['parameters']
+                n_comp = sitedict['number'] * site.comp_dict[comp_name]['number']
+                if compobj.emission_production_rate > 0:
+                    n_leaks = np.random.binomial(n_comp, compobj.emission_per_comp)
+                else:
+                    n_leaks = 0
+                self.emission_maker(n_leaks, self.initial_emissions, comp_name, n_comp, time, site)
+            if site.site_em_dist:
+                self.site_emissions_enforcer(site)
+
+    def set_indexes(self):
+        """
+        Counts components for each site and assigns appropriate indexes
+        """
+        site_ind = 0
         for site_dict in self.sites.values():
             site = site_dict['parameters']
             self.n_sites += site_dict['number']
@@ -136,70 +162,48 @@ class GasField:
             for compname, comp_d in site.comp_dict.items():
                 comp = comp_d['parameters']
                 comp_count = comp_d['number']
-                if comp.vent_duration > 0:
-                    comp.vent_starts = np.random.uniform(0, comp.vent_period, comp_count)
-                    self.avg_vent += comp.vent_duration / comp.vent_period * comp_count * site_dict['number']
                 self.n_comps += comp_d['number'] * site_dict['number']
                 if compname in self.comp_dict:
                     raise ValueError("All component names must be unique.")
                 self.comp_dict[compname] = comp
             site_ind += site_dict['number']
-        # create initial_leaks
-        cap_est = 0
-        for site_dict in self.sites.values():
-            cap_est += site_dict['number'] * 10
-        if self.initial_emissions is None:
-            self.initial_emissions = lcf.Emission(capacity=cap_est)
-            # This generates new leaks for each component type in each site type
-            for sitedict in self.sites.values():
-                site = sitedict['parameters']
-                for comp_name in site.comp_dict:
-                    compobj = site.comp_dict[comp_name]['parameters']
-                    n_comp = sitedict['number'] * site.comp_dict[comp_name]['number']
-                    if compobj.emission_production_rate > 0:
-                        n_leaks = np.random.binomial(n_comp, compobj.emission_per_comp)
-                    else:
-                        n_leaks = 0
-                    self.leak_maker(n_leaks, self.initial_emissions, comp_name, n_comp, time, site)
-                if site.site_em_dist:
-                    self.site_emissions_enforcer(site)
         self.n_sites = site_ind
-        if self.new_leaks is None:
-            self.new_leaks = lcf.Emission()
-            for site_dict in self.sites.values():
-                site = site_dict['parameters']
-                for compname, comp in site.comp_dict.items():
-                    n_comp = site_dict['number'] * comp['number']
-                    n_leaks = np.random.poisson(n_comp * comp['parameters'].emission_production_rate * time.end_time)
-                    n_episodic = np.random.poisson(n_comp * comp['parameters'].episodic_emission_per_day * time.end_time)
-                    self.leak_maker(n_leaks, self.new_leaks, compname, n_comp, time, site, n_episodic=n_episodic)
-            self.start_times = np.random.randint(0, time.n_timesteps, self.new_leaks.n_leaks, dtype=int)
-            self.new_leaks.endtime += self.start_times * time.delta_t
-        input_leaks = []
-        for ind in range(time.n_timesteps):
-            cond = np.where(self.start_times == ind)[0]
-            input_leaks.append(lcf.Emission(flux=self.new_leaks.flux[cond],
-                                            reparable=self.new_leaks.reparable[cond],
-                                            site_index=self.new_leaks.site_index[cond],
-                                            comp_index=self.new_leaks.comp_index[cond],
-                                            endtime=self.new_leaks.endtime[cond],
-                                            repair_cost=self.new_leaks.repair_cost[cond]))
-        self.input_leaks = input_leaks
+
+    def emerging_emissions(self, time):
+        """
+        Defines emissions that emerge during a simulation
+        :param time:
+        :return:
+        """
+        self.new_emissions = ecf.Emission()
+        for site_dict in self.sites.values():
+            site = site_dict['parameters']
+            for compname, comp in site.comp_dict.items():
+                if comp['parameters'].vent_duration > 0:
+                    comp['parameters'].vent_starts = np.random.uniform(0, comp['parameters'].vent_period,
+                                                                       comp['number'])
+                n_comp = site_dict['number'] * comp['number']
+                n_leaks = np.random.poisson(n_comp * comp['parameters'].emission_production_rate * time.end_time)
+                n_episodic = np.random.poisson(n_comp * comp['parameters'].episodic_emission_per_day * time.end_time)
+                self.emission_maker(n_leaks, self.new_emissions, compname, n_comp, time, site, n_episodic=n_episodic)
+        self.start_times = np.random.randint(0, time.n_timesteps, self.new_emissions.n_leaks, dtype=int)
+        self.new_emissions.endtime += self.start_times * time.delta_t
+
 
     # Define functions and parameters related to leaks
-    def leak_size_maker(self, time):
+    def emission_size_maker(self, time):
         """
         Creates a new set of leaks based on attributes of the gas field
         :param time: a time object (the parameter delta_t is used)
         :return new_leaks: the new leak object
         """
-        new_leaks = lcf.Emission()
+        new_leaks = ecf.Emission()
         for site_dict in self.sites.values():
             site = site_dict['parameters']
             for compname, comp in site.comp_dict.items():
                 n_comp = site_dict['number'] * comp['number']
                 n_leaks = np.random.poisson(n_comp * comp['parameters'].emission_production_rate * time.delta_t)
-                self.leak_maker(n_leaks, new_leaks, compname, n_comp, time, site)
+                self.emission_maker(n_leaks, new_leaks, compname, n_comp, time, site)
         return new_leaks
 
     def met_data_maker(self, time):
@@ -254,9 +258,9 @@ class GasField:
         return met_conds
 
     @staticmethod
-    def leak_maker(n_leaks, new_leaks, comp_name, n_comp, time, site, n_episodic=None):
+    def emission_maker(n_leaks, new_leaks, comp_name, n_comp, time, site, n_episodic=None):
         """
-        Updates a leak object with new values returned by leak_size_maker
+        Updates a leak object with new values returned by emission_size_maker
         :param n_leaks: number of new leaks to create
         :param new_leaks: a leak object to extend
         :param comp_name: name of a component object included in site.comp_dict
@@ -267,44 +271,19 @@ class GasField:
         :return: None
         """
         comp = site.comp_dict[comp_name]['parameters']
-        new_leaks.extend(comp.leak_size_maker(n_leaks, comp_name, site, time, reparable=comp.base_reparable))
+        new_leaks.extend(comp.emission_size_maker(n_leaks, comp_name, site, time, reparable=comp.base_reparable))
         if n_episodic is None:
             n_episodic = np.random.poisson(n_comp * comp.episodic_emission_per_day * time.delta_t)
-        new_leaks.extend(comp.emission_maker(n_episodic,
-                                             comp.episodic_emission_sizes,
-                                             comp.episodic_emission_duration,
-                                             time, site, comp_name))
+        new_leaks.extend(comp.intermittent_emission_maker(n_episodic,
+                                                          comp.episodic_emission_sizes,
+                                                          comp.episodic_emission_duration,
+                                                          time, site, comp_name))
         n_vent = 0
         if comp.vent_starts.size > 0:
             n_vent = np.random.poisson(comp.vent_duration / comp.vent_period * n_comp *
                                        min(1, time.delta_t/comp.vent_period))
-        new_leaks.extend(comp.emission_maker(n_vent, comp.vent_sizes, comp.vent_duration, time, site, comp_name))
+        new_leaks.extend(comp.intermittent_emission_maker(n_vent, comp.vent_sizes, comp.vent_duration, time, site, comp_name))
         return None
-
-
-# FinanceSettings stores all parameters relating to economic calculations
-class FinanceSettings:
-    def __init__(self, gas_price=2E-4, discount_rate=0.08):
-        self.gas_price = gas_price  # dollars/gram (2e-4 $/g=$5/mcf methane at STP)
-        self.discount_rate = discount_rate
-
-
-class Results:
-    """
-    Class in which to save results
-    """
-    def __init__(self, time, gas_field, ldar_program_dict, econ_set):
-        """
-        Inputs:
-        time                    Time object
-        gas_field               GasField object
-        ldar_program_dict       dict of detection methods and associated data
-        econ_set                Economic settings defined for the simulation
-        """
-        self.time = time
-        self.gas_field = gas_field
-        self.ldar_program_dict = ldar_program_dict
-        self.econ_settings = econ_set
 
 
 class Site:

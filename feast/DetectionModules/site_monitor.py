@@ -1,6 +1,6 @@
 import numpy as np
 from .abstract_detection_method import DetectionMethod
-from ..GeneralClassesFunctions.simulation_functions import set_kwargs_attrs
+from ..EmissionSimModules.simulation_functions import set_kwargs_attrs
 
 
 class SiteMonitor(DetectionMethod):

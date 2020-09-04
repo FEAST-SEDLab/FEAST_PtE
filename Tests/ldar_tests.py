@@ -4,8 +4,8 @@ import feast
 import os
 import pickle
 import time as ti
-from feast.GeneralClassesFunctions import simulation_classes as sc
-import feast.GeneralClassesFunctions.emission_class_functions as ecf
+from feast.EmissionSimModules import simulation_classes as sc
+import feast.EmissionSimModules.emission_class_functions as ecf
 from feast import DetectionModules as Dm
 from Tests.test_helper import basic_gas_field
 from Tests.test_helper import ex_prob_detect_arrays
@@ -286,7 +286,7 @@ def test_ldar_program():
 
 def test_field_simulation():
     gas_field = basic_gas_field()
-    timeobj = feast.GeneralClassesFunctions.simulation_classes.Time(delta_t=1, end_time=2)
+    timeobj = feast.EmissionSimModules.simulation_classes.Time(delta_t=1, end_time=2)
     rep = Dm.repair.Repair(repair_delay=0)
     points = np.logspace(-3, 1, 100)
     probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.02)) / (0.8 * np.sqrt(2))) for f
@@ -452,6 +452,7 @@ def test_empirical_interpolator():
     probs = tech.empirical_interpolator(tech.detection_probability_points, tech.detection_probabilities, np.array([0.01, 1.5]))
     if not tech.detection_probabilities[0] >= probs[0] >= tech.detection_probabilities[6]:
         raise ValueError("empirical_interpolator is not interpolating correctly")
+
 
 def test_choose_sites():
     gas_field = basic_gas_field()

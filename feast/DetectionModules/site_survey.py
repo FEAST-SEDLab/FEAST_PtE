@@ -6,7 +6,7 @@ from scipy import spatial
 from .abstract_detection_method import DetectionMethod
 from .comp_survey import CompSurvey
 from .repair import Repair
-from ..GeneralClassesFunctions.simulation_functions import set_kwargs_attrs
+from ..EmissionSimModules.simulation_functions import set_kwargs_attrs
 
 
 class SiteSurvey(DetectionMethod):

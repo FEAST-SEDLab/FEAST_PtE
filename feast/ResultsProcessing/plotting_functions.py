@@ -3,7 +3,7 @@ from pickle import load
 from os import listdir
 from os.path import isfile, join
 import numpy as np
-from . import results_analysis_functions
+from feast.ResultsProcessing import results_analysis_functions
 from matplotlib import rc, rcParams
 
 # The color set defined here is the Tableau 10 color set.

@@ -1,6 +1,6 @@
 import copy
 import numpy as np
-from ..GeneralClassesFunctions.simulation_functions import set_kwargs_attrs
+from ..EmissionSimModules.simulation_functions import set_kwargs_attrs
 from scipy import interpolate as interp
 
 

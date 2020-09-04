@@ -1,7 +1,7 @@
 """
 This module defines all classes used to store input data
 """
-from ..GeneralClassesFunctions.simulation_functions import set_kwargs_attrs
+from ..EmissionSimModules.simulation_functions import set_kwargs_attrs
 
 
 class DataFile:

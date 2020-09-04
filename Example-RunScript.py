@@ -6,7 +6,8 @@ the simulation. Three different survey-based LDAR programs are also defined and 
 import numpy as np
 import copy
 import feast
-from feast.GeneralClassesFunctions.simulation_classes import Component
+import feast.EmissionSimModules.infrastructure_classes
+from feast.EmissionSimModules.infrastructure_classes import Component
 
 # The random seed below can be un-commented to generate reproducible realizations.
 # np.random.seed(0)
@@ -32,7 +33,7 @@ misc_vent = Component(
 
 
 # Simulates unloading emissions from a well with a plunger lift
-plunger = feast.GeneralClassesFunctions.simulation_classes.Component(
+plunger = feast.EmissionSimModules.infrastructure_classes.Component(
     name='plunger',
     emission_production_rate=0,  # Expected rate of production for fugitive emissions
     episodic_emission_sizes=[50.36],  # gram-per-sec
@@ -41,7 +42,7 @@ plunger = feast.GeneralClassesFunctions.simulation_classes.Component(
 )
 
 # Simulates unloading emissions from a well with out a plunger lift
-noplunger = feast.GeneralClassesFunctions.simulation_classes.Component(
+noplunger = feast.EmissionSimModules.infrastructure_classes.Component(
     name='no plunger',
     emission_production_rate=0,
     episodic_emission_sizes=[76.98],  # gram-per-sec
@@ -74,7 +75,7 @@ for ind in range(30):
         if counts[n_wells_in_site - 1] == 0:
             continue
         cond = (n_wells_samp == n_wells_in_site)
-        basicpad = feast.GeneralClassesFunctions.simulation_classes.Site(
+        basicpad = feast.EmissionSimModules.infrastructure_classes.Site(
             name='basic pad',
             comp_dict={
                 # ------ The number of components is proportional to the number of wells, ind2
@@ -86,7 +87,7 @@ for ind in range(30):
         )
 
         site_dict['basic pad ' + str(n_wells_in_site)] = {'number': counts[n_wells_in_site - 1], 'parameters': basicpad}
-    plungersite = feast.GeneralClassesFunctions.simulation_classes.Site(
+    plungersite = feast.EmissionSimModules.infrastructure_classes.Site(
         name='plunger well',
         comp_dict={
             'Fugitive_plunger': {'number': 700, 'parameters': copy.copy(comp_fug)},
@@ -94,7 +95,7 @@ for ind in range(30):
             'misc vent plunge': {'number': 600, 'parameters': copy.copy(misc_vent)}
         }
     )
-    unloadnp = feast.GeneralClassesFunctions.simulation_classes.Site(
+    unloadnp = feast.EmissionSimModules.infrastructure_classes.Site(
         name='Site 4',
         comp_dict={
             'Fugitive_4': {'number': 700, 'parameters': copy.copy(comp_fug)},
@@ -106,8 +107,8 @@ for ind in range(30):
     site_dict['unload no plunger'] = {'number': 1, 'parameters': unloadnp}
 
     # Define time and gas field parameters
-    timeobj = feast.GeneralClassesFunctions.simulation_classes.Time(delta_t=1/24, end_time=3*365)
-    gas_field = feast.GeneralClassesFunctions.simulation_classes.GasField(
+    timeobj = feast.EmissionSimModules.simulation_classes.Time(delta_t=1 / 24, end_time=3 * 365)
+    gas_field = feast.EmissionSimModules.infrastructure_classes.GasField(
         sites=site_dict,
         time=timeobj
     )
