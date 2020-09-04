@@ -23,7 +23,6 @@ def results_analysis(directory):
     emissions_timeseries = np.zeros([n_prog, sample.time.n_timesteps, n_realizations])
     costs = np.zeros([n_prog, n_realizations])
     progs = list(sample.ldar_program_dict.keys())
-    no_repair_npv = dict()
     null_npv = dict()
     npv_keys = ['Repair', 'Finding', 'Gas', 'Total']
     for key in npv_keys:
@@ -35,7 +34,7 @@ def results_analysis(directory):
         for index in range(0, len(progs)):
             emissions_timeseries[index, :, jindex] = sample.ldar_program_dict[progs[index]].emissions_timeseries
             costs[index, jindex] = np.sum(sample.ldar_program_dict[progs[index]].find_cost) + \
-                                   np.sum(sample.ldar_program_dict[progs[index]].repair_cost)
+                np.sum(sample.ldar_program_dict[progs[index]].repair_cost)
         # iterate through each category of value
         null_npv_temp = npv_calculator(directory + '/' + files[jindex])
         for key in null_npv.keys():
@@ -75,14 +74,13 @@ def npv_calculator(filepath):
         if progs[index] != 'Null':
             ind = index - null_correct
             repair_cost_null[ind, :] = sample.ldar_program_dict[progs[index]].repair_cost / discount_array - \
-                                       null_repair_cost
+                null_repair_cost
             gas_value_n[ind] = sum((null_emissions - sample.ldar_program_dict[progs[index]].emissions_timeseries) /
                                    discount_array) * sample.time.delta_t * 24 * 3600 * sample.econ_settings.gas_price
             find_cost_null[ind, :] = sample.ldar_program_dict[progs[index]].find_cost / discount_array
         else:
             null_correct += 1
     # consolidate costs into totals
-    find = np.sum(find_cost, 1)
     find_n = np.sum(find_cost_null, 1)
     n_repair = np.sum(repair_cost_null, 1)
     null_npv = {'Repair': n_repair, 'Finding': find_n, 'Gas': gas_value_n}

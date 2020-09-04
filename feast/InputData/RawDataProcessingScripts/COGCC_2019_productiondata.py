@@ -52,9 +52,9 @@ llsqnum = np.array(wells.API_SEQ[cond], dtype='str')
 llcounty = np.array(wells.API_COUNTY[cond], dtype='str')
 lats, longs, APIs = list(wells.LATITUDE[cond]), list(wells.LONGITUDE[cond]), list(wells.API[cond])
 sortargs = np.argsort(lats)
-lats = [lats[l] for l in sortargs]
-longs = [longs[l] for l in sortargs]
-APIs = [APIs[l] for l in sortargs]
+lats = [lats[l_index] for l_index in sortargs]
+longs = [longs[l_index] for l_index in sortargs]
+APIs = [APIs[l_index] for l_index in sortargs]
 
 # Determine which wells in the production data set are not in the location data set
 missing_codes = []
@@ -78,6 +78,7 @@ long = list(long[sortargs])
 api = list(api[sortargs])
 
 
+# noinspection PyShadowingNames
 def distance(places, point):
     """
     calculates the distance between an array of places and a point.
@@ -166,8 +167,8 @@ def finder(ll, lats, longs, APIs, pad, max_dist=0.05):
             temp += 1
         cond.sort(reverse=True)
         # final selection of nearby wells to be included in the pad
-        la = [lats[l] for l in cond]
-        lo = [longs[l] for l in cond]
+        la = [lats[l_index] for l_index in cond]
+        lo = [longs[l_index] for l_index in cond]
         distances = distance(np.array(list(zip(la, lo))), ll)
         cond2 = np.where(distances < max_dist)[0]
         if len(cond) == 0:

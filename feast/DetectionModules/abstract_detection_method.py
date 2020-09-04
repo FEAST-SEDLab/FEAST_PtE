@@ -23,11 +23,11 @@ class DetectionMethod:
         set_kwargs_attrs(self, kwargs, only_existing=True)
         if type(self.detection_variables) is not dict:
             raise TypeError("Detection_variables must be a dict of form {name: interpolation mode,}")
+
     def check_time(self, time):
         """
         Determines whether or not the detection method is active during the present time step
         :param time:
-        :param gas_field:
         :return:
         """
         oktime = self.ophrs['begin'] <= np.mod(time.current_time, 1) * 24 < self.ophrs['end']
@@ -66,7 +66,7 @@ class DetectionMethod:
                 site = gas_field.sites[self.find_site_name(gas_field, site_index)]
                 condition = site.op_env_params[name]
             if params['class'] == 1 and not self.check_min_max_condition(condition, params):
-                    return 'field fail'
+                return 'field fail'
             elif params['class'] in [2, 6]:
                 status = 'site pass'
                 site_params = {'min': params['min'][site_index], 'max': params['max'][site_index]}
@@ -118,7 +118,6 @@ class DetectionMethod:
                 # This applies if the end of the queue is reached before n_sites is reached
                 break
         return site_inds
-
 
     @staticmethod
     def check_min_max_condition(condition, params):
@@ -195,8 +194,8 @@ class DetectionMethod:
         calculates the probabiity of detection analytically
         :param test_conditions: conditions to be interpolated from
         :param test_results: results associated with each condition listed in test_conditions
-        :param sim_conditions: Nxk array of current conditions, where N is the number of emissions to consider, and k is the
-                    number of conditions
+        :param sim_conditions: Nxk array of current conditions, where N is the number of emissions to consider,
+            and k is the number of conditions
         :return:
         """
         probs = interp.griddata(test_conditions, test_results, sim_conditions)

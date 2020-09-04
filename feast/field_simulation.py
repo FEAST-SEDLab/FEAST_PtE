@@ -44,10 +44,10 @@ def field_simulation(gas_field, dir_out='Results', time=None, ldar_program_dict=
         econ_set = simulation_classes.FinanceSettings()
 
     if ldar_program_dict is None:
-        ldar_program_dict = {'Null': Dm.ldar_program.LDARProgram(time, gas_field)}
+        ldar_program_dict = {'Null': Dm.ldar_program.LDARProgram(time, gas_field, tech_dict={})}
 
     elif 'Null' not in ldar_program_dict:
-        ldar_program_dict['Null'] = Dm.ldar_program.LDARProgram(time, gas_field)
+        ldar_program_dict['Null'] = Dm.ldar_program.LDARProgram(time, gas_field, tech_dict={})
     # -------------- Run the simulation --------------
     # check_timestep(gas_field, time)
     for time.time_index in range(0, time.n_timesteps):
@@ -62,8 +62,8 @@ def field_simulation(gas_field, dir_out='Results', time=None, ldar_program_dict=
                 emissions = ldar_program.emissions.flux[:ldar_program.emissions.n_leaks] * \
                     np.min([np.ones(ldar_program.emissions.n_leaks), timestep_fraction], axis=0)
                 ldar_program.emissions_timeseries.append(np.sum(emissions))
-                ldar_program.vents_timeseries.append(np.sum(emissions[np.invert(ldar_program.emissions.reparable
-                                                                            [:ldar_program.emissions.n_leaks])]))
+                vented_em_indexes = np.invert(ldar_program.emissions.reparable[:ldar_program.emissions.n_leaks])
+                ldar_program.vents_timeseries.append(np.sum(emissions[vented_em_indexes]))
             else:
                 ldar_program.emissions_timeseries.append(0)
                 ldar_program.vents_timeseries.append(0)

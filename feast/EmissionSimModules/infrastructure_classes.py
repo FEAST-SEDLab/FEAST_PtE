@@ -109,7 +109,7 @@ class GasField:
         # Define indexes and initialize emissions
         self.set_indexes()
         if self.met_data_path:
-            self.met_data_maker(time)
+            self.met_data_maker()
         if self.initial_emissions is None:
             self.initialize_emissions(time)
         if self.new_emissions is None:
@@ -161,7 +161,6 @@ class GasField:
             site.production = np.random.choice(site.prod_dat, site_dict['number'])
             for compname, comp_d in site.comp_dict.items():
                 comp = comp_d['parameters']
-                comp_count = comp_d['number']
                 self.n_comps += comp_d['number'] * site_dict['number']
                 if compname in self.comp_dict:
                     raise ValueError("All component names must be unique.")
@@ -189,8 +188,6 @@ class GasField:
         self.start_times = np.random.randint(0, time.n_timesteps, self.new_emissions.n_leaks, dtype=int)
         self.new_emissions.endtime += self.start_times * time.delta_t
 
-
-    # Define functions and parameters related to leaks
     def emission_size_maker(self, time):
         """
         Creates a new set of leaks based on attributes of the gas field
@@ -206,7 +203,7 @@ class GasField:
                 self.emission_maker(n_leaks, new_leaks, compname, n_comp, time, site)
         return new_leaks
 
-    def met_data_maker(self, time):
+    def met_data_maker(self):
         if self.met_data_path:
             met_dat = pd.read_csv(self.met_data_path, header=1)
             self.met['wind speed'] = met_dat['wind speed (m/s)']
@@ -219,15 +216,18 @@ class GasField:
             self.met['cloud cover'] = met_dat['cloud cover (%)']
             self.met['solar intensity'] = met_dat['solar intensity (direct normal irradiance--W/m^2)']
 
-    def get_met(self, time, parameter_names, interp_modes='mean', ophrs={'begin': 0, 'end': 24}):
+    def get_met(self, time, parameter_names, interp_modes='mean', ophrs=None):
         """
         Return the relevant meteorological condition, accounting for discrepancies between simulation time resolution
         and data time resolution
         :param time: time object
         :param parameter_names: specify a list of meteorological conditions to return
-        :param interp_mode: can be a list of strings: mean, median, max or min
+        :param interp_modes: can be a list of strings: mean, median, max or min
+        :param ophrs: Hours to consider when interpolating met data should be of form {'begin': 5, 'end':17}
         :return met_conds: dict of meteorological conditions
         """
+        if ophrs is None:
+            ophrs = {'begin': 0, 'end': 24}
         hour_index = int(np.mod(time.current_time * 24, 8760))
         # if a string is passed, put it in a list with one entry
         if type(parameter_names) is str:
@@ -282,7 +282,8 @@ class GasField:
         if comp.vent_starts.size > 0:
             n_vent = np.random.poisson(comp.vent_duration / comp.vent_period * n_comp *
                                        min(1, time.delta_t/comp.vent_period))
-        new_leaks.extend(comp.intermittent_emission_maker(n_vent, comp.vent_sizes, comp.vent_duration, time, site, comp_name))
+        new_leaks.extend(comp.intermittent_emission_maker(n_vent, comp.vent_sizes, comp.vent_duration,
+                                                          time, site, comp_name))
         return None
 
 

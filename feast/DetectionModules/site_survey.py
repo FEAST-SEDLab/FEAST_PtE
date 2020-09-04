@@ -107,7 +107,7 @@ class SiteSurvey(DetectionMethod):
                 # Deploy follow up action
                 self.dispatch_object.action(detect, None)
 
-    def action(self, site_inds=[], emit_inds=[]):
+    def action(self, site_inds=None, emit_inds=None):
         """
         Action to add sites to queue. Expected to be called by another detection method or by an LDAR program
         :param site_inds: List of sites to add to the queue

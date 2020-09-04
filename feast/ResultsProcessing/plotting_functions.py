@@ -94,9 +94,6 @@ def abatement_cost_plotter(directory, gwp=34):
     (see Table 8.7, page 714 in Chapter 8 of Climate Change 2013: The Physical Science Basis.)
     :param directory: A directory containing one or more realizations of a scenario
     :param gwp: global warming potential of methane
-    :param display: display the plot
-    :param save: save the plot
-    :param file_out: name to save the plot under
     :return:
     """
     _, emissions, costs, techs = results_analysis_functions.results_analysis(directory)
@@ -118,7 +115,7 @@ def abatement_cost_plotter(directory, gwp=34):
         ind += 1
     ax = plt.gca()
     ax.set_xticklabels(techs[:2])
-    ax.set_ylabel('Mitigation cost\n(\$/metric ton CO$_2$ eq.)')
+    ax.set_ylabel('Mitigation cost\n(USD/metric ton CO$_2$ eq.)')
     ax.set_xlabel('LDAR program')
     plot_fixer()
 

@@ -155,7 +155,7 @@ def test_site_survey():
         raise ValueError("site_detect.detect_prob_curve not returning expected sites.")
     # test sites_surveyed with empty queue
     sites_surveyed = tech.sites_surveyed(gas_field, time, find_cost)
-    if sites_surveyed != []:
+    if sites_surveyed:
         raise ValueError("sites_surveyed returning sites when it should not")
     if find_cost[0] > 0:
         raise ValueError("sites_surveyed updating find_cost when it should not")
@@ -442,14 +442,15 @@ def test_empirical_interpolator():
         detection_probabilities=detect_probs
     )
     probs = tech.empirical_interpolator(tech.detection_probability_points, tech.detection_probabilities,
-                               np.array([[0.01, 1], [0.05, 1]]))
+                                        np.array([[0.01, 1], [0.05, 1]]))
     if np.abs(probs[0] - 0.24509709) > 1e-5 or np.abs(probs[1] - 0.25784611) > 1e-5:
         raise ValueError("empirical_interpolator is not returning the correct probabilities")
     probs = tech.empirical_interpolator(tech.detection_probability_points, tech.detection_probabilities,
                                         np.array([0.03, 1]))
     if not min(tech.detection_probabilities[:2]) <= probs[0] <= max(tech.detection_probabilities[:2]):
         raise ValueError("empirical_interpolator is not interpolating correctly")
-    probs = tech.empirical_interpolator(tech.detection_probability_points, tech.detection_probabilities, np.array([0.01, 1.5]))
+    probs = tech.empirical_interpolator(tech.detection_probability_points, tech.detection_probabilities,
+                                        np.array([0.01, 1.5]))
     if not tech.detection_probabilities[0] >= probs[0] >= tech.detection_probabilities[6]:
         raise ValueError("empirical_interpolator is not interpolating correctly")
 
@@ -481,7 +482,7 @@ def test_choose_sites():
 
     tech.site_queue = []
     siteinds = tech.choose_sites(gas_field, time, 10)
-    if siteinds != []:
+    if siteinds:
         raise ValueError("choose_sites() fails for empty site_queue queue")
 
 

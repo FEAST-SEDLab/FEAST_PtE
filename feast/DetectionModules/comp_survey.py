@@ -23,8 +23,8 @@ class CompSurvey(DetectionMethod):
         self.survey_interval = None
         self.survey_speed = 150  # components/hr
         self.labor = 100  # $/hr
-        self.op_env_wait_time = 7  # days (amount of time to wait for operating envelope conditions at a partly surveyed
-                                   # site)
+        # days (amount of time to wait for operating envelope conditions at a partly surveyed site)
+        self.op_env_wait_time = 7
 
         # --------------- Detection Variables -----------------
         self.site_queue = []  # queue of sites to survey
@@ -47,6 +47,8 @@ class CompSurvey(DetectionMethod):
         """
         This function determines which leaks are found given an array of indexes defined by "cond"
         In this case, the detected leaks are determined using a probability of detection curve
+        :param time: FEAST time object
+        :param gas_field: FEAST gas_field object
         :param cond: The set of indexes to be considered
         :param emissions: an object storing all emissions in the simulation
         :return detect: the indexes of detected leaks
@@ -126,7 +128,7 @@ class CompSurvey(DetectionMethod):
                 # Deploy follow up action
                 self.dispatch_object.action(None, detect)
 
-    def action(self, site_inds=[], emit_inds=[]):
+    def action(self, site_inds=None, emit_inds=None):
         """
         Action to add sites to queue. Expected to be called by another detection method or by an LDAR program
         :param site_inds: List of sites to add to the queue

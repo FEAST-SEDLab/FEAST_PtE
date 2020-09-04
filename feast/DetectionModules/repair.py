@@ -23,7 +23,6 @@ class Repair:
         If the null emission end time comes before the repair time, the end time is not changed
 
         :param time: a Time object as defined in simulation classes
-        :param detected: a list of emission indexes that are eligible for repair
         :param emissions: an Emission object, as defined in simulation classes
         :return:
         """
@@ -33,5 +32,5 @@ class Repair:
             emissions.endtime[rep_cond] = time.current_time + self.repair_delay
             self.to_repair = []
 
-    def action(self, site_inds=[], emit_inds=[]):
+    def action(self, site_inds=None, emit_inds=None):
         self.to_repair.extend(emit_inds)

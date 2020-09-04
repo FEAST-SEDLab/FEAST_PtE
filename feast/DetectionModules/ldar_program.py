@@ -12,7 +12,7 @@ class LDARProgram:
     """
     An LDAR program contains any detection methods that will be applied as well as the repair method
     """
-    def __init__(self, time, gas_field, tech_dict={}):
+    def __init__(self, time, gas_field, tech_dict):
         self.find_cost = np.zeros(time.n_timesteps)
         self.repair_cost = np.zeros(time.n_timesteps)
         self.emissions = copy.deepcopy(gas_field.initial_emissions)
