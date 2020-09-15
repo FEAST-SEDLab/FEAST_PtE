@@ -92,7 +92,7 @@ def test_comp_survey_emitters_surveyed():
     gas_field = basic_gas_field()
     gas_field.met_data_path = 'TMY-DataExample.csv'
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
-    gas_field.met_data_maker(time)
+    gas_field.met_data_maker()
     find_cost = np.zeros(time.n_timesteps)
     rep = Dm.repair.Repair(repair_delay=0)
     wind_dirs_mins = np.zeros(gas_field.n_sites)
@@ -181,7 +181,7 @@ def test_sitedetect_sites_surveyed():
     gas_field = basic_gas_field()
     gas_field.met_data_path = 'TMY-DataExample.csv'
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
-    gas_field.met_data_maker(time)
+    gas_field.met_data_maker()
     find_cost = np.zeros(time.n_timesteps)
     wind_dirs_mins = np.zeros(gas_field.n_sites)
     wind_dirs_maxs = np.ones(gas_field.n_sites) * 90
@@ -365,7 +365,7 @@ def test_check_op_envelope():
     gas_field = basic_gas_field()
     gas_field.met_data_path = 'TMY-DataExample.csv'
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
-    gas_field.met_data_maker(time)
+    gas_field.met_data_maker()
     rep = Dm.repair.Repair(repair_delay=0)
     wind_dirs_mins = np.zeros(gas_field.n_sites)
     wind_dirs_maxs = np.ones(gas_field.n_sites) * 90
@@ -402,7 +402,7 @@ def test_get_current_conditions():
     gas_field = basic_gas_field()
     gas_field.met_data_path = 'TMY-DataExample.csv'
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
-    gas_field.met_data_maker(time)
+    gas_field.met_data_maker()
     rep = Dm.repair.Repair(repair_delay=0)
     prob_points, detect_probs = ex_prob_detect_arrays()
     tech = Dm.comp_survey.CompSurvey(
@@ -459,7 +459,7 @@ def test_choose_sites():
     gas_field = basic_gas_field()
     gas_field.met_data_path = 'TMY-DataExample.csv'
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
-    gas_field.met_data_maker(time)
+    gas_field.met_data_maker()
     rep = Dm.repair.Repair(repair_delay=0)
     # wind_dirs_mins = np.zeros(gas_field.n_sites)
     # wind_dirs_maxs = np.ones(gas_field.n_sites) * 90
@@ -490,7 +490,7 @@ def test_site_monitor():
     gas_field = basic_gas_field()
     gas_field.met_data_path = 'TMY-DataExample.csv'
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
-    gas_field.met_data_maker(time)
+    gas_field.met_data_maker()
     rep = Dm.repair.Repair(repair_delay=0)
     cm = Dm.site_monitor.SiteMonitor(
         time,
@@ -510,6 +510,17 @@ def test_site_monitor():
     for mnd in must_not_detect:
         if mnd in detect:
             raise ValueError("site_monitor.detect_prob_curve flagging sites that it should not")
+    ttd_list = []
+    ttd = 0
+    time.delta_t = 0.1
+    for ind in range(1000):
+        ttd += time.delta_t
+        detect = cm.detect_prob_curve(time, gas_field, site_inds, emissions)
+        if 1 in detect:
+            ttd_list.append(ttd)
+            ttd = 0
+    if np.abs(np.mean(ttd_list) - 1) > 0.5:
+        raise ValueError("Mean time to detection deviates from expected value by >5 sigma in site_monitor test")
 
 
 test_repair()
