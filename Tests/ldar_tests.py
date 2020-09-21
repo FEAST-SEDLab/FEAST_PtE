@@ -353,12 +353,7 @@ def test_field_simulation():
 
     for f in os.listdir('ResultsTemp'):
         os.remove(os.path.join('ResultsTemp', f))
-    try:
-        os.rmdir('ResultsTemp')
-    except PermissionError:
-        # If there is an automated syncing process, a short pause may be necessary before removing "ResultsTemp"
-        ti.sleep(5)
-        os.rmdir('ResultsTemp')
+    os.rmdir('ResultsTemp')
 
 
 def test_check_op_envelope():
