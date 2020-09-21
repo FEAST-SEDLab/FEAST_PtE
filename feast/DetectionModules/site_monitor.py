@@ -30,6 +30,8 @@ class SiteMonitor(DetectionMethod):
 
         # Set all attributes defined in kwargs
         set_kwargs_attrs(self, kwargs, only_existing=True)
+        if type(self.site_queue) is not list:
+            self.site_queue = list(self.site_queue)
         self.time_to_detect_points = np.array(self.time_to_detect_points)
         self.time_to_detect_days = np.array(self.time_to_detect_days)
         # -------------- Set calculated parameters --------------

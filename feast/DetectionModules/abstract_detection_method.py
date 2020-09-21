@@ -19,6 +19,7 @@ class DetectionMethod:
         self.op_envelope = {}
         self.detection_variables = {}  # Dict with format {name: interpolation mode}
         self.hull = None
+        self.site_queue = []
         # Set all attributes defined in kwargs, regardless of whether they already exist
         set_kwargs_attrs(self, kwargs, only_existing=True)
         if type(self.detection_variables) is not dict:

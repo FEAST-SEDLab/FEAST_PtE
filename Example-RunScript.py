@@ -5,9 +5,9 @@ the simulation. Three different survey-based LDAR programs are also defined and 
 """
 import numpy as np
 import copy
-import feast
 import feast.EmissionSimModules.infrastructure_classes
 from feast.EmissionSimModules.infrastructure_classes import Component
+import feast.DetectionModules as Dm
 
 # The random seed below can be un-commented to generate reproducible realizations.
 # np.random.seed(0)
@@ -67,7 +67,7 @@ counts, n_wells_bin = np.histogram(n_wells_samp,
 
 
 # ------Each iteration of this for loop generates one realization of the simulation
-for ind in range(30):
+for ind in range(2):
     print('Iteration number: {:0.0f}'.format(ind))
     site_dict = {}
     # Assign components to sites
@@ -112,42 +112,93 @@ for ind in range(30):
         sites=site_dict,
         time=timeobj
     )
+    gas_field.met_data_path = 'TMY-DataExample.csv'
+    gas_field.met_data_maker()
 
+    # --- Define LDAR programs ----
+    rep0 = Dm.repair.Repair(repair_delay=0)
+    rep7 = Dm.repair.Repair(repair_delay=7)
+    points = np.logspace(-3, 1, 100)  # emission rates
+    probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.02)) / (0.8 * np.sqrt(2))) for f
+                                  in points])
+    probs[0] = 0
+    ogi = Dm.comp_survey.CompSurvey(
+        timeobj,
+        survey_interval=50,
+        survey_speed=150,
+        ophrs={'begin': 8, 'end': 17},
+        labor=100,
+        dispatch_object=copy.copy(rep0),
+        detection_variables={'flux': 'mean'},
+        detection_probability_points=points,  # g/s
+        detection_probabilities=probs
+    )
+    ogi_no_survey = Dm.comp_survey.CompSurvey(
+        timeobj,
+        survey_interval=None,
+        survey_speed=150,
+        ophrs={'begin': 8, 'end': 17},
+        labor=100,
+        dispatch_object=copy.copy(rep0),
+        detection_variables={'flux': 'mean'},
+        detection_probability_points=points,
+        detection_probabilities=probs
+    )
+    points = np.logspace(-3, 1, 100)
+    probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.474)) / (1.36 * np.sqrt(2))) for f
+                                  in points])
+    probs[0] = 0
+    plane_survey = Dm.site_survey.SiteSurvey(
+        timeobj,
+        survey_interval=50,
+        sites_per_day=200,
+        site_cost=100,
+        mu=0.1,
+        dispatch_object=ogi_no_survey,
+        detection_variables={'flux': 'mean'},
+        detection_probability_points=points,
+        detection_probabilities=probs
+    )
+    cm_ogi = copy.deepcopy(ogi_no_survey)
+    cont_monitor = Dm.site_monitor.SiteMonitor(
+        timeobj,
+        time_to_detect_points=[[19, 1], [20, 1], [21, 1], [19, 5], [20, 5], [21, 5], [19, 5.1], [20, 5.1], [21, 5.1]],
+        time_to_detect_days=[np.infty, 1, 0, np.infty, 5, 0, np.infty, np.infty, np.infty],
+        detection_variables={'flux': 'mean', 'wind speed': 'mean'},
+        dispatch_object=cm_ogi,
+        site_queue=np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int),
+        op_envelope={
+            'wind direction': {'class': 2, 'min': [[45, 225]]*gas_field.n_sites, 'max': [[135, 315]]*gas_field.n_sites}
+        },
+    )
     # Define LDAR programs
-    tech = {
-        'ogi': {'survey_interval': 180,  # Days between surveys
-                'mu': 0.0018,  # Emission rate with 50% probability of detection (g/s)
-                'lam': 2.23,  # Width parameter for the probability of detection curve
-                'survey_speed': 400  # Components per day
-                },
+    ogi_survey = Dm.ldar_program.LDARProgram(
+        timeobj, copy.deepcopy(gas_field), {'ogi': ogi}
+    )
+    # tiered survey
+    tech_dict = {
+        'plane': plane_survey,
+        'ogi': ogi_no_survey
     }
-    tech_dict = {}
-    for tech, params in tech.items():
-        tech_dict[tech] = feast.DetectionModules.tech_detect.TechDetect(
-            timeobj, gas_field,
-            **params
-        )
-    tiered_tech = {
-        'Plane': {
-            'survey_interval': 180,  # Days between surveys
-            'mu': 0.474,  # Emission rate with 50% probability of detection (g/s)
-            'lam': 3.88,  # Width parameter for the probability of detection curve
-            'sites_per_day': 222,  # Defines the speed of the primary survey (sites per day)
-            'lam2': 2.23,  # Width parameter for the secondary survey probability of detection curve.
-            'mu2': 0.002,  # Emission size with a 50% probability of detection for the secondary survey (g/s)
-            'secondary_comps_hr': 400,  # Defines the speed of the secondary survey (components per hour)
-            'site_cost': 100,
-            'labor': 100
-        }
+    plane_ogi_survey = Dm.ldar_program.LDARProgram(
+        timeobj, copy.deepcopy(gas_field), tech_dict
+    )
+
+    # continuous monitor
+    tech_dict = {
+        'cm': cont_monitor,
+        'ogi': cm_ogi
     }
-
-    for tech, params in tiered_tech.items():
-        tech_dict[tech] = feast.DetectionModules.tiered_detect.TieredDetect(
-            timeobj, gas_field,
-            **params
-        )
-
+    cm_ogi = Dm.ldar_program.LDARProgram(
+        timeobj, copy.deepcopy(gas_field), tech_dict
+    )
+    ldar_dict = {
+        'cm': cm_ogi,
+        'ogi': ogi_survey,
+        'plane': plane_ogi_survey
+    }
     feast.field_simulation.field_simulation(
         time=timeobj, gas_field=gas_field,
-        tech_dict=tech_dict, dir_out='ExampleRunScriptResults', display_status=False
+        ldar_program_dict=ldar_dict,
+        dir_out='ExampleRunScriptResults', display_status=False
     )

@@ -42,7 +42,7 @@ class SiteSurvey(DetectionMethod):
         # -------------- Set calculated parameters --------------
         work_time = (self.ophrs['end'] - self.ophrs['begin']) / 24
         self.sites_per_timestep = int(self.sites_per_day * time.delta_t * np.min([1, time.delta_t / work_time]))
-        if self.sites_per_timestep < 1 and self.sites_per_Day > 0:
+        if self.sites_per_timestep < 1 and self.sites_per_day > 0:
             print("WARNING: expecting less than 1 site surveyed per timestep. May lead to unexpected behavior.")
 
     def detect_prob_curve(self, time, gas_field, site_inds, emissions):

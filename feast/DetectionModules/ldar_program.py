@@ -48,7 +48,8 @@ class LDARProgram:
         :return:
         """
         for tech in self.tech_dict.values():
-            if tech.survey_interval and np.mod(time.current_time, tech.survey_interval) < time.delta_t:
+            if hasattr(tech, 'survey_interval') and tech.survey_interval \
+                    and np.mod(time.current_time, tech.survey_interval) < time.delta_t:
                 tech.action(list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)))
             tech.detect(time, gas_field, self.emissions, self.find_cost)
         for rep in self.repair:
