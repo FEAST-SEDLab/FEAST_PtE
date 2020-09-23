@@ -28,7 +28,7 @@ misc_vent = Component(
     emission_data_path='production_emissions.p',
     emission_per_comp=0.00231,  # Fraction of components expected to be emitting at the beginning of the simulation.
     emission_production_rate=5.4 / 650 / 365,  # number of new emissions per component per day
-    base_reparable=False,
+    base_reparable=True,
 )
 
 
@@ -36,18 +36,18 @@ misc_vent = Component(
 plunger = feast.EmissionSimModules.infrastructure_classes.Component(
     name='plunger',
     emission_production_rate=0,  # Expected rate of production for fugitive emissions
-    episodic_emission_sizes=[50.36],  # gram-per-sec
+    episodic_emission_sizes=[0], #[50.36],  # gram-per-sec
     episodic_emission_duration=2059 / 3600 / 24,  # Average length of emission (days)
-    episodic_emission_per_day=0.0165  # Number of events per day per plunger well
+    episodic_emission_per_day=0 # 0.0165  # Number of events per day per plunger well
 )
 
 # Simulates unloading emissions from a well with out a plunger lift
 noplunger = feast.EmissionSimModules.infrastructure_classes.Component(
     name='no plunger',
     emission_production_rate=0,
-    episodic_emission_sizes=[76.98],  # gram-per-sec
+    episodic_emission_sizes=[0],  # [76.98],  # gram-per-sec
     episodic_emission_duration=4973.5 / 3600 / 24,  # Average length of emission (days)
-    episodic_emission_per_day=0.0002111  # Number of events per day for unloading wells without a plunger
+    episodic_emission_per_day=0  # 0.0002111  # Number of events per day for unloading wells without a plunger
 )
 
 
@@ -67,7 +67,7 @@ counts, n_wells_bin = np.histogram(n_wells_samp,
 
 
 # ------Each iteration of this for loop generates one realization of the simulation
-for ind in range(2):
+for ind in range(1):
     print('Iteration number: {:0.0f}'.format(ind))
     site_dict = {}
     # Assign components to sites
@@ -107,7 +107,7 @@ for ind in range(2):
     site_dict['unload no plunger'] = {'number': 1, 'parameters': unloadnp}
 
     # Define time and gas field parameters
-    timeobj = feast.EmissionSimModules.simulation_classes.Time(delta_t=1 / 24, end_time=3 * 365)
+    timeobj = feast.EmissionSimModules.simulation_classes.Time(delta_t=1, end_time=365)
     gas_field = feast.EmissionSimModules.infrastructure_classes.GasField(
         sites=site_dict,
         time=timeobj
@@ -124,7 +124,7 @@ for ind in range(2):
     probs[0] = 0
     ogi = Dm.comp_survey.CompSurvey(
         timeobj,
-        survey_interval=50,
+        survey_interval=180,
         survey_speed=150,
         ophrs={'begin': 8, 'end': 17},
         labor=100,
@@ -142,18 +142,18 @@ for ind in range(2):
         dispatch_object=copy.copy(rep0),
         detection_variables={'flux': 'mean'},
         detection_probability_points=points,
-        detection_probabilities=probs
+        detection_probabilities=probs,
     )
     points = np.logspace(-3, 1, 100)
-    probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.474)) / (1.36 * np.sqrt(2))) for f
+    # 0.474
+    probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(1.5)) / (1.36 * np.sqrt(2))) for f
                                   in points])
     probs[0] = 0
     plane_survey = Dm.site_survey.SiteSurvey(
         timeobj,
-        survey_interval=50,
+        survey_interval=180,
         sites_per_day=200,
         site_cost=100,
-        mu=0.1,
         dispatch_object=ogi_no_survey,
         detection_variables={'flux': 'mean'},
         detection_probability_points=points,
@@ -162,7 +162,8 @@ for ind in range(2):
     cm_ogi = copy.deepcopy(ogi_no_survey)
     cont_monitor = Dm.site_monitor.SiteMonitor(
         timeobj,
-        time_to_detect_points=[[19, 1], [20, 1], [21, 1], [19, 5], [20, 5], [21, 5], [19, 5.1], [20, 5.1], [21, 5.1]],
+        time_to_detect_points=[[0.5, 1], [1.0, 1], [1.1, 1], [0.5, 5], [1.0, 5], [1.1, 5],
+                               [0.5, 5.1], [1.0, 5.1], [1.1, 5.1]],
         time_to_detect_days=[np.infty, 1, 0, np.infty, 5, 0, np.infty, np.infty, np.infty],
         detection_variables={'flux': 'mean', 'wind speed': 'mean'},
         dispatch_object=cm_ogi,
@@ -173,7 +174,7 @@ for ind in range(2):
     )
     # Define LDAR programs
     ogi_survey = Dm.ldar_program.LDARProgram(
-        timeobj, copy.deepcopy(gas_field), {'ogi': ogi}
+        timeobj, copy.deepcopy(gas_field), {'ogi': ogi},
     )
     # tiered survey
     tech_dict = {
@@ -181,7 +182,7 @@ for ind in range(2):
         'ogi': ogi_no_survey
     }
     plane_ogi_survey = Dm.ldar_program.LDARProgram(
-        timeobj, copy.deepcopy(gas_field), tech_dict
+        timeobj, copy.deepcopy(gas_field), tech_dict,
     )
 
     # continuous monitor
@@ -190,7 +191,7 @@ for ind in range(2):
         'ogi': cm_ogi
     }
     cm_ogi = Dm.ldar_program.LDARProgram(
-        timeobj, copy.deepcopy(gas_field), tech_dict
+        timeobj, copy.deepcopy(gas_field), tech_dict,
     )
     ldar_dict = {
         'cm': cm_ogi,
@@ -200,5 +201,5 @@ for ind in range(2):
     feast.field_simulation.field_simulation(
         time=timeobj, gas_field=gas_field,
         ldar_program_dict=ldar_dict,
-        dir_out='ExampleRunScriptResults', display_status=False
+        dir_out='ExampleRunScriptResults', display_status=True
     )

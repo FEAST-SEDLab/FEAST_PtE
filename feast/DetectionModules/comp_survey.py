@@ -60,7 +60,7 @@ class CompSurvey(DetectionMethod):
         n_scores = len(cond)
         scores = np.random.uniform(0, 1, n_scores)
         vals = self.get_current_conditions(time, gas_field, emissions, cond)
-        probs = self.empirical_interpolator(self.detection_probabilities, self.detection_probability_points, vals)
+        probs = self.empirical_interpolator(self.detection_probability_points, self.detection_probabilities, vals)
         detect = cond[scores <= probs]
         return detect
 
@@ -135,4 +135,4 @@ class CompSurvey(DetectionMethod):
         :param emit_inds: Not used.
         :return:
         """
-        self.site_queue.extend(site_inds)
+        self.extend_site_queue(site_inds)

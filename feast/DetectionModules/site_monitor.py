@@ -67,15 +67,15 @@ class SiteMonitor(DetectionMethod):
         probs = np.zeros(n_scores)
         counter = 0
         for site_ind in site_inds:
-            vals = np.zeros(len(self.detection_variables))
+            vals = np.zeros([1, len(self.detection_variables)])
             ind = 0
             cond = np.where(emissions.site_index[:emissions.n_leaks] == site_ind)[0]
             for v, im in self.detection_variables.items():
                 if v in gas_field.met:
-                    vals[ind] = gas_field.get_met(time, v, interp_modes=im, ophrs=self.ophrs)[v]
+                    vals[0, ind] = gas_field.get_met(time, v, interp_modes=im, ophrs=self.ophrs)[v]
                 else:
                     # sum all emission variables needed for detection
-                    vals[ind] = np.sum(emissions.__getattribute__(v)[cond])
+                    vals[0, ind] = np.sum(emissions.__getattribute__(v)[cond])
                 ind += 1
             ttd = self.empirical_interpolator(self.time_to_detect_points, self.time_to_detect_days, vals)
             probs[counter] = self.prob_detection(time, ttd)
@@ -94,7 +94,7 @@ class SiteMonitor(DetectionMethod):
         # enforces the operating hours
         if self.check_time(time):
             # choose sites accounts for the operating envelope
-            site_inds = self.choose_sites(gas_field, time, len(self.site_queue))
+            site_inds = self.choose_sites(gas_field, time, len(self.site_queue), clear_sites=False)
             if len(site_inds) > 0:
                 detect = self.detect_prob_curve(time, gas_field, site_inds, emissions)
                 # Deploy follow up action
@@ -107,4 +107,4 @@ class SiteMonitor(DetectionMethod):
         :param emit_inds: Not used.
         :return:
         """
-        self.site_queue.extend(site_inds)
+        self.extend_site_queue(site_inds)

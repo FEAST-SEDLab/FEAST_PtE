@@ -29,8 +29,6 @@ class SiteSurvey(DetectionMethod):
         self.site_cost = 100  # $/site
 
         # --------------- Detection Variables -----------------
-        self.mu = 0.474  # g/s (emission size with 50% probability of detection)
-        self.sigma = 1.36  # ln(g/s) (standard deviation of emission detection probability curve in log space)
         self.site_queue = []  # queue of sites to survey
         self.site_survey_index = None
         self.detection_probability_points = None
@@ -41,7 +39,8 @@ class SiteSurvey(DetectionMethod):
 
         # -------------- Set calculated parameters --------------
         work_time = (self.ophrs['end'] - self.ophrs['begin']) / 24
-        self.sites_per_timestep = int(self.sites_per_day * time.delta_t * np.min([1, time.delta_t / work_time]))
+        self.sites_per_timestep = int(self.sites_per_day * (int(time.delta_t) +
+                                                            np.min([1, np.mod(time.delta_t, 1) / work_time])))
         if self.sites_per_timestep < 1 and self.sites_per_day > 0:
             print("WARNING: expecting less than 1 site surveyed per timestep. May lead to unexpected behavior.")
 
@@ -87,7 +86,7 @@ class SiteSurvey(DetectionMethod):
         :param find_cost: the find_cost array associated with the ldar program
         """
         n_sites = np.min([self.sites_per_timestep, len(self.site_queue)])
-        # Determines the operating envelope status
+        # Determines the sites to survey based on operating envelope
         site_inds = self.choose_sites(gas_field, time, n_sites)
         find_cost[time.time_index] += len(site_inds) * self.site_cost
         return site_inds
@@ -114,4 +113,4 @@ class SiteSurvey(DetectionMethod):
         :param emit_inds: Not used.
         :return:
         """
-        self.site_queue.extend(site_inds)
+        self.extend_site_queue(site_inds)

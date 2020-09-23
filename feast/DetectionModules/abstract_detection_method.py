@@ -89,35 +89,39 @@ class DetectionMethod:
                     status = 'site fail'
         return status
 
-    def choose_sites(self, gas_field, time, n_sites):
+    def choose_sites(self, gas_field, time, n_sites, clear_sites=True):
         """
         Identifies sites to survey at this time step
         :param gas_field:
         :param time:
         :param n_sites: Max number of sites to survey at this time step
+        :param clear_sites: If true, clear sites selected from the queue. If False, leave sites in the queue
+                            (eg. continuous monitors)
         :return:
         """
         site_inds = []
         queue_ind = 0
-        while len(site_inds) < n_sites and len(self.site_queue) > 0:
+        while len(site_inds) < n_sites and queue_ind < len(self.site_queue):
             op_env = self.check_op_envelope(gas_field, time, self.site_queue[queue_ind])
             if op_env == 'field pass':
                 # This case applies if there are no site-specific operating envelope conditions.
                 site_inds = self.site_queue[:n_sites]
-                del self.site_queue[:n_sites]
+                if clear_sites:
+                    del self.site_queue[:n_sites]
             elif op_env == 'site pass':
                 # This case applies if the operating envelope is satisifed for this site,
                 # but may fail for a different site.
-                site_inds.append(self.site_queue.pop(queue_ind))
+                if clear_sites:
+                    site_inds.append(self.site_queue.pop(queue_ind))
+                else:
+                    site_inds.append(self.site_queue[queue_ind])
+                    queue_ind += 1
             elif op_env == 'field fail':
                 # This case applies if the operating envelope fails for the entire field at this time step.
                 return site_inds
             else:
                 # This condition applies if the site fails the operating envelope but other sites may pass.
                 queue_ind += 1
-            if queue_ind == len(self.site_queue):
-                # This applies if the end of the queue is reached before n_sites is reached
-                break
         return site_inds
 
     @staticmethod
@@ -206,3 +210,13 @@ class DetectionMethod:
         cond = np.where(np.isnan(probs))[0]
         probs[cond] = interp.griddata(test_conditions, test_results, sim_conditions[cond], method='nearest')
         return np.ndarray.flatten(probs)
+
+    def extend_site_queue(self, site_inds):
+        """
+        Add new sites to the site_queue if they are not already in the queue
+        :param site_inds: List of indexes to add to the queue
+        :return:
+        """
+        for si in site_inds:
+            if si not in self.site_queue:
+                self.site_queue.append(si)
