@@ -201,11 +201,7 @@ def emission_objects_generator(dist_type, emission_data_path, custom_emission_ma
         dist_type           Type of leak distribution to be used
         leak_data_path      Path to a leak data file
     """
-    rsc_path, _ = os.path.split(dirname(abspath(__file__)))
-    if emission_data_path in os.listdir(os.path.join(rsc_path, 'InputData', 'DataObjectInstances')):
-        rsc_path = os.path.join(rsc_path, 'InputData', 'DataObjectInstances', emission_data_path)
-    else:
-        rsc_path = emission_data_path
+    rsc_path = emission_data_path
     with open(rsc_path, 'rb') as f:
         emission_params = pickle.load(f)
 
@@ -232,12 +228,12 @@ def emission_objects_generator(dist_type, emission_data_path, custom_emission_ma
 def permitted_emission(n_emit, sizes, duration, time, site, comp_name):
     """
     Creates a leak object specifying new permitted emissions
-    :param comp_name: Name of the component to be considered from within site.comp_dict
     :param n_emit: number of emissions to create
     :param sizes: a list of leak sizes from which to specify the emission rate
     :param duration: a float defining the duration of the emission
     :param time: a Time object
     :param site: a Site object
+    :param comp_name: Name of the component to be considered from within site.comp_dict
     :return: A Leak object
     """
     flux = np.random.choice(sizes, n_emit)

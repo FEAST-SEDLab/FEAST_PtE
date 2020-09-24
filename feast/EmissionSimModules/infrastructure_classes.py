@@ -25,14 +25,14 @@ class Component:
         self.component_type = "fugitive leak source"
 
         # Repair cost data file path
-        self.repair_cost_path = 'fernandez_leak_repair_costs_2006.p'
+        self.repair_cost_path = None
         # ---- Emissions with a constant probability of occurring and duration determined by the null repair rate
         self.dist_type = 'bootstrap'
-        self.emission_data_path = 'production_emissions.p'
+        self.emission_data_path = None
         # new emissions per component per day (typically on the order of 1e-5)
         self.emission_production_rate = 0
         # if emission_per_comp is left as None, FEAST uses the # of emissions/# of components in the emission_data file
-        self.emission_per_comp = None
+        self.emission_per_comp = 0
         self.custom_emission_maker = None  # Optional custom method for creating new emissions
         self.base_reparable = True
         # ---- Permitted events with a constant probability of occurring and known duration NOT REPARABLE
@@ -46,18 +46,16 @@ class Component:
         self.vent_starts = np.array([])
         # ---- Update any attributes defined by kwargs
         set_kwargs_attrs(self, kwargs)
-        rsc_path, _ = os.path.split(dirname(abspath(__file__)))
         # ---- Distribution of leak repair costs
-        if self.repair_cost_path in os.listdir(os.path.join(rsc_path, 'InputData', 'DataObjectInstances')):
-            rsc_path = os.path.join(rsc_path, 'InputData', 'DataObjectInstances', self.repair_cost_path)
-        else:
+        if self.repair_cost_path:
             rsc_path = self.repair_cost_path
-        with open(rsc_path, 'rb') as f:
-            self.repair_cost_dist = pickle.load(f)
-        self.emission_size_maker, self.emission_params, self.emission_per_well, emission_per_comp \
-            = leak_obj_gen(self.dist_type, self.emission_data_path, self.custom_emission_maker)
-        if self.emission_per_comp is None:
-            self.emission_per_comp = emission_per_comp
+            with open(rsc_path, 'rb') as f:
+                self.repair_cost_dist = pickle.load(f)
+        if self.emission_data_path:
+            self.emission_size_maker, self.emission_params, self.emission_per_well, emission_per_comp \
+                = leak_obj_gen(self.dist_type, self.emission_data_path, self.custom_emission_maker)
+            if self.emission_per_comp is None:
+                self.emission_per_comp = emission_per_comp
         if null_repair_rate is None:
             if self.emission_per_comp == 0:
                 self.null_repair_rate = 0
@@ -72,33 +70,21 @@ class GasField:
     """
     GasField accommodates all data that defines a gas field at the beginning of a simulation.
     """
-    def __init__(self, time=Time(), **kwargs):
+    def __init__(self, time=None, sites=None, initial_emissions=None, new_emissions=None,
+                 start_times=None, met_data_path=None):
         """
-        Input params:
-            initial_leaks     The set of leaks that exist at the beginning of the simulation
-            null_repair_rate  The rate at which leaks are repaired in the Null process (repairs/leak/day)
-            kwargs           All attributes defined in the kwargs section below
+        :param time: A FEAST time object
+        :param sites: a dict of sites like this: {'name': {'number': n_sites, 'parameters': site_object}}
+        :param initial_emissions: A FEAST emission object defining emissions at the beginning of the simulation
+        :param new_emissions: A list of FEAST emission objects with length time.n_timesteps
+        :param start_times: The times at which new emissions begin
+        :param met_data_path: A path to a met data file
         """
-
-        # -------------- Attributes that can be defined with kwargs --------------
-        # sites should be a dict of the form demonstrated below.
-        # 'name' can be changed to any string that indicates the type of site represented here
-        # the key 'number' should not be changed. Its value represents the number of identical sites to include in
-        # the simulation.
-        # the key 'parameters' should not be changed. Its value should be an object of type Site.
-        self.sites = {
-            'name': {'number': 0, 'parameters': Site()}
-        }
-        # Initial emissions defined for the gas field
-        self.initial_emissions = None
-        # emissions to be created during the simulation
-        self.new_emissions = None
-        # emissions to be created during the simulation
-        self.start_times = None
-        # path to TMY data
-        self.met_data_path = None
-        # Update any attributes defined by kwargs
-        set_kwargs_attrs(self, kwargs)
+        self.sites = sites
+        self.initial_emissions = initial_emissions
+        self.new_emissions = new_emissions
+        self.start_times = start_times
+        self.met_data_path = met_data_path
 
         # -------------- Calculated parameters --------------
         self.n_comps, self.n_sites = 0, 0
@@ -145,8 +131,6 @@ class GasField:
                 else:
                     n_leaks = 0
                 self.emission_maker(n_leaks, self.initial_emissions, comp_name, n_comp, time, site)
-            if site.site_em_dist:
-                self.site_emissions_enforcer(site)
 
     def set_indexes(self):
         """
@@ -271,7 +255,8 @@ class GasField:
         :return: None
         """
         comp = site.comp_dict[comp_name]['parameters']
-        new_leaks.extend(comp.emission_size_maker(n_leaks, comp_name, site, time, reparable=comp.base_reparable))
+        if n_leaks > 0:
+            new_leaks.extend(comp.emission_size_maker(n_leaks, comp_name, site, time, reparable=comp.base_reparable))
         if n_episodic is None:
             n_episodic = np.random.poisson(n_comp * comp.episodic_emission_per_day * time.delta_t)
         new_leaks.extend(comp.intermittent_emission_maker(n_episodic,
@@ -291,23 +276,12 @@ class Site:
     """
     A class to store the number and type of components associated with a site.
     """
-    def __init__(self, prod_dat=None, **kwargs):
-        self.name = 'default'
-        self.comp_dict = {'default': {'number': 650, 'parameters': Component()}}  # Based on Fort Worth data
-        self.op_env_params = {}
-        self.site_em_dist = False
-        if prod_dat is None:
-            # By default, load the production distribution from Colorado
-            rsc_path, _ = os.path.split(dirname(abspath(__file__)))
-            rsc_path = os.path.join(rsc_path, 'InputData', 'DataObjectInstances', 'COGCC_site_prod_2019.p')
-            with open(rsc_path, 'rb') as f:
-                # Column 2 contains gas production data, and that is all that is saved by default
-                self.prod_dat = pickle.load(f).site_prod[:, 2]
-            # By default, only use sites that recorded nonzero production
-            self.prod_dat = self.prod_dat[self.prod_dat > 0]
-        else:
-            self.prod_dat = prod_dat
-        set_kwargs_attrs(self, kwargs)
+    def __init__(self, name='default', comp_dict=None,
+                 site_em_dist=False, prod_dat=None):
+        self.name = name  # A string
+        self.comp_dict = comp_dict  # Structured like this: {'default': {'number': 650, 'parameters': Component()}}
+        self.site_em_dist = site_em_dist
+        self.prod_dat = prod_dat
 
         # Calculated parameters
         comp_ind = 0

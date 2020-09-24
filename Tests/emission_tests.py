@@ -155,7 +155,7 @@ def test_gasfield_emission_size_maker():
 
 
 def test_emission_obj():
-    dat_test = feast.InputData.input_data_classes.LeakData(notes='test')
+    dat_test = feast.input_data_classes.LeakData(notes='test')
     leak_data = {'All': np.array([1, 4, 2, 3, 2, 4])}
     well_counts = {'All': 1}  # Number of wells in the study
     comp_counts = {'All': 600}  # Assumed components per well

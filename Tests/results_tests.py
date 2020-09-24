@@ -51,14 +51,14 @@ def test_npv_calculator():
     file_out = 'temp_emissions.p'
     rep_file_out = 'temp_rep_costs.p'
     em_array = np.ones(100)
-    emissions = feast.InputData.input_data_classes.LeakData()
+    emissions = feast.input_data_classes.LeakData()
     leak_data = {'All': em_array}
     well_counts = {'All': 100}  # Number of wells in the study
     comp_counts = {'All': 100}  # Assumed components per well
     emissions.define_data(leak_data=leak_data, well_counts=well_counts, comp_counts=comp_counts)
     with open(file_out, 'wb') as f:
         pickle.dump(emissions, f)
-    repair_out = feast.InputData.input_data_classes.RepairData()
+    repair_out = feast.input_data_classes.RepairData()
     repair_out.define_data(repair_costs=np.ones(5) * 2)
     with open(rep_file_out, 'wb') as f:
         pickle.dump(repair_out, f)

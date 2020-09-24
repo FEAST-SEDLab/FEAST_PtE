@@ -9,7 +9,7 @@
 
 # -------------- reading the csv file --------------
 import csv
-from ..input_data_classes import LeakData
+from feast.input_data_classes import LeakData
 import pickle
 from os.path import dirname, abspath
 import os

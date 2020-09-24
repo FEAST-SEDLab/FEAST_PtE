@@ -5,7 +5,7 @@
 
 # -------------- reading the spreadsheet --------------
 import pandas as pd
-from ..input_data_classes import LeakData
+from feast.input_data_classes import LeakData
 import pickle
 import numpy as np
 from os.path import dirname, abspath

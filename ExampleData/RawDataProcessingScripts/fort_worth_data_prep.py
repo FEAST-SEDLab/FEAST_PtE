@@ -21,16 +21,15 @@
 
 # -------------- reading the csv file --------------
 import csv
-from ..input_data_classes import LeakData
+from feast.input_data_classes import LeakData
 import pickle
 from os.path import dirname, abspath
 import os
 
-rsc_path, _ = os.path.split(dirname(abspath(__file__)))
+rsc_path = dirname(abspath(__file__))
+rsc_path, _ = os.path.split(rsc_path)
 file_in = os.path.join(rsc_path, 'RawData', 'FortWorth.csv')
-file_out_tank = os.path.join(rsc_path, 'DataObjectInstances', 'fort_worth_tank.p')
-file_out_notank = os.path.join(rsc_path, 'DataObjectInstances', 'fort_worth_notank.p')
-
+file_out = os.path.join(rsc_path, 'DataObjectInstances', 'fort_worth_leaks.p')
 
 # -------------- Hard coded values --------------
 # In some cases, a leak would be detected with an FID or IR camera, but no flux could be measured with the HI-FLOW
@@ -48,16 +47,6 @@ cfm_to_gps = 0.0283/60*1e5/8.314/293*16
 flux_IR, flux_FID = [], []  # g/s
 # There are some characters in the csv file that raise errors. These characters are in text and are ignored by the
 # errors='ignore' flag
-tank = {
-    'IR': [],
-    'FID': []
-}
-
-notank = {
-    'IR': [],
-    'FID': []
-}
-
 with open(file_in, encoding='utf-8', errors='ignore') as csvfile:
     data = csv.reader(csvfile, delimiter=',', quotechar='|')
     for row in data:
@@ -65,33 +54,22 @@ with open(file_in, encoding='utf-8', errors='ignore') as csvfile:
             flux = float(row[28])
             if flux != cfm_unmeasured_value:
                 flux *= cfm_to_gps
-                if row[7] == 'TK':
-                    if row[29] == '--':
-                        tank['FID'].append(flux)
-                    else:
-                        tank['IR'].append(flux)
+                if row[29] == '--':
+                    flux_FID.append(flux)
                 else:
-                    if row[29] == '--':
-                        notank['FID'].append(flux)
-                    else:
-                        notank['IR'].append(flux)
+                    flux_IR.append(flux)
 
-note_base = \
+notes = \
     """Data extracted from City of Fort Worth Natural Gas Air Quality Study. Tech. rep. Fort Worth, TX:
     Eastern Research Group and Sage Environmental Consulting LP. for the City
     of Fort Worth, 2011. Flux data are recorded in grams/second."""
 
-note_tank = note_base + " Only data labeled TK are included."
-note_notank = note_base + " Only data labeled NTK are included."
-fname = 'fort_worth_tank_notank.py'
-fort_worth_tank = LeakData(notes=note_tank, raw_file_name=file_in.split('/')[-1], data_prep_file=fname)
-fort_worth_notank = LeakData(notes=note_notank, raw_file_name=file_in.split('/')[-1], data_prep_file=fname)
+fort_worth_leaks = LeakData(notes=notes, raw_file_name=file_in.split('/')[-1], data_prep_file='fortWorthDataPrep')
 
+leak_data = {'IR': flux_IR, 'FID': flux_FID}
 well_counts = {'IR': n_wells_IR, 'FID': n_wells_FID}
 comp_counts = {'IR': n_comp_IR, 'FID': n_comp_FID}
 
-fort_worth_tank.define_data(leak_data=tank, well_counts=well_counts, comp_counts=comp_counts)
-fort_worth_notank.define_data(leak_data=notank, well_counts=well_counts, comp_counts=comp_counts)
+fort_worth_leaks.define_data(leak_data=leak_data, well_counts=well_counts, comp_counts=comp_counts)
 
-pickle.dump(fort_worth_tank, open(file_out_tank, 'wb'))
-pickle.dump(fort_worth_notank, open(file_out_notank, 'wb'))
+pickle.dump(fort_worth_leaks, open(file_out, 'wb'))

@@ -55,7 +55,7 @@ def field_simulation(gas_field, dir_out='Results', time=None, ldar_program_dict=
             print("The evaluation is {:0.0f}% complete" .format(100 * time.time_index / time.n_timesteps))
         # Loop through each LDAR program:
         for ldar_program in ldar_program_dict.values():
-            # The extra factor here accounts for emissions that end part way through a timestep
+            # The extra factor here accounts for emissions that end part way through the present timestep.
             if len(ldar_program.emissions.flux) > 0:
                 timestep_fraction = (ldar_program.emissions.endtime[:ldar_program.emissions.n_leaks] -
                                      time.current_time + time.delta_t) / time.delta_t

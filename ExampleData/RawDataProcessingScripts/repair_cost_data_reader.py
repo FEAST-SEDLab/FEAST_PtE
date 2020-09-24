@@ -7,7 +7,7 @@ def repair_cost_data_reader(file_in=None, notes=None, file_out=None):
     file_out:     Path to store the data at
     """
     import csv
-    from ..input_data_classes import RepairData
+    from feast.input_data_classes import RepairData
     import pickle
 
     repair_costs = []

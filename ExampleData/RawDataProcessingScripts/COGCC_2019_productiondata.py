@@ -8,10 +8,11 @@ The COGCC provides production and location data by well. In order to group wells
 import pandas as pd
 import numpy as np
 import pysal as ps
+import pysal.lib
 import geopy.distance
 from os.path import dirname, abspath
 import pickle
-from ..input_data_classes import DataFile
+from feast.input_data_classes import DataFile
 import os
 
 rsc_path, _ = os.path.split(dirname(abspath(__file__)))
@@ -21,7 +22,7 @@ file_out = os.path.join(rsc_path, 'DataObjectInstances', 'COGCC_site_prod_2019.p
 
 
 # Load location data
-db = ps.lib.io.open(loc_path)
+db = pysal.lib.io.open(loc_path)
 d = {str.upper(col): db.by_col(col) for col in db.header}
 wells = pd.DataFrame(d)
 db.close()
