@@ -38,6 +38,12 @@ def test_check_time():
     rep = Dm.repair.Repair(repair_delay=0)
     tech = Dm.comp_survey.CompSurvey(
         time,
+        survey_speed=150,
+        labor=100,
+        site_queue=[0, 1, 2, 3],
+        detection_probability_points=[1, 2, 3],
+        detection_probabilities=[0, 0.5, 1],
+        detection_variables={'flux': 'mean'},
         survey_interval=50,
         dispatch_object=rep
     )
@@ -46,6 +52,12 @@ def test_check_time():
     time = sc.Time(delta_t=0.1, end_time=10, current_time=0)
     tech = Dm.comp_survey.CompSurvey(
         time,
+        survey_speed=150,
+        labor=100,
+        site_queue=[0, 1, 2, 3],
+        detection_probability_points=[1, 2, 3],
+        detection_probabilities=[0, 0.5, 1],
+        detection_variables={'flux': 'mean'},
         survey_interval=50,
         dispatch_object=rep
     )
@@ -63,6 +75,7 @@ def test_comp_survey():
                                   in points])
     tech = Dm.comp_survey.CompSurvey(
         time,
+        site_queue=list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)),
         survey_interval=50,
         survey_speed=150,
         ophrs={'begin': 8, 'end': 17},
@@ -136,13 +149,26 @@ def test_site_survey():
     points = np.logspace(-3, 1, 100)
     probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.474)) / (1.36 * np.sqrt(2))) for f
                                   in points])
+    rep = Dm.repair.Repair(repair_delay=0)
+    comp_temp = Dm.comp_survey.CompSurvey(
+        time,
+        site_queue=[],
+        survey_interval=50,
+        survey_speed=150,
+        ophrs={'begin': 8, 'end': 17},
+        labor=100,
+        dispatch_object=rep,
+        detection_variables={'flux': 'mean'},
+        detection_probability_points=points,
+        detection_probabilities=probs
+    )
     tech = Dm.site_survey.SiteSurvey(
         time,
         survey_interval=50,
         sites_per_day=100,
         ophrs={'begin': 8, 'end': 17},
         site_cost=100,
-        dispatch_object=Dm.comp_survey.CompSurvey(time),
+        dispatch_object=comp_temp,
         detection_variables={'flux': 'mean'},
         detection_probability_points=points,
         detection_probabilities=probs
@@ -217,6 +243,7 @@ def test_ldar_program():
     probs[0] = 0
     ogi = Dm.comp_survey.CompSurvey(
         time,
+        site_queue=list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)),
         survey_interval=50,
         survey_speed=150,
         ophrs={'begin': 8, 'end': 17},
@@ -228,6 +255,7 @@ def test_ldar_program():
     )
     ogi_no_survey = Dm.comp_survey.CompSurvey(
         time,
+        site_queue=[],
         survey_interval=None,
         survey_speed=150,
         ophrs={'begin': 8, 'end': 17},
@@ -237,9 +265,8 @@ def test_ldar_program():
         detection_probability_points=points,
         detection_probabilities=probs
     )
-    points = np.logspace(-3, 1, 100)
-    probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.474)) / (1.36 * np.sqrt(2))) for f
-                                  in points])
+    points = [0.5, 0.6]
+    probs = [0, 1]
     probs[0] = 0
     plane_survey = Dm.site_survey.SiteSurvey(
         time,
@@ -278,6 +305,7 @@ def test_ldar_program():
         time, gas_field, tech_dict
     )
     # test action
+    np.random.seed(0)
     tiered_survey.action(time, gas_field)
     if np.sum(tiered_survey.emissions.flux) != 79:
         raise ValueError("Unexpected emission rate after LDAR program action with tiered survey")
@@ -411,9 +439,9 @@ def test_get_current_conditions():
     )
     emissions = gas_field.initial_emissions
     emissions.flux = np.linspace(0.1, 10, 100)
-    em_indexes = np.linspace(0, emissions.n_leaks - 1, emissions.n_leaks, dtype=int)
+    em_indexes = np.linspace(0, emissions.n_em - 1, emissions.n_em, dtype=int)
     ret = tech.get_current_conditions(time, gas_field, emissions, em_indexes)
-    if np.any(ret[:, 0] != emissions.flux[:emissions.n_leaks]):
+    if np.any(ret[:, 0] != emissions.flux[:emissions.n_em]):
         raise ValueError("get_current_conditions not returning the correct values")
     if np.any(ret[:, 1] != np.mean(gas_field.met['wind speed'][8:17])):
         raise ValueError("get_current_conditions not returning the correct values")

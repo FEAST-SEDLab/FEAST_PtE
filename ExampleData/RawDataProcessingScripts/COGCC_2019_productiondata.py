@@ -12,7 +12,7 @@ import pysal.lib
 import geopy.distance
 from os.path import dirname, abspath
 import pickle
-from feast.input_data_classes import DataFile
+from feast.input_data_classes import ProductionData
 import os
 
 rsc_path, _ = os.path.split(dirname(abspath(__file__)))
@@ -222,7 +222,7 @@ The downloads were completed on Jan. 13, 2020. In order to group wells into site
 site_prod.site_prod contains 4 columns: latitude (degrees), longitude (degrees), gas production (mcf/year), oil 
 production (bbl/year)
 """
-site_prod = DataFile(notes=notes, raw_file_name=raw_data_file, data_prep_file='COGCC_2019_productiondata.py',
+site_prod = ProductionData(notes=notes, raw_file_name=raw_data_file, data_prep_file='COGCC_2019_productiondata.py',
                      site_prod=site_prod)
 
 pickle.dump(site_prod, open(file_out, 'wb'))

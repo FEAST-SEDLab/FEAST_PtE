@@ -7,9 +7,9 @@ from os.path import isfile, join
 def results_analysis(directory):
     """
     Process many realizations of a single scenario stored in a directory
-    Inputs:
-        directory       A directory of results files all generated under the same scenario
-    Return:
+
+    :param directory:       A directory of results files all generated under the same scenario
+    :return:
         null_npv          array of null-NPV of each LDAR program in each realization [k$/well]
         emissions_timeseries  Array of emissions in each LDAR program in each realization at each time step
         costs                 Array of costs associated with each LDAR program (no discounting, all costs summed)
@@ -46,9 +46,9 @@ def results_analysis(directory):
 def npv_calculator(filepath):
     """
         Calculates the net present value (NPV) of each LDAR program in the results file
-        Inputs:
-            filepath        path to a results file
-        Return:
+
+        :param filepath:        path to a results file
+        :return:
             null_npv          NPV of each LDAR program compared to a scenario with only the Null LDAR program [k$/well]
     """
     sample = load(open(filepath, 'rb'))

@@ -2,17 +2,13 @@
 This module stores component, gasfield and site classes to represent infrastructure in a simulation
 """
 
-import os
 import pickle
-from os.path import dirname, abspath
-
 import numpy as np
 import pandas as pd
 
 from feast.EmissionSimModules import emission_class_functions as ecf
 from feast.EmissionSimModules.emission_class_functions import emission_objects_generator as leak_obj_gen
 from feast.EmissionSimModules.simulation_classes import Time
-from feast.EmissionSimModules.simulation_functions import set_kwargs_attrs
 
 
 class Component:
@@ -20,32 +16,47 @@ class Component:
     A class to store parameters defining a component (for example, name, leak production rate, leak size
     distribution, etc)
     """
-    def __init__(self, null_repair_rate=None, **kwargs):
-        self.name = 'default'
-        self.component_type = "fugitive leak source"
-
-        # Repair cost data file path
-        self.repair_cost_path = None
-        # ---- Emissions with a constant probability of occurring and duration determined by the null repair rate
-        self.dist_type = 'bootstrap'
-        self.emission_data_path = None
-        # new emissions per component per day (typically on the order of 1e-5)
-        self.emission_production_rate = 0
-        # if emission_per_comp is left as None, FEAST uses the # of emissions/# of components in the emission_data file
-        self.emission_per_comp = 0
-        self.custom_emission_maker = None  # Optional custom method for creating new emissions
-        self.base_reparable = True
-        # ---- Permitted events with a constant probability of occurring and known duration NOT REPARABLE
-        self.episodic_emission_sizes = [0]  # g/s
-        self.episodic_emission_per_day = 0
-        self.episodic_emission_duration = 0
-        # ---- Periodic vents: repetitive events with a known period between emissions and known duration NOT REPARABLE
-        self.vent_sizes = [0]  # g/s
-        self.vent_period = np.infty  # days
-        self.vent_duration = 0  # days
-        self.vent_starts = np.array([])
-        # ---- Update any attributes defined by kwargs
-        set_kwargs_attrs(self, kwargs)
+    def __init__(self, repair_cost_path=None, emission_data_path=None, base_reparable=None, custom_emission_maker=None,
+                 emission_production_rate=0, emission_per_comp=None, episodic_emission_sizes=[0],
+                 episodic_emission_per_day=0, episodic_emission_duration=0, vent_sizes=[0],
+                 vent_period=np.infty, vent_starts=np.array([]), vent_duration=0, name='default',
+                 null_repair_rate=None, dist_type='bootstrap'):
+        """
+        :param repair_cost_path: path to a repair cost data file
+        :param emission_data_path: path to an emission data file
+        :param base_reparable: Defines whether emissions generated are reparable with a boolean true/false
+        :param custom_emission_maker: Optional custom defined function for creating new emissions
+        :param emission_production_rate: The rate at which new emissions are created (emissions per day per component)
+        :param emission_per_comp: The number of emissions expected per component (must be less than 1)
+            If emission_per_comp is left as None, then emission_per_comp is set equal to the emissions per component
+            recorded in the file at emission_data_path.
+        :param episodic_emission_sizes: A list of emission sizes to draw from for episodic emissions (g/s)
+        :param episodic_emission_per_day: The average frequency at which episodic emissions occur (1/days)
+        :param episodic_emission_duration: The duration of episodic emissions (days)
+        :param vent_sizes: A list of emission sizes for periodic emissions (g/s)
+        :param vent_period: The time between emissions (days)
+        :param vent_duration: the time that a periodic vent persits (days)
+        :param vent_starts: the time at which the first periodic vent occurs at each component in the simulation
+        :param name: A name for the instance of Component
+        :param null_repair_rate: the rate at which fugitive emissions are repaired. If None, a steady state
+            assumption is enforced based on emission_production_rate and emission_per_comp.
+        :param dist_type: The type of distribution to be used in determining emission rates for new emissions
+        """
+        self.name = name
+        self.repair_cost_path = repair_cost_path
+        self.dist_type = dist_type
+        self.emission_data_path = emission_data_path
+        self.emission_production_rate = emission_production_rate
+        self.emission_per_comp = emission_per_comp
+        self.custom_emission_maker = custom_emission_maker
+        self.base_reparable = base_reparable
+        self.episodic_emission_sizes = episodic_emission_sizes
+        self.episodic_emission_per_day = episodic_emission_per_day
+        self.episodic_emission_duration = episodic_emission_duration
+        self.vent_sizes = vent_sizes
+        self.vent_period = vent_period
+        self.vent_duration = vent_duration
+        self.vent_starts = vent_starts
         # ---- Distribution of leak repair costs
         if self.repair_cost_path:
             rsc_path = self.repair_cost_path
@@ -113,6 +124,7 @@ class GasField:
     def initialize_emissions(self, time):
         """
         Create emissions that exist at the beginning of the simulation
+
         :param time:
         :return:
         """
@@ -142,7 +154,8 @@ class GasField:
             self.n_sites += site_dict['number']
             # This ensures that site indexes do not overlap between site types.
             site.site_inds = [site_ind, site_ind + site_dict['number']]
-            site.production = np.random.choice(site.prod_dat, site_dict['number'])
+            if site.prod_dat:
+                site.production = np.random.choice(site.prod_dat, site_dict['number'])
             for compname, comp_d in site.comp_dict.items():
                 comp = comp_d['parameters']
                 self.n_comps += comp_d['number'] * site_dict['number']
@@ -169,7 +182,7 @@ class GasField:
                 n_leaks = np.random.poisson(n_comp * comp['parameters'].emission_production_rate * time.end_time)
                 n_episodic = np.random.poisson(n_comp * comp['parameters'].episodic_emission_per_day * time.end_time)
                 self.emission_maker(n_leaks, self.new_emissions, compname, n_comp, time, site, n_episodic=n_episodic)
-        self.start_times = np.random.randint(0, time.n_timesteps, self.new_emissions.n_leaks, dtype=int)
+        self.start_times = np.random.randint(0, time.n_timesteps, self.new_emissions.n_em, dtype=int)
         self.new_emissions.endtime += self.start_times * time.delta_t
 
     def emission_size_maker(self, time):
@@ -204,6 +217,7 @@ class GasField:
         """
         Return the relevant meteorological condition, accounting for discrepancies between simulation time resolution
         and data time resolution
+        
         :param time: time object
         :param parameter_names: specify a list of meteorological conditions to return
         :param interp_modes: can be a list of strings: mean, median, max or min
@@ -244,7 +258,8 @@ class GasField:
     @staticmethod
     def emission_maker(n_leaks, new_leaks, comp_name, n_comp, time, site, n_episodic=None):
         """
-        Updates a leak object with new values returned by emission_size_maker
+        Updates an Emission object with new values returned by emission_size_maker
+
         :param n_leaks: number of new leaks to create
         :param new_leaks: a leak object to extend
         :param comp_name: name of a component object included in site.comp_dict
@@ -276,11 +291,15 @@ class Site:
     """
     A class to store the number and type of components associated with a site.
     """
-    def __init__(self, name='default', comp_dict=None,
-                 site_em_dist=False, prod_dat=None):
+    def __init__(self, name='default', comp_dict=None, prod_dat=None):
+        """
+        :param name: The name of the site object (a string)
+        :param comp_dict: A dict of components at the site, for example:
+            {'name': {'number': 650, 'parameters': Component()}}
+        :param prod_dat:
+        """
         self.name = name  # A string
-        self.comp_dict = comp_dict  # Structured like this: {'default': {'number': 650, 'parameters': Component()}}
-        self.site_em_dist = site_em_dist
+        self.comp_dict = comp_dict
         self.prod_dat = prod_dat
 
         # Calculated parameters
