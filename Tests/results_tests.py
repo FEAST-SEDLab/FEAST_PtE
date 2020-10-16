@@ -25,7 +25,8 @@ def test_results_analysis():
             dispatch_object=rep,
             detection_variables={'flux': 'mean'},
             detection_probability_points=points,
-            detection_probabilities=probs
+            detection_probabilities=probs,
+            site_queue=[]
         )
         ogi_survey = Dm.ldar_program.LDARProgram(
             timeobj, copy.deepcopy(gf), {'ogi': ogi}
@@ -102,14 +103,17 @@ def test_npv_calculator():
         dispatch_object=rep,
         detection_variables={'flux': 'mean'},
         detection_probability_points=points,
-        detection_probabilities=probs
+        detection_probabilities=probs,
+        site_queue=[]
     )
     ogi_survey = Dm.ldar_program.LDARProgram(
         timeobj, copy.deepcopy(gas_field), {'ogi': ogi}
     )
+    econ_set = feast.EmissionSimModules.simulation_classes.FinanceSettings(gas_price=2e-4, discount_rate=0.08)
     feast.field_simulation.field_simulation(
         time=timeobj, gas_field=gas_field, dir_out='ResultsTemp',
-        display_status=False, ldar_program_dict={'ogi': ogi_survey}
+        display_status=False, ldar_program_dict={'ogi': ogi_survey},
+        econ_set=econ_set
     )
     npv = feast.ResultsProcessing.results_analysis_functions.npv_calculator('ResultsTemp/realization0.p')
     if npv['Repair'] != 2000:

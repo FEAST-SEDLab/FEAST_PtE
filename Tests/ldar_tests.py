@@ -126,7 +126,8 @@ def test_comp_survey_emitters_surveyed():
         },
         detection_variables={'flux': 'mean'},
         detection_probability_points=points,
-        detection_probabilities=probs
+        detection_probabilities=probs,
+        site_queue=[]
     )
     tech.action(list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)))
     emissions = gas_field.initial_emissions
@@ -212,17 +213,32 @@ def test_sitedetect_sites_surveyed():
     wind_dirs_mins = np.zeros(gas_field.n_sites)
     wind_dirs_maxs = np.ones(gas_field.n_sites) * 90
     wind_dirs_maxs[50] = 270
+    points = np.logspace(-3, 1, 100)
+    probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.474)) / (1.36 * np.sqrt(2))) for f
+                                  in points])
+    comp_survey = Dm.comp_survey.CompSurvey(
+        time,
+        dispatch_object=None,
+        survey_interval=None,
+        survey_speed=100,
+        labor=100,
+        site_queue=[],
+        detection_probability_points=[1, 2],
+        detection_probabilities=[0, 1]
+    )
     tech = Dm.site_survey.SiteSurvey(
         time,
         survey_interval=50,
         sites_per_day=100,
         ophrs={'begin': 8, 'end': 17},
         site_cost=100,
-        dispatch_object=Dm.comp_survey.CompSurvey(time),
+        dispatch_object=comp_survey,
         op_envelope={
             'wind speed': {'class': 1, 'min': 1, 'max': 10},
             'wind direction': {'class': 2, 'min': wind_dirs_mins, 'max': wind_dirs_maxs}
-        }
+        },
+        detection_probability_points=points,
+        detection_probabilities=probs
     )
     tech.site_queue = list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int))
     np.random.seed(0)
@@ -257,7 +273,7 @@ def test_ldar_program():
         time,
         site_queue=[],
         survey_interval=None,
-        survey_speed=150,
+        survey_speed=100,
         ophrs={'begin': 8, 'end': 17},
         labor=100,
         dispatch_object=rep,
@@ -307,7 +323,7 @@ def test_ldar_program():
     # test action
     np.random.seed(0)
     tiered_survey.action(time, gas_field)
-    if np.sum(tiered_survey.emissions.flux) != 79:
+    if np.sum(tiered_survey.emissions.flux) != 86:
         raise ValueError("Unexpected emission rate after LDAR program action with tiered survey")
 
 
@@ -327,7 +343,8 @@ def test_field_simulation():
         dispatch_object=rep,
         detection_variables={'flux': 'mean'},
         detection_probability_points=points,
-        detection_probabilities=probs
+        detection_probabilities=probs,
+        site_queue=[]
     )
     ogi_no_survey = Dm.comp_survey.CompSurvey(
         timeobj,
@@ -338,7 +355,8 @@ def test_field_simulation():
         dispatch_object=rep,
         detection_variables={'flux': 'mean'},
         detection_probability_points=points,
-        detection_probabilities=probs
+        detection_probabilities=probs,
+        site_queue=[]
     )
     points = np.logspace(-3, 1, 100)
     probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.474)) / (1.36 * np.sqrt(2))) for f
@@ -390,6 +408,9 @@ def test_check_op_envelope():
     rep = Dm.repair.Repair(repair_delay=0)
     wind_dirs_mins = np.zeros(gas_field.n_sites)
     wind_dirs_maxs = np.ones(gas_field.n_sites) * 90
+    points = np.logspace(-3, 1, 100)
+    probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.02)) / (0.8 * np.sqrt(2))) for f
+                                  in points])
     tech = Dm.comp_survey.CompSurvey(
         time,
         survey_interval=50,
@@ -400,7 +421,10 @@ def test_check_op_envelope():
         op_envelope={
             'wind speed': {'class': 1, 'min': 1, 'max': 10},
             'wind direction': {'class': 2, 'min': wind_dirs_mins, 'max': wind_dirs_maxs}
-        }
+        },
+        site_queue=[],
+        detection_probability_points=points,
+        detection_probabilities=probs
     )
     op_env = tech.check_op_envelope(gas_field, time, 0)
     if op_env != 'site fail':
@@ -435,7 +459,8 @@ def test_get_current_conditions():
         dispatch_object=rep,
         detection_variables={'flux': 'mean', 'wind speed': 'mean'},
         detection_probability_points=prob_points,
-        detection_probabilities=detect_probs
+        detection_probabilities=detect_probs,
+        site_queue=[]
     )
     emissions = gas_field.initial_emissions
     emissions.flux = np.linspace(0.1, 10, 100)
@@ -460,7 +485,8 @@ def test_empirical_interpolator():
         dispatch_object=rep,
         detection_variables={'flux': 'mean', 'wind speed': 'mean'},
         detection_probability_points=prob_points,
-        detection_probabilities=detect_probs
+        detection_probabilities=detect_probs,
+        site_queue=[]
     )
     probs = tech.empirical_interpolator(tech.detection_probability_points, tech.detection_probabilities,
                                         np.array([[0.01, 1], [0.05, 1]]))
@@ -494,7 +520,10 @@ def test_choose_sites():
         op_envelope={
             # 'wind speed': {'class': 1, 'min': 1, 'max': 10},
             # 'wind direction': {'class': 2, 'min': wind_dirs_mins, 'max': wind_dirs_maxs}
-        }
+        },
+        site_queue=[],
+        detection_probability_points=[1, 2],
+        detection_probabilities=[0, 1]
     )
     tech.site_queue = list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int))
     siteinds = tech.choose_sites(gas_field, time, 10)
@@ -523,7 +552,7 @@ def test_site_monitor():
     site_inds = list(range(0, 10))
     emissions = copy.copy(gas_field.initial_emissions)
     detect = cm.detect_prob_curve(time, gas_field, site_inds, emissions)
-    must_detect = [0, 9, 3]
+    must_detect = [0, 9]
     must_not_detect = [2, 7, 8]
     for md in must_detect:
         if md not in detect:

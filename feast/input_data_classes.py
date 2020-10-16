@@ -16,7 +16,6 @@ class DataFile:
         self.notes = notes
         self.raw_file_name = raw_file_name
         self.data_prep_file = data_prep_file
-        # set_kwargs_attrs(self, kwargs, only_existing=False)
 
 
 class LeakData(DataFile):
@@ -24,7 +23,7 @@ class LeakData(DataFile):
    LeakData is designed to store all leak size data from a reference. It accommodates multiple detection methods
    within a single instance.
     """
-    def __init__(self, notes='No notes provided', raw_file_name=None, data_prep_file=None, leak_sizes=None):
+    def __init__(self, notes='No notes provided', raw_file_name=None, data_prep_file=None, leak_sizes={}):
         """
         Creates a LeakData object
 
@@ -34,7 +33,7 @@ class LeakData(DataFile):
         :param leak_sizes: list of leak sizes. If leaks were detected using multiple methods, leak_sizes must be a dict
                         with one key for each detection method
         """
-        DataFile.__init__(self, notes, raw_file_name, leak_sizes=leak_sizes, data_prep_file=data_prep_file)
+        DataFile.__init__(self, notes, raw_file_name, data_prep_file=data_prep_file)
         self.leak_sizes = dict()
         self.well_counts = dict()
         self.comp_counts = dict()

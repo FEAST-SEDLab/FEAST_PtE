@@ -52,8 +52,8 @@ class CompSurvey(DetectionMethod):
         self.site_queue = site_queue  # queue of sites to survey
         self.comp_survey_index = comp_survey_index
         self.site_survey_index = site_survey_index
-        self.detection_probability_points = detection_probability_points
-        self.detection_probabilities = detection_probabilities
+        self.detection_probability_points = np.array(detection_probability_points)
+        self.detection_probabilities = np.array(detection_probabilities)
 
         # -------------- Internal variables -----------------
         self.mid_site_fail_time = np.infty

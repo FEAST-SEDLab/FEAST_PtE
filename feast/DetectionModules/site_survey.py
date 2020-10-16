@@ -53,8 +53,8 @@ class SiteSurvey(DetectionMethod):
 
         # --------------- Detection Variables -----------------
         self.site_queue = site_queue  # queue of sites to survey
-        self.detection_probability_points = detection_probability_points
-        self.detection_probabilities = detection_probabilities
+        self.detection_probability_points = np.array(detection_probability_points)
+        self.detection_probabilities = np.array(detection_probabilities)
 
         # -------------- Set calculated parameters --------------
         work_time = (self.ophrs['end'] - self.ophrs['begin']) / 24
