@@ -57,7 +57,7 @@ def field_simulation(gas_field, dir_out='Results', time=None, ldar_program_dict=
     # -------------- Run the simulation --------------
     # check_timestep(gas_field, time)
     for time.time_index in range(0, time.n_timesteps):
-        if display_status and time.current_time % int(time.end_time/10) < time.delta_t:
+        if display_status and time.current_time % (time.end_time / 10) < time.delta_t:
             print("The evaluation is {:0.0f}% complete" .format(100 * time.time_index / time.n_timesteps))
         # Loop through each LDAR program:
         for ldar_program in ldar_program_dict.values():

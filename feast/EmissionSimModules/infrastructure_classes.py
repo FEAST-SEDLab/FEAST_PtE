@@ -68,7 +68,7 @@ class Component:
             if self.emission_per_comp is None:
                 self.emission_per_comp = emission_per_comp
         if null_repair_rate is None:
-            if self.emission_per_comp == 0:
+            if self.emission_per_comp == 0 or self.emission_production_rate==0:
                 self.null_repair_rate = 0
             else:
                 self.null_repair_rate = self.emission_production_rate / self.emission_per_comp
@@ -154,7 +154,7 @@ class GasField:
             self.n_sites += site_dict['number']
             # This ensures that site indexes do not overlap between site types.
             site.site_inds = [site_ind, site_ind + site_dict['number']]
-            if site.prod_dat:
+            if site.prod_dat is not None:
                 site.production = np.random.choice(site.prod_dat, site_dict['number'])
             for compname, comp_d in site.comp_dict.items():
                 comp = comp_d['parameters']
