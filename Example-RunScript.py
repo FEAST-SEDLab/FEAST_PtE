@@ -9,11 +9,12 @@ import feast.EmissionSimModules.infrastructure_classes
 from feast.EmissionSimModules.infrastructure_classes import Component
 import feast.DetectionModules as Dm
 import pickle
+import time
 
 # The random seed below can be un-commented to generate reproducible realizations.
 # np.random.seed(0)
 n_montecarlo = 1
-
+a = time.time()
 
 def define_emitters():
     """
@@ -288,3 +289,6 @@ for ind in range(n_montecarlo):
         ldar_program_dict=ldar_dict,
         dir_out='ExampleRunScriptResults', display_status=True
     )
+
+b = time.time()
+print("run time {:0.2f} seconds".format(b - a))
