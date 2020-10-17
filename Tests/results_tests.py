@@ -4,6 +4,7 @@ import feast
 import os
 import pickle
 from feast import DetectionModules as Dm
+from feast import EmissionSimModules as Esm
 from feast.ResultsProcessing import results_analysis_functions as raf
 from Tests.test_helper import basic_gas_field
 
@@ -31,10 +32,9 @@ def test_results_analysis():
         ogi_survey = Dm.ldar_program.LDARProgram(
             timeobj, copy.deepcopy(gf), {'ogi': ogi}
         )
-        feast.field_simulation.field_simulation(gf, time=timeobj,
-                                                ldar_program_dict={'ogi': ogi_survey},
-                                                dir_out='ResultsTemp', display_status=False)
-    null_npv, emissions, costs, techs = raf.results_analysis('ResultsTemp')
+        sc = Esm.simulation_classes.Scenario(time=timeobj, gas_field=gf, ldar_program_dict={'ogi': ogi_survey})
+        sc.run(display_status=False, dir_out='ResultsTemp')
+    null_npv, emissions, costs, techs = raf.results_analysis('ResultsTemp', 0.08, 2e-4)
     if len(null_npv.keys()) != 4:
         raise ValueError("results analysis function returning the wrong number of keys")
     if null_npv['Finding'].shape != (1, 3):
@@ -109,13 +109,9 @@ def test_npv_calculator():
     ogi_survey = Dm.ldar_program.LDARProgram(
         timeobj, copy.deepcopy(gas_field), {'ogi': ogi}
     )
-    econ_set = feast.EmissionSimModules.simulation_classes.FinanceSettings(gas_price=2e-4, discount_rate=0.08)
-    feast.field_simulation.field_simulation(
-        time=timeobj, gas_field=gas_field, dir_out='ResultsTemp',
-        display_status=False, ldar_program_dict={'ogi': ogi_survey},
-        econ_set=econ_set
-    )
-    npv = feast.ResultsProcessing.results_analysis_functions.npv_calculator('ResultsTemp/realization0.p')
+    sc = Esm.simulation_classes.Scenario(time=timeobj, gas_field=gas_field, ldar_program_dict={'ogi': ogi_survey})
+    sc.run(dir_out='ResultsTemp', display_status=False)
+    npv = feast.ResultsProcessing.results_analysis_functions.npv_calculator('ResultsTemp/realization0.p', 0.08, 2e-4)
     if npv['Repair'] != 2000:
         raise ValueError("npv_calculator not returning the expected repair cost")
     if np.abs(npv['Gas'] - 34560) > 100:  # 34560 = gas_value * 1000 g/s * 2 days * 3600 * 24 sec/day--no discount rate.

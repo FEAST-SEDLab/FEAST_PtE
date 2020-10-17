@@ -4,7 +4,7 @@ from os import listdir
 from os.path import isfile, join
 
 
-def results_analysis(directory):
+def results_analysis(directory, discount_rate, gas_price):
     """
     Process many realizations of a single scenario stored in a directory
 
@@ -36,18 +36,20 @@ def results_analysis(directory):
             costs[index, jindex] = np.sum(sample.ldar_program_dict[progs[index]].find_cost) + \
                 np.sum(sample.ldar_program_dict[progs[index]].repair_cost)
         # iterate through each category of value
-        null_npv_temp = npv_calculator(directory + '/' + files[jindex])
+        null_npv_temp = npv_calculator(directory + '/' + files[jindex], discount_rate, gas_price)
         for key in null_npv.keys():
             # no_repair_npv[key][:, jindex] = no_repair_npv_temp[key]
             null_npv[key][:, jindex] = null_npv_temp[key]
     return null_npv, emissions_timeseries, costs, progs
 
 
-def npv_calculator(filepath):
+def npv_calculator(filepath, discount_rate, gas_price):
     """
         Calculates the net present value (NPV) of each LDAR program in the results file
 
         :param filepath:        path to a results file
+        :param discount_rate: The discount rate of future cash flows (should be between 0 and 1)
+        :param gas_price: The value to assign to mitigated gas losses ($/gram)
         :return:
             null_npv          NPV of each LDAR program compared to a scenario with only the Null LDAR program [k$/well]
     """
@@ -59,7 +61,7 @@ def npv_calculator(filepath):
         raise NameError('tech_dict must contain a "Null" detection method to use npv_calculator')
     null_emissions = np.array(sample.ldar_program_dict['Null'].emissions_timeseries)
     time = np.linspace(0, sample.time.n_timesteps * sample.time.delta_t, sample.time.n_timesteps)
-    discount_array = (1 + sample.econ_settings.discount_rate)**(time / 365)
+    discount_array = (1 + discount_rate)**(time / 365)
     # Initialize all arrays
     gas_value_n = np.zeros(len(progs) - 1)
     find_cost = np.zeros([len(progs), sample.time.n_timesteps])
@@ -76,7 +78,7 @@ def npv_calculator(filepath):
             repair_cost_null[ind, :] = sample.ldar_program_dict[progs[index]].repair_cost / discount_array - \
                 null_repair_cost
             gas_value_n[ind] = sum((null_emissions - sample.ldar_program_dict[progs[index]].emissions_timeseries) /
-                                   discount_array) * sample.time.delta_t * 24 * 3600 * sample.econ_settings.gas_price
+                                   discount_array) * sample.time.delta_t * 24 * 3600 * gas_price
             find_cost_null[ind, :] = sample.ldar_program_dict[progs[index]].find_cost / discount_array
         else:
             null_correct += 1

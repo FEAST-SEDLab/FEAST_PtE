@@ -6,6 +6,7 @@ the simulation. A component level survey, a tiered site level survey and a tiere
 import numpy as np
 import copy
 import feast.EmissionSimModules.infrastructure_classes
+import feast.EmissionSimModules.simulation_classes as sc
 from feast.EmissionSimModules.infrastructure_classes import Component
 import feast.DetectionModules as Dm
 import pickle
@@ -283,12 +284,8 @@ for ind in range(n_montecarlo):
     gas_field = define_gas_field(timeobj, site_dict)
     ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7 = define_detection_methods(timeobj)
     ldar_dict = define_ldar_programs(timeobj, gas_field, ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7)
-
-    feast.field_simulation.field_simulation(
-        time=timeobj, gas_field=gas_field,
-        ldar_program_dict=ldar_dict,
-        dir_out='ExampleRunScriptResults', display_status=True
-    )
+    scenario = sc.Scenario(time=timeobj, gas_field=gas_field, ldar_program_dict=ldar_dict)
+    scenario.run(dir_out='ExampleRunScriptResults', display_status=True)
 
 b = time.time()
 print("run time {:0.2f} seconds".format(b - a))

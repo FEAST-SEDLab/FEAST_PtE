@@ -327,7 +327,7 @@ def test_ldar_program():
         raise ValueError("Unexpected emission rate after LDAR program action with tiered survey")
 
 
-def test_field_simulation():
+def test_scenario_run():
     gas_field = basic_gas_field()
     timeobj = feast.EmissionSimModules.simulation_classes.Time(delta_t=1, end_time=2)
     rep = Dm.repair.Repair(repair_delay=0)
@@ -381,19 +381,16 @@ def test_field_simulation():
     tiered_survey = Dm.ldar_program.LDARProgram(
         timeobj, gas_field, tech_dict
     )
-    feast.field_simulation.field_simulation(
-            time=timeobj, gas_field=gas_field,
-            ldar_program_dict={'tiered': tiered_survey, 'ogi': ogi_survey},
-            dir_out='ResultsTemp', display_status=False
-        )
-
+    scenario = sc.Scenario(time=timeobj, gas_field=gas_field, ldar_program_dict={'tiered': tiered_survey,
+                                                                                 'ogi': ogi_survey})
+    scenario.run(dir_out='ResultsTemp', display_status=False)
     with open('ResultsTemp/realization0.p', 'rb') as f:
         res = pickle.load(f)
     if res.ldar_program_dict['tiered'].emissions_timeseries[-1] >= \
             res.ldar_program_dict['ogi'].emissions_timeseries[-1]:
-        raise ValueError("field_simulation is not returning emission reductions as expected")
+        raise ValueError("Scenario.run is not returning emission reductions as expected")
     if res.ldar_program_dict['ogi'].emissions_timeseries[-1] >= res.ldar_program_dict['Null'].emissions_timeseries[-1]:
-        raise ValueError("field_simulation is not returning emission reductions as expected")
+        raise ValueError("Scenario.run is not returning emission reductions as expected")
 
     for f in os.listdir('ResultsTemp'):
         os.remove(os.path.join('ResultsTemp', f))
@@ -578,7 +575,7 @@ test_comp_survey()
 test_check_time()
 test_site_survey()
 test_ldar_program()
-test_field_simulation()
+test_scenario_run()
 test_check_op_envelope()
 test_sitedetect_sites_surveyed()
 test_comp_survey_emitters_surveyed()
