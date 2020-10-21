@@ -4,21 +4,22 @@ defined in this module.
 """
 import pickle
 import numpy as np
+import pandas as pd
 
 
 class Emission:
     """
     Stores all properties of all emissions that exist at a particular instant in a simulation.
     """
-    def __init__(self, flux=(), capacity=0,
-                 reparable=True, site_index=(), comp_index=(), endtime=np.infty, repair_cost=()):
+    def __init__(self, flux=(), reparable=True, site_index=(), comp_index=(), start_time=0, endtime=np.infty,
+                 repair_cost=()):
         """
         :param flux: An array of emission rates (array of floats--gram/second)
-        :param capacity: The size of the arrays to initialize at the beginning of a simulation in FEAST (int)
         :param reparable: An array of True/False values to indicate whether or not an emission is reparable
         :param site_index: An array indicating the index of the site that contains every emission
         :param comp_index: An array indicating the index of the component that is the source of each emission
-        :param endtime: An array the time when every emission will end (days)
+        :param start_time: An array specifying the time when every emission begins
+        :param endtime: An array specifying the time when every emission will end (days)
         :param repair_cost: An array storing the cost of repairing every emission ($)
         """
         try:
@@ -26,36 +27,25 @@ class Emission:
         except TypeError:
             length_in = 1
 
-        if capacity == 0:
-            self.flux = np.array(flux)
-            self.site_index = np.array(site_index)
-            self.comp_index = np.array(comp_index)
-            if reparable is True:
-                self.reparable = np.ones(length_in, dtype=np.bool)
-            elif reparable is False:
-                self.reparable = np.zeros(length_in, dtype=np.bool)
-            else:
-                self.reparable = reparable
-            try:
-                if len(endtime) == length_in:
-                    self.endtime = np.array(endtime)
-            except TypeError:
-                self.endtime = np.ones(length_in) * endtime
-            self.repair_cost = np.array(repair_cost)
+        if reparable is True:
+            rep_array = np.ones(length_in, dtype=np.bool)
+        elif reparable is False:
+            rep_array = np.zeros(length_in, dtype=np.bool)
         else:
-            self.flux = np.zeros(capacity)
-            self.site_index = -np.ones(capacity, dtype=int)
-            self.comp_index = -np.ones(capacity, dtype=int)
-            self.reparable = np.ones(capacity, dtype=np.bool)
-            self.endtime = np.ones(capacity) * np.inf
-            self.repair_cost = np.zeros(capacity)
-            self.flux[0:length_in] = flux
-            self.reparable[0:length_in] = reparable
-            self.site_index[0:length_in] = site_index
-            self.comp_index[0:length_in] = comp_index
-            self.endtime[0:length_in] = endtime
-            self.repair_cost[0:length_in] = repair_cost
-        self.n_em = length_in
+            rep_array = np.array(reparable)
+        try:
+            if len(endtime) == length_in:
+                endtime = np.array(endtime)
+        except TypeError:
+            endtime = np.ones(length_in) * endtime
+        self.emitters = pd.DataFrame({
+            'flux': np.array(flux),
+            'site_index': np.array(site_index),
+            'comp_index': np.array(comp_index),
+            'reparable': rep_array,
+            'endtime': endtime,
+            'repair_cost': np.array(repair_cost)
+        })
 
     def extend(self, em_object_in):
         """

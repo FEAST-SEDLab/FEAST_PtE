@@ -123,8 +123,60 @@ def test_npv_calculator():
     os.rmdir('ResultsTemp')
 
 
-test_results_analysis()
-test_npv_calculator()
+def test_ResultsAggregate():
+    res = Esm.simulation_classes.ResultAggregate(units='g/s')
+    if res.units != 'g/s':
+        raise ValueError("ResultsAggregate is not initializing self.units correctly")
+    if res.time_value:
+        raise ValueError("ResultsAggregate is not initializing self.time or self.value corerctly")
+    res.append_entry([35, 6.2])
+    if res.time_value[-1][0] != 35:
+        raise ValueError("ResultsAggregate is not appending times correctly")
+    if res.time_value[-1][1] != 6.2:
+        raise ValueError("ResultsAggregate is not appending values correctly")
+    v = res.get_vals(35)
+    if v[0] != 6.2:
+        raise ValueError("ResultsAggregate.get_value is not returning the correct entry")
+    v = res.get_vals(36)
+    if len(v) != 0:
+        raise ValueError("ResultsAggregate.get_value is not returning an empty array if the requested time has no "
+                         "value associated with it")
 
+
+def test_ResultsDiscrete():
+    res = Esm.simulation_classes.ResultDiscrete(units='g/s')
+    if res.units != 'g/s':
+        raise ValueError("ResultsDiscrete is not initializing self.units correctly")
+    if res.time_value:
+        raise ValueError("ResultsDiscrete is not initializing self.time or self.value corerctly")
+    res.append_entry([35, 6.2])
+    res.append_entry([37, 3.4])
+    if res.time_value[0][0] != 35:
+        raise ValueError("ResultsDiscrete is not appending times correctly")
+    if res.time_value[-1][1] != 3.4:
+        raise ValueError("ResultsDiscrete is not appending values correctly")
+    if res.get_cumulative_vals(0, 38)[1][0] != 6.2 or res.get_cumulative_vals(0, 38)[1][1] != 9.6:
+        raise ValueError("ResultsDiscrete is not computing cumulative vals correctly")
+    if res.get_sum_val(0, 38) != 9.6:
+        raise ValueError("ResultsDiscrete.get_sum_val is not computing sums correctly")
+
+
+def test_ResultsContinuous():
+    res = Esm.simulation_classes.ResultContinuous(units='g/s')
+    if res.units != 'g/s':
+        raise ValueError("ResultsDiscrete is not initializing self.units correctly")
+    res.append_entry([0, 6.2])
+    res.append_entry([37, 3.4])
+    if res.get_time_integrated(0, 30) != 30 * 6.2:
+        raise ValueError('ResultsContinuous.get_time_integrated is not integrating correctly')
+    if res.get_time_integrated(0, 40) != 6.2 * 37 + (40 - 37) * 3.4:
+        raise ValueError('ResultsContinuous.get_time_integrated is not integrating corretly')
+
+
+# test_results_analysis()
+# test_npv_calculator()
+test_ResultsAggregate()
+test_ResultsDiscrete()
+test_ResultsContinuous()
 
 print("Successfully completed results tests.")

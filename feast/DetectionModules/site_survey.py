@@ -18,7 +18,7 @@ class SiteSurvey(DetectionMethod):
     3. The ability to dispatch a follow up action
     """
     def __init__(self, time, dispatch_object, sites_per_day, site_cost, detection_probability_points,
-                 detection_probabilities, op_envelope={}, ophrs={'begin': 0, 'end': 24}, site_queue=[],
+                 detection_probabilities, op_envelope=None, ophrs=None, site_queue=None,
                  survey_interval=None, **kwargs):
         """
         :param time: a Time object
@@ -45,14 +45,14 @@ class SiteSurvey(DetectionMethod):
         self.dispatch_object = dispatch_object
 
         # --------------- Process Variables -------------------
-        self.ophrs = ophrs
-        self.op_envelope = op_envelope
+        self.ophrs = ophrs or {'begin': 0, 'end': 24}
+        self.op_envelope = op_envelope or {}
         self.survey_interval = survey_interval
         self.sites_per_day = sites_per_day
         self.site_cost = site_cost  # $/site
 
         # --------------- Detection Variables -----------------
-        self.site_queue = site_queue  # queue of sites to survey
+        self.site_queue = site_queue or []  # queue of sites to survey
         self.detection_probability_points = np.array(detection_probability_points)
         self.detection_probabilities = np.array(detection_probabilities)
 

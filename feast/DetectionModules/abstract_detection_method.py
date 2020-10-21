@@ -7,14 +7,14 @@ class DetectionMethod:
     """
     DetectionMethod is an abstract super class that defines the form required for all detection methods
     """
-    def __init__(self, time, detection_variables={}, op_envelope={}):
+    def __init__(self, time, detection_variables=None, op_envelope=None):
         """
         :param time: a Time object
         """
         self.find_cost = np.zeros(time.n_timesteps)
         self.repair_cost = np.zeros(time.n_timesteps)
-        self.op_envelope = op_envelope
-        self.detection_variables = detection_variables  # Dict with format {name: interpolation mode}
+        self.op_envelope = op_envelope or {}
+        self.detection_variables = detection_variables or {}  # Dict with format {name: interpolation mode}
         self.site_queue = []
         if type(self.detection_variables) is not dict:
             raise TypeError("Detection_variables must be a dict of form {name: interpolation mode,}")

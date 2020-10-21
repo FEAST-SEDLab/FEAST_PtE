@@ -16,7 +16,7 @@ class SiteMonitor(DetectionMethod):
     3. The ability to dispatch a follow up action
     """
     def __init__(self, time, dispatch_object, time_to_detect_points, time_to_detect_days,
-                 ophrs={'begin': 0, 'end': 24}, capital=0, site_queue=[], **kwargs):
+                 ophrs=None, capital=0, site_queue=None, **kwargs):
         """
         :param time: a Time object
         :param dispatch_object: the object to dispatch for follow up actions
@@ -32,12 +32,14 @@ class SiteMonitor(DetectionMethod):
         """
 
         DetectionMethod.__init__(self, time, **kwargs)
+        if self.ophrs is None:
+            self.ophrs = {'begin': 0, 'end': 24}
         self.dispatch_object = dispatch_object
 
         # --------------- Process Variables -------------------
         self.ophrs = ophrs
         self.capital = capital
-        self.site_queue = site_queue  # list of sites where this method applies
+        self.site_queue = site_queue or []  # list of sites where this method applies
 
         # --------------- Detection Variables -----------------
         self.time_to_detect_points = time_to_detect_points  # conditions for which the mean time to detect is specified

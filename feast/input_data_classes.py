@@ -23,7 +23,7 @@ class LeakData(DataFile):
    LeakData is designed to store all leak size data from a reference. It accommodates multiple detection methods
    within a single instance.
     """
-    def __init__(self, notes='No notes provided', raw_file_name=None, data_prep_file=None, leak_sizes={}):
+    def __init__(self, notes='No notes provided', raw_file_name=None, data_prep_file=None, leak_sizes=None):
         """
         Creates a LeakData object
 
@@ -34,7 +34,7 @@ class LeakData(DataFile):
                         with one key for each detection method
         """
         DataFile.__init__(self, notes, raw_file_name, data_prep_file=data_prep_file)
-        self.leak_sizes = dict()
+        self.leak_sizes = leak_sizes or dict()
         self.well_counts = dict()
         self.comp_counts = dict()
 
