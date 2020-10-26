@@ -1,21 +1,24 @@
-import copy
 import numpy as np
 from scipy import interpolate as interp
+from feast.EmissionSimModules import simulation_classes as sc
 
 
 class DetectionMethod:
     """
     DetectionMethod is an abstract super class that defines the form required for all detection methods
     """
-    def __init__(self, time, detection_variables=None, op_envelope=None):
+    def __init__(self, time, detection_variables=None, op_envelope=None, ophrs=None):
         """
         :param time: a Time object
         """
         self.find_cost = np.zeros(time.n_timesteps)
         self.repair_cost = np.zeros(time.n_timesteps)
         self.op_envelope = op_envelope or {}
+        self.ophrs = ophrs or {}
         self.detection_variables = detection_variables or {}  # Dict with format {name: interpolation mode}
         self.site_queue = []
+        self.op_env_site_fails = sc.ResultDiscrete()
+        self.op_env_field_fails = sc.ResultDiscrete()
         if type(self.detection_variables) is not dict:
             raise TypeError("Detection_variables must be a dict of form {name: interpolation mode,}")
 
@@ -68,15 +71,14 @@ class DetectionMethod:
                 site = gas_field.sites[self.find_site_name(gas_field, site_index)]
                 condition = site.op_env_params[name]
             if params['class'] == 1 and not self.check_min_max_condition(condition, params):
-                # TODO: change to status=
-                return 'field fail'
+                status = 'field fail'
             elif params['class'] in [2, 6]:
                 status = 'site pass'
                 site_params = {'min': params['min'][site_index], 'max': params['max'][site_index]}
                 if not self.check_min_max_condition(condition, site_params):
                     status = 'site fail'
             elif params['class'] == 3 and condition in params['enum_fail_list']:
-                return 'field fail'
+                status = 'field fail'
             elif params['class'] in [4, 8]:
                 status = 'site pass'
                 if condition in params['enum_fail_list'][site_index]:
@@ -89,10 +91,12 @@ class DetectionMethod:
                 status = 'site pass'
                 if condition in params['enum_fail_list']:
                     status = 'site fail'
-
-        # TODO: if 'site fail' in status:
-        #     self.op_env_fail_count.append([time.current_time, 1])
-        # TODO: if 'field fail' in status:
+            if 'fail' in status:
+                if 'site fail' in status:
+                    self.op_env_site_fails.append_entry([time.current_time, 1])
+                elif 'field fail' in status:
+                    self.op_env_field_fails.append_entry([time.current_time, 1])
+                return status
         return status
 
     def choose_sites(self, gas_field, time, n_sites, clear_sites=True):
@@ -183,23 +187,24 @@ class DetectionMethod:
                 return compname
         return -1
 
-    def get_current_conditions(self, time, gas_field, emissions, em_indexes):
+    def get_current_conditions(self, time, gas_field, emissions, em_id):
         """
         Extracts conditions specified in self.detection_variables
 
         :param time: a Time object
         :param gas_field: a GasField object
-        :param emissions: an Emissions object
-        :param em_indexes: indexes of emissions to consider
+        :param emissions: a DataFrame of current emissions
+        :param em_id: emission indexes to consider
         :return conditions: an array (n_emissions, n_variables) of conditions for use in the PoD calculation
         """
-        conditions = np.zeros([len(em_indexes), len(self.detection_variables)])
+        conditions = np.zeros([len(em_id), len(self.detection_variables)])
+
         index = 0
         for v, im in self.detection_variables.items():
             if v in gas_field.met:
                 conditions[:, index] = gas_field.get_met(time, v, interp_modes=im, ophrs=self.ophrs)[v]
             else:
-                conditions[:, index] = emissions.__getattribute__(v)[em_indexes]
+                conditions[:, index] = emissions[v][em_id]
             index += 1
         return conditions
 

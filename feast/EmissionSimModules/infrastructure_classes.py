@@ -81,20 +81,15 @@ class GasField:
     """
     GasField accommodates all data that defines a gas field at the beginning of a simulation.
     """
-    def __init__(self, time=None, sites=None, initial_emissions=None, new_emissions=None,
-                 start_times=None, met_data_path=None):
+    def __init__(self, time=None, sites=None, emissions=None,
+                 met_data_path=None):
         """
         :param time: A FEAST time object
         :param sites: a dict of sites like this: {'name': {'number': n_sites, 'parameters': site_object}}
-        :param initial_emissions: A FEAST emission object defining emissions at the beginning of the simulation
-        :param new_emissions: A list of FEAST emission objects with length time.n_timesteps
-        :param start_times: The times at which new emissions begin
+        :param emissions: A FEAST emission object to be used during the simulations
         :param met_data_path: A path to a met data file
         """
         self.sites = sites
-        self.initial_emissions = initial_emissions
-        self.new_emissions = new_emissions
-        self.start_times = start_times
         self.met_data_path = met_data_path
 
         # -------------- Calculated parameters --------------
@@ -107,31 +102,32 @@ class GasField:
         self.set_indexes()
         if self.met_data_path:
             self.met_data_maker()
-        if self.initial_emissions is None:
-            self.initialize_emissions(time)
-        if self.new_emissions is None:
-            self.emerging_emissions(time)
-        self.input_emissions = []
-        for ind in range(time.n_timesteps):
-            cond = np.where(self.start_times == ind)[0]
-            self.input_emissions.append(ecf.Emission(flux=self.new_emissions.flux[cond],
-                                                     reparable=self.new_emissions.reparable[cond],
-                                                     site_index=self.new_emissions.site_index[cond],
-                                                     comp_index=self.new_emissions.comp_index[cond],
-                                                     endtime=self.new_emissions.endtime[cond],
-                                                     repair_cost=self.new_emissions.repair_cost[cond]))
+        if emissions is None:
+            self.emissions = self.initialize_emissions(time)
+            self.emissions.extend(self.emerging_emissions(time))
+        else:
+            self.emissions = emissions
+        # self.input_emissions = []
+        # for ind in range(time.n_timesteps):
+        #     cond = np.where(self.start_times == ind)[0]
+        #     self.input_emissions.extend(ecf.Emission(flux=self.new_emissions.flux[cond],
+        #                                              reparable=self.new_emissions.reparable[cond],
+        #                                              site_index=self.new_emissions.site_index[cond],
+        #                                              comp_index=self.new_emissions.comp_index[cond],
+        #                                              end_time=self.new_emissions.endtime[cond],
+        #                                              repair_cost=self.new_emissions.repair_cost[cond]))
 
     def initialize_emissions(self, time):
         """
         Create emissions that exist at the beginning of the simulation
 
         :param time:
-        :return:
+        :return initial_emissions:
         """
         cap_est = 0
         for site_dict in self.sites.values():
             cap_est += site_dict['number'] * 10
-        self.initial_emissions = ecf.Emission(capacity=cap_est)
+        initial_emissions = ecf.Emission()
         # This generates new leaks for each component type in each site type
         for sitedict in self.sites.values():
             site = sitedict['parameters']
@@ -142,7 +138,9 @@ class GasField:
                     n_leaks = np.random.binomial(n_comp, compobj.emission_per_comp)
                 else:
                     n_leaks = 0
-                self.emission_maker(n_leaks, self.initial_emissions, comp_name, n_comp, time, site)
+                self.emission_maker(n_leaks, initial_emissions, comp_name, n_comp, time, site)
+        initial_emissions.emissions.loc[:, 'start_time'] = np.zeros(len(initial_emissions.emissions.flux))
+        return initial_emissions
 
     def set_indexes(self):
         """
@@ -171,7 +169,7 @@ class GasField:
         :param time:
         :return:
         """
-        self.new_emissions = ecf.Emission()
+        new_emissions = ecf.Emission()
         for site_dict in self.sites.values():
             site = site_dict['parameters']
             for compname, comp in site.comp_dict.items():
@@ -181,9 +179,11 @@ class GasField:
                 n_comp = site_dict['number'] * comp['number']
                 n_leaks = np.random.poisson(n_comp * comp['parameters'].emission_production_rate * time.end_time)
                 n_episodic = np.random.poisson(n_comp * comp['parameters'].episodic_emission_per_day * time.end_time)
-                self.emission_maker(n_leaks, self.new_emissions, compname, n_comp, time, site, n_episodic=n_episodic)
-        self.start_times = np.random.randint(0, time.n_timesteps, self.new_emissions.n_em, dtype=int)
-        self.new_emissions.endtime += self.start_times * time.delta_t
+                self.emission_maker(n_leaks, new_emissions, compname, n_comp, time, site, n_episodic=n_episodic)
+        new_emissions.emissions.end_time += new_emissions.emissions.start_time
+        n_em = len(new_emissions.emissions.flux)
+        new_emissions.emissions.index = np.linspace(1, n_em, n_em, dtype=int) + np.max(self.emissions.emissions.index)
+        return new_emissions
 
     def emission_size_maker(self, time):
         """
@@ -258,7 +258,7 @@ class GasField:
     @staticmethod
     def emission_maker(n_leaks, new_leaks, comp_name, n_comp, time, site, n_episodic=None):
         """
-        Updates an Emission object with new values returned by emission_size_maker
+        Updates an Emission object with new values returned by emission_size_maker and assigns unique indexes to them
 
         :param n_leaks: number of new leaks to create
         :param new_leaks: a leak object to extend
@@ -267,23 +267,37 @@ class GasField:
         :param time: a time object
         :param site: a site object
         :param n_episodic: number of episodic emissions to create
+        :param start_time: time at which the new emissions begin emitting
         :return: None
         """
         comp = site.comp_dict[comp_name]['parameters']
+        max_ind = np.max(new_leaks.emissions.index)
+        if np.isnan(max_ind):
+            max_ind = 0
+        n_existing = len(new_leaks.emissions.index)
         if n_leaks > 0:
-            new_leaks.extend(comp.emission_size_maker(n_leaks, comp_name, site, time, reparable=comp.base_reparable))
+            start_time = np.random.uniform(0, time.end_time, n_leaks)
+            new_leaks.extend(comp.emission_size_maker(n_leaks, comp_name, site, time, reparable=comp.base_reparable,
+                                                      start_time=start_time))
         if n_episodic is None:
             n_episodic = np.random.poisson(n_comp * comp.episodic_emission_per_day * time.delta_t)
+
+        start_time = np.random.uniform(0, time.end_time, n_episodic)
         new_leaks.extend(comp.intermittent_emission_maker(n_episodic,
                                                           comp.episodic_emission_sizes,
                                                           comp.episodic_emission_duration,
-                                                          time, site, comp_name))
+                                                          time, site, comp_name, start_time))
         n_vent = 0
         if comp.vent_starts.size > 0:
             n_vent = np.random.poisson(comp.vent_duration / comp.vent_period * n_comp *
                                        min(1, time.delta_t/comp.vent_period))
+        start_time = np.random.uniform(0, time.end_time, n_vent)
         new_leaks.extend(comp.intermittent_emission_maker(n_vent, comp.vent_sizes, comp.vent_duration,
-                                                          time, site, comp_name))
+                                                          time, site, comp_name, start_time))
+        n_em = n_vent + n_leaks + n_episodic
+        update_index = np.array(new_leaks.emissions.index)
+        update_index[n_existing:] = np.linspace(max_ind + 1, max_ind + n_em, n_em, dtype=int)
+        new_leaks.emissions.index = update_index
         return None
 
 

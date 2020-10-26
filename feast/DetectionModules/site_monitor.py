@@ -86,13 +86,12 @@ class SiteMonitor(DetectionMethod):
         for site_ind in site_inds:
             vals = np.zeros([1, len(self.detection_variables)])
             ind = 0
-            cond = np.where(emissions.site_index[:emissions.n_em] == site_ind)[0]
             for v, im in self.detection_variables.items():
                 if v in gas_field.met:
                     vals[0, ind] = gas_field.get_met(time, v, interp_modes=im, ophrs=self.ophrs)[v]
                 else:
                     # sum all emission variables needed for detection
-                    vals[0, ind] = np.sum(emissions.__getattribute__(v)[cond])
+                    vals[0, ind] = np.sum(emissions[v][emissions.site_index == site_ind])
                 ind += 1
             ttd = self.empirical_interpolator(self.time_to_detect_points, self.time_to_detect_days, vals)
             probs[counter] = self.prob_detection(time, ttd)

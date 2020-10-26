@@ -6,6 +6,7 @@ import feast.EmissionSimModules.infrastructure_classes
 def basic_gas_field():
     np.random.seed(0)
     n_sites = 100
+    n_em = 100
     site_dict = {}
     comp_fug = feast.EmissionSimModules.infrastructure_classes.Component(
         repair_cost_path='../ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p',
@@ -25,14 +26,20 @@ def basic_gas_field():
     site_dict['basic pad'] = {'number': n_sites, 'parameters': basicpad}
     timeobj = feast.EmissionSimModules.simulation_classes.Time(delta_t=1, end_time=2)
     initial_leaks = feast.EmissionSimModules.emission_class_functions.Emission(
-        flux=np.ones(100), site_index=np.random.randint(0, n_sites, 100),
-        comp_index=np.random.randint(0, 100, 100), endtime=np.infty, repair_cost=np.ones(100) * 2
+        flux=np.ones(n_em), site_index=np.random.randint(0, n_sites, n_em),
+        comp_index=np.random.randint(0, 100, n_em), end_time=np.infty, repair_cost=np.ones(n_em) * 2
     )
     gas_field = feast.EmissionSimModules.infrastructure_classes.GasField(
         sites=site_dict,
         time=timeobj,
-        initial_emissions=initial_leaks
+        met_data_path='TMY-DataExample.csv'
     )
+    # This enforces hard coded emissions for test reproducability
+    gas_field.emissions.emissions = gas_field.emissions.emissions[gas_field.emissions.emissions.start_time > 0]
+    gas_field.emissions.emissions.index = list(np.linspace(n_em, n_em + len(gas_field.emissions.emissions.flux) - 1,
+                                                           len(gas_field.emissions.emissions.flux), dtype=int))
+    gas_field.emissions.extend(initial_leaks)
+
     return gas_field
 
 

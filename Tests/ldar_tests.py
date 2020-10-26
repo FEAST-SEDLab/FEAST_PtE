@@ -3,7 +3,7 @@ import copy
 import feast
 import os
 import pickle
-import time as ti
+import pandas as pd
 from feast.EmissionSimModules import simulation_classes as sc
 import feast.EmissionSimModules.emission_class_functions as ecf
 from feast import DetectionModules as Dm
@@ -13,12 +13,13 @@ from Tests.test_helper import ex_prob_detect_arrays
 
 def test_repair():
     n_em = 10
-    flux, capacity, reparable, repair_cost = np.zeros(n_em), 10, np.zeros(n_em, dtype=bool), np.ones(n_em)
+    flux, reparable, repair_cost = np.zeros(n_em), np.zeros(n_em, dtype=bool), np.ones(n_em)
     site_index, comp_index = np.zeros(n_em), np.zeros(n_em)
     flux[5:] = 1
     reparable[3: 8] = True
     endtime = np.linspace(0, 9, n_em)
-    emission = ecf.Emission(flux, capacity, reparable, site_index, comp_index, repair_cost=repair_cost, endtime=endtime)
+    emission = ecf.Emission(flux, reparable, site_index, comp_index, repair_cost=repair_cost,
+                            end_time=endtime)
     time = sc.Time()
     time.time_index = 3
     time.current_time = 4.5
@@ -27,8 +28,8 @@ def test_repair():
     repair_proc.action(emit_inds=detected)
     repair_proc.repair(time, emission)
     expected = np.array([0., 1., 2., 3., 4., 5., 5.5, 5.5, 8., 9.])
-    for ind in range(len(emission.endtime)):
-        if emission.endtime[ind] != expected[ind]:
+    for ind in range(len(emission.emissions.end_time)):
+        if emission.emissions.end_time[ind] != expected[ind]:
             raise ValueError("DetectionModules.repair.Repair is not adjusting "
                              "emission endtimes correctly at index {:0.0f}".format(ind))
 
@@ -45,7 +46,8 @@ def test_check_time():
         detection_probabilities=[0, 0.5, 1],
         detection_variables={'flux': 'mean'},
         survey_interval=50,
-        dispatch_object=rep
+        dispatch_object=rep,
+        ophrs={'begin': 8, 'end': 17}
     )
     if not tech.check_time(time):
         raise ValueError("Check time returning False when it should be true at time 0")
@@ -59,7 +61,8 @@ def test_check_time():
         detection_probabilities=[0, 0.5, 1],
         detection_variables={'flux': 'mean'},
         survey_interval=50,
-        dispatch_object=rep
+        dispatch_object=rep,
+        ophrs={'begin': 8, 'end': 17}
     )
     if tech.check_time(time):
         raise ValueError("check_time returning True when it should return False at time 0")
@@ -85,19 +88,20 @@ def test_comp_survey():
         detection_probability_points=points,
         detection_probabilities=probs
     )
-    emissions = gas_field.initial_emissions
+    emissions = gas_field.emissions.get_current_emissions(time)
     tech.action(list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)))
     tech.detect(time, gas_field, emissions, find_cost)
-    if np.max(emissions.site_index[rep.to_repair]) != 13:
+    if np.max(emissions.site_index[emissions.index.isin(rep.to_repair)]) != 13:
         raise ValueError("tech.detect repairing emissions at incorrect sites")
-    expected_detected_inds = [54, 55, 75, 66, 87, 62, 58, 84, 5, 25, 43, 71, 13, 79, 97]
+    expected_detected_ids = [54, 55, 75, 66, 87, 62, 58, 84, 5, 25, 43, 71, 13, 79, 97]
     for ind in range(len(rep.to_repair)):
-        if expected_detected_inds[ind] != rep.to_repair[ind]:
+        if expected_detected_ids[ind] != rep.to_repair[ind]:
             raise ValueError("tech.detect not detecting the correct emissions")
-    if len(expected_detected_inds) != len(rep.to_repair):
+    if len(expected_detected_ids) != len(rep.to_repair):
         raise ValueError("tech.detect not detecting the correct emissoins")
-    rep.repair(time, emissions)
-    if np.max(emissions.endtime[np.array(expected_detected_inds)]) != 0:
+    rep.repair(time, gas_field.emissions)
+    expected_repaired = gas_field.emissions.emissions.index.isin(expected_detected_ids)
+    if np.max(gas_field.emissions.emissions.end_time[expected_repaired]) != 0:
         raise ValueError("rep.repair not adjusting the end times correctly")
 
 
@@ -130,7 +134,7 @@ def test_comp_survey_emitters_surveyed():
         site_queue=[]
     )
     tech.action(list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)))
-    emissions = gas_field.initial_emissions
+    emissions = gas_field.emissions.get_current_emissions(time)
     emitter_inds = tech.emitters_surveyed(time, gas_field, emissions, find_cost)
     if emitter_inds:
         # emitter_inds is expected to be []
@@ -174,7 +178,7 @@ def test_site_survey():
         detection_probability_points=points,
         detection_probabilities=probs
     )
-    emissions = gas_field.initial_emissions
+    emissions = gas_field.emissions.get_current_emissions(time)
     np.random.seed(0)
     # test detect_prob_curve
     detect = tech.detect_prob_curve(time, gas_field, [0, 1, 2], emissions)
@@ -224,7 +228,8 @@ def test_sitedetect_sites_surveyed():
         labor=100,
         site_queue=[],
         detection_probability_points=[1, 2],
-        detection_probabilities=[0, 1]
+        detection_probabilities=[0, 1],
+        ophrs={'begin': 8, 'end': 17}
     )
     tech = Dm.site_survey.SiteSurvey(
         time,
@@ -298,19 +303,18 @@ def test_ldar_program():
     ogi_survey = Dm.ldar_program.LDARProgram(
         time, copy.deepcopy(gas_field), {'ogi': ogi}
     )
-    if len(ogi_survey.find_cost) != 11:
+    if len(ogi_survey.find_cost) != 10:
         raise ValueError("find_cost not set to the correct length")
-    if np.sum(ogi_survey.emissions.flux) != 100:
+    em = ogi_survey.emissions.get_current_emissions(time)
+    if np.sum(em.flux) != 100:
         raise ValueError("Unexpected emission rate in LDAR program initialization")
 
     # test end_emissions
-    ogi_survey.emissions.endtime[0] = 0
-    ogi_survey.end_emissions(time)
-    if ogi_survey.emissions.flux[0] != 0:
-        raise ValueError("ldar_program.end_emissions not zeroing emissions as expected")
+    ogi_survey.emissions.emissions.loc[0, 'end_time'] = 0
     # test action
     ogi_survey.action(time, gas_field)
-    if np.sum(ogi_survey.emissions.flux) != 84:
+    em = ogi_survey.emissions.get_current_emissions(time)
+    if np.sum(em.flux) != 84:
         raise ValueError("Unexpected emission rate after LDAR program action")
     # test combined program
     tech_dict = {
@@ -323,7 +327,8 @@ def test_ldar_program():
     # test action
     np.random.seed(0)
     tiered_survey.action(time, gas_field)
-    if np.sum(tiered_survey.emissions.flux) != 86:
+    em = tiered_survey.emissions.get_current_emissions(time)
+    if np.sum(em.flux) != 86:
         raise ValueError("Unexpected emission rate after LDAR program action with tiered survey")
 
 
@@ -437,7 +442,7 @@ def test_check_op_envelope():
     tech.op_envelope['wind speed']['max'] = [2]
     op_env = tech.check_op_envelope(gas_field, time, 0)
     if op_env != 'field fail':
-        raise ValueError("check_op_envelope is no retruning 'field fail' as expected")
+        raise ValueError("check_op_envelope is not retruning 'field fail' as expected")
 
 
 def test_get_current_conditions():
@@ -459,11 +464,13 @@ def test_get_current_conditions():
         detection_probabilities=detect_probs,
         site_queue=[]
     )
-    emissions = gas_field.initial_emissions
-    emissions.flux = np.linspace(0.1, 10, 100)
-    em_indexes = np.linspace(0, emissions.n_em - 1, emissions.n_em, dtype=int)
+    # pd.DataFrame initializes a new DataFrame to avoid chained indexing warnings
+    emissions = pd.DataFrame(gas_field.emissions.get_current_emissions(time))
+    n_em = 100
+    emissions.loc[:, 'flux'] = np.linspace(0.1, 10, n_em)
+    em_indexes = np.linspace(0, n_em - 1, n_em, dtype=int)
     ret = tech.get_current_conditions(time, gas_field, emissions, em_indexes)
-    if np.any(ret[:, 0] != emissions.flux[:emissions.n_em]):
+    if np.any(ret[:, 0] != emissions.flux):
         raise ValueError("get_current_conditions not returning the correct values")
     if np.any(ret[:, 1] != np.mean(gas_field.met['wind speed'][8:17])):
         raise ValueError("get_current_conditions not returning the correct values")
@@ -547,7 +554,7 @@ def test_site_monitor():
         dispatch_object=rep,
     )
     site_inds = list(range(0, 10))
-    emissions = copy.copy(gas_field.initial_emissions)
+    emissions = copy.copy(gas_field.emissions.get_current_emissions(time))
     detect = cm.detect_prob_curve(time, gas_field, site_inds, emissions)
     must_detect = [0, 9]
     must_not_detect = [2, 7, 8]

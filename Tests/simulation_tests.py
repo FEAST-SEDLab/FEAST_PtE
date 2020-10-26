@@ -40,7 +40,7 @@ def test_results_analysis():
     if null_npv['Finding'].shape != (1, 3):
         raise ValueError("results analysis function returning the wrong number of realizations or LDAR programs in "
                          + "null npv")
-    if emissions.shape != (2, 3, 3):
+    if emissions.shape != (2, 2, 3):
         raise ValueError("results analysis function returning the wrong number of realizations or "
                          + "LDAR programs in emissions")
     for f in os.listdir('ResultsTemp'):
@@ -81,15 +81,19 @@ def test_npv_calculator():
     )
     site_dict['basic pad'] = {'number': n_sites, 'parameters': basicpad}
     timeobj = feast.EmissionSimModules.simulation_classes.Time(delta_t=1, end_time=2)
+    n_em = 1000
     initial_leaks = feast.EmissionSimModules.emission_class_functions.Emission(
-        flux=np.ones(1000), site_index=np.random.randint(0, n_sites, 1000),
-        comp_index=np.random.randint(0, 100, 1000), endtime=np.infty, repair_cost=np.ones(1000) * 2
+        flux=np.ones(n_em), site_index=np.random.randint(0, n_sites, n_em),
+        comp_index=np.random.randint(0, 100, n_em), end_time=np.infty, repair_cost=np.ones(n_em) * 2
     )
     gas_field = feast.EmissionSimModules.infrastructure_classes.GasField(
         sites=site_dict,
         time=timeobj,
-        initial_emissions=initial_leaks
     )
+    gas_field.emissions.emissions = gas_field.emissions.emissions[gas_field.emissions.emissions.start_time > 0]
+    gas_field.emissions.emissions.index = list(np.linspace(n_em, n_em + len(gas_field.emissions.emissions.flux) - 1,
+                                               len(gas_field.emissions.emissions.flux), dtype=int))
+    gas_field.emissions.extend(initial_leaks)
     rep = Dm.repair.Repair(repair_delay=0)
     points = np.logspace(-3, 1, 100)
     probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.02)) / (0.8 * np.sqrt(2))) for f
@@ -173,10 +177,10 @@ def test_ResultsContinuous():
         raise ValueError('ResultsContinuous.get_time_integrated is not integrating corretly')
 
 
-# test_results_analysis()
-# test_npv_calculator()
+test_results_analysis()
+test_npv_calculator()
 test_ResultsAggregate()
 test_ResultsDiscrete()
 test_ResultsContinuous()
 
-print("Successfully completed results tests.")
+print("Successfully completed simulation tests.")

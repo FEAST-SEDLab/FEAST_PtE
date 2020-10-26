@@ -19,9 +19,9 @@ class CompSurvey(DetectionMethod):
     3. The ability to call a follow up action
     """
     def __init__(self, time, dispatch_object, survey_interval, survey_speed, labor, site_queue,
-                 detection_probability_points, detection_probabilities,
+                 detection_probability_points, detection_probabilities, ophrs,
                  comp_survey_index=0, site_survey_index=0,
-                 op_env_wait_time=7, ophrs={'begin': 8, 'end': 17}, **kwargs):
+                 op_env_wait_time=7, **kwargs):
         """
         :param time: a Time object
         :param dispatch_object: an object to dispatch for follow-up actions (typically a Repair method)
@@ -62,26 +62,24 @@ class CompSurvey(DetectionMethod):
         work_time = (self.ophrs['end'] - self.ophrs['begin']) / 24
         self.comps_per_timestep = self.survey_speed * 24 * time.delta_t * np.min([1, work_time / time.delta_t])
 
-    def detect_prob_curve(self, time, gas_field, cond, emissions):
+    def detect_prob_curve(self, time, gas_field, em_surveyed, emissions):
         """
         This function determines which leaks are found given an array of indexes defined by "cond."
         The method uses attributes of the DetectionMethod and interpolation.
 
         :param time: a Time object
         :param gas_field: a GasField object
-        :param cond: The array of indexes to be considered (array of ints)
-        :param emissions: an Emission object storing all emissions in the simulation
+        :param em_surveyed: Array of emission_id to consider
+        :param emissions: a DataFrame of current emissions
         :return detect: the indexes of detected leaks (array of ints)
         """
-        n_scores = len(cond)
+        n_scores = len(em_surveyed)
         if n_scores == 0:
-            return cond
-        cond = cond[emissions.flux[cond] > 0]
-        n_scores = len(cond)
+            return em_surveyed
         scores = np.random.uniform(0, 1, n_scores)
-        vals = self.get_current_conditions(time, gas_field, emissions, cond)
+        vals = self.get_current_conditions(time, gas_field, emissions, em_surveyed)
         probs = self.empirical_interpolator(self.detection_probability_points, self.detection_probabilities, vals)
-        detect = cond[scores <= probs]
+        detect = em_surveyed[scores <= probs]
         return detect
 
     def emitters_surveyed(self, time, gas_field, emissions, find_cost):
@@ -92,9 +90,9 @@ class CompSurvey(DetectionMethod):
 
         :param time: a Time object
         :param gas_field: a GasField object
-        :param emissions: an Emissions object
+        :param emissions: a DataFrame of current emissions
         :param find_cost: the find_cost array associated with the ldar program
-        :return emitter_inds: indexes of emissions to evaluate at this timestep (list of ints)
+        :return emitter_inds: emission_id of emissions to evaluate at this timestep (list of ints)
         """
         remaining_comps = self.comps_per_timestep
         find_cost[time.time_index] += self.comps_per_timestep / self.survey_speed * self.labor
@@ -127,7 +125,7 @@ class CompSurvey(DetectionMethod):
             site_cond = emissions.site_index == self.site_survey_index
             comp_cond = (emissions.comp_index >= self.comp_survey_index) & \
                         (emissions.comp_index < self.comp_survey_index + remaining_comps)
-            emitter_inds.extend(np.where(site_cond & comp_cond)[0])
+            emitter_inds.extend(emissions.index[site_cond & comp_cond])
             if remaining_comps + self.comp_survey_index > gas_field.sites[site_name]['parameters'].max_comp_ind:
                 remaining_comps -= (gas_field.sites[site_name]['parameters'].max_comp_ind - self.comp_survey_index)
                 self.comp_survey_index = 0
@@ -143,6 +141,8 @@ class CompSurvey(DetectionMethod):
 
         :param time: a Time object
         :param gas_field: a GasField object
+        :param emissions: a DataFrame of current emissions
+        :param find_cost: an array of finding costs
         """
         # enforces the operating hours
         if self.check_time(time):

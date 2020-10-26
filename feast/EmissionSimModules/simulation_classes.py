@@ -17,7 +17,7 @@ class Time:
         :param end_time: length of the simulation (days)
         :param current_time: current time in a simulation (days)
         """
-        self.n_timesteps = int(end_time/delta_t+1)
+        self.n_timesteps = int(end_time / delta_t)
         self.end_time = end_time
         self.delta_t = delta_t
         self.current_time = current_time
@@ -56,23 +56,11 @@ class Scenario:
             if display_status and self.time.current_time % (self.time.end_time / 10) < self.time.delta_t:
                 print("The evaluation is {:0.0f}% complete".format(100 * self.time.time_index / self.time.n_timesteps))
             # Loop through each LDAR program:
-            for ldar_program in self.ldar_program_dict.values():
-                # The extra factor here accounts for emissions that end part way through the present timestep.
-                if len(ldar_program.emissions.flux) > 0:
-                    timestep_fraction = (ldar_program.emissions.endtime[:ldar_program.emissions.n_em] -
-                                         self.time.current_time + self.time.delta_t) / self.time.delta_t
-                    emissions = ldar_program.emissions.flux[:ldar_program.emissions.n_em] * \
-                                np.min([np.ones(ldar_program.emissions.n_em), timestep_fraction], axis=0)
-                    ldar_program.emissions_timeseries.append(np.sum(emissions))
-                    vented_em_indexes = np.invert(ldar_program.emissions.reparable[:ldar_program.emissions.n_em])
-                    ldar_program.vents_timeseries.append(np.sum(emissions[vented_em_indexes]))
-                else:
-                    ldar_program.emissions_timeseries.append(0)
-                    ldar_program.vents_timeseries.append(0)
-                ldar_program.action(self.time, self.gas_field)
-                ldar_program.emissions.extend(self.gas_field.input_emissions[self.time.time_index])
-                if self.time.time_index % 1000 == 0:
-                    ldar_program.emissions.clear_zeros()
+            for lp in self.ldar_program_dict.values():
+                lp.action(self.time, self.gas_field)
+                t0 = self.time.current_time
+                lp.emissions_timeseries.append(lp.emissions.em_rate_in_range(t0, t0 + self.time.delta_t))
+                lp.vents_timeseries.append(lp.emissions.em_rate_in_range(t0, t0 + self.time.delta_t, reparable=False))
             self.time.current_time += self.time.delta_t
 
         # -------------- Save results --------------

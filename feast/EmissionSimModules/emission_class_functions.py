@@ -11,15 +11,16 @@ class Emission:
     """
     Stores all properties of all emissions that exist at a particular instant in a simulation.
     """
-    def __init__(self, flux=(), reparable=True, site_index=(), comp_index=(), start_time=0, endtime=np.infty,
-                 repair_cost=()):
+    def __init__(self, flux=(), reparable=True, site_index=(), comp_index=(), start_time=0, end_time=np.infty,
+                 repair_cost=(), emission_id=None):
         """
         :param flux: An array of emission rates (array of floats--gram/second)
         :param reparable: An array of True/False values to indicate whether or not an emission is reparable
         :param site_index: An array indicating the index of the site that contains every emission
         :param comp_index: An array indicating the index of the component that is the source of each emission
         :param start_time: An array specifying the time when every emission begins
-        :param endtime: An array specifying the time when every emission will end (days)
+        :param end_time: An array specifying the time when every emission will end (days)
+        :param emission_id:
         :param repair_cost: An array storing the cost of repairing every emission ($)
         """
         try:
@@ -33,108 +34,159 @@ class Emission:
             rep_array = np.zeros(length_in, dtype=np.bool)
         else:
             rep_array = np.array(reparable)
+        emission_id = emission_id or np.linspace(0, length_in - 1, length_in, dtype=int)
         try:
-            if len(endtime) == length_in:
-                endtime = np.array(endtime)
+            if len(end_time) == length_in:
+                end_time = np.array(end_time)
         except TypeError:
-            endtime = np.ones(length_in) * endtime
-        self.emitters = pd.DataFrame({
+            end_time = np.ones(length_in) * end_time
+        self.emissions = pd.DataFrame({
             'flux': np.array(flux),
             'site_index': np.array(site_index),
             'comp_index': np.array(comp_index),
             'reparable': rep_array,
-            'endtime': endtime,
-            'repair_cost': np.array(repair_cost)
-        })
+            'end_time': end_time,
+            'repair_cost': np.array(repair_cost),
+            'start_time': np.array(start_time)
+        }, index=np.array(emission_id))
+        self.emissions.index.name = 'emission_id'
 
-    def extend(self, em_object_in):
+    def get_current_emissions(self, time):
         """
-        The function extends the existing attributes of self with the attributes of em_object_in. If the arrays
-        in self have capacity, n_em the new values are inserted and n_em is updated. If there is not sufficient
-        remaining capacity, the arrays of em_obj_in are appended to the existing arrays. The complexity allows was
-        developed to improve the speed of calculations by initializing the arrays.
-
-        :param em_object_in: an emission object
+        Returns all emissions that exist at time.current_time
+        :param time: a Time object
+        :return: a DataFrame of current emissions
         """
-        if len(self.flux) - em_object_in.n_em - self.n_em >= 0:
-            self.flux[self.n_em: self.n_em + em_object_in.n_em] = em_object_in.flux
-            self.reparable[self.n_em: self.n_em + em_object_in.n_em] = em_object_in.reparable
-            self.endtime[self.n_em: self.n_em + em_object_in.n_em] = em_object_in.endtime
-            self.site_index[self.n_em: self.n_em + em_object_in.n_em] = em_object_in.site_index
-            self.comp_index[self.n_em: self.n_em + em_object_in.n_em] = em_object_in.comp_index
-            self.repair_cost[self.n_em: self.n_em + em_object_in.n_em] = em_object_in.repair_cost
-        else:
-            self.flux = np.append(self.flux[:self.n_em], em_object_in.flux)
-            self.reparable = np.append(self.reparable[:self.n_em], em_object_in.reparable)
-            self.endtime = np.append(self.endtime[:self.n_em], em_object_in.endtime)
-            self.site_index = np.append(self.site_index[:self.n_em], em_object_in.site_index)
-            self.comp_index = np.append(self.comp_index[:self.n_em], em_object_in.comp_index)
-            self.repair_cost = np.append(self.repair_cost[:self.n_em], em_object_in.repair_cost)
+        cond = (self.emissions['start_time'] <= time.current_time) & (self.emissions['end_time'] > time.current_time)
+        return self.emissions.loc[cond]
 
-        self.n_em += em_object_in.n_em
-
-    def delete_leaks(self, indexes_to_delete):
+    def get_emissions_in_range(self, t0, t1, reparable=None):
         """
-        Delete all parameters associated with leaks at indexes 'indexes_to_delete'
-
-        :param indexes_to_delete: A list of leak indexes to delete, or the string 'all'
+        Returns all emissions that existed between t0 and t1
+        :param t0: beginning of interval (days)
+        :param t1: end of interval (days)
+        :param reparable: boolean condition. If set, only returns emissions with a matching reparable property
+        :return: a DataFrame of all emissions that existed at any time in the interval t0:t1
         """
-        if type(indexes_to_delete) is str:
-            if indexes_to_delete == 'all':
-                indexes_to_delete = list(range(0, self.n_em))
-            else:
-                raise ValueError('indexes_to_delete must be a scalar, an array or the str "all"')
-        self.flux[indexes_to_delete] = 0
+        cond = (self.emissions['start_time'] < t1) & (self.emissions['end_time'] >= t0)
+        if reparable is not None:
+            cond = cond & (self.emissions['reparable'] == reparable)
+        return self.emissions[cond]
 
-    def clear_zeros(self):
+    def em_rate_in_range(self, t0, t1, reparable=None):
         """
-        This function removes all leaks from the leak object that have zero flux. This is in contrast to the
-        delete_leaks method, which sets the flux to zero for specified leak indexes. These methods are implemented
-        separately for computation efficiency: delete_leaks is called frequently, and only changes the flux value at
-        a few indexes. clear_zeros is called less frequently and creates a new copy of the leak attribute arrays with
-        the 0 flux entries omitted.
-
-        :return: None
+        Returns the sum of emissions that existed between t0 and t1 integrated over the time period
+        :param t0: beginning of interval (days)
+        :param t1: end of interval (days)
+        :param reparable: boolean condition. If set, only returns emissions with a matching reparable property
+        :return: Average emission rate between t1 and t0 (g/s)
         """
-        indexes_to_delete = np.argwhere(self.flux[:self.n_em] == 0)
-        self.flux = np.delete(self.flux, indexes_to_delete)
-        self.reparable = np.delete(self.reparable, indexes_to_delete)
-        self.endtime = np.delete(self.endtime, indexes_to_delete)
-        self.site_index = np.delete(self.site_index, indexes_to_delete)
-        self.comp_index = np.delete(self.comp_index, indexes_to_delete)
-        self.repair_cost = np.delete(self.repair_cost, indexes_to_delete)
-        try:
-            self.n_em -= len(indexes_to_delete)
-        except TypeError:
-            self.n_em -= 1
+        em = self.get_emissions_in_range(t0, t1, reparable=reparable)
+        st = em['start_time'].to_numpy()
+        st[st < t0] = t0
+        et = em['end_time'].to_numpy()
+        et[et > t1] = t1
+        duration = et - st
+        return np.sum(duration * em.flux) / (t1 - t0)
 
-    def sort_by_site(self):
+    def extend(self, *args):
         """
-        sorts all of the leak attributes based on the site they are associated with.
-
-        :return: None
+        Extends the existing emissions data frame with all of the entries in args
+        :param args: a list of Emission objects
+        :return:
         """
-        sortorder = np.argsort(self.site_index[:self.n_em])
-        self.flux[:self.n_em] = self.flux[:self.n_em][sortorder]
-        self.reparable[:self.n_em] = self.reparable[:self.n_em][sortorder]
-        self.endtime[:self.n_em] = self.endtime[:self.n_em][sortorder]
-        self.site_index[:self.n_em] = self.site_index[:self.n_em][sortorder]
-        self.comp_index[:self.n_em] = self.comp_index[:self.n_em][sortorder]
-        self.repair_cost[:self.n_em] = self.repair_cost[:self.n_em][sortorder]
+        emission_list = [self.emissions]
+        [emission_list.append(a.emissions) for a in args]
+        self.emissions = pd.concat(emission_list)
+    # def extend(self, em_object_in):
+    #     """
+    #     The function extends the existing attributes of self with the attributes of em_object_in. If the arrays
+    #     in self have capacity, n_em the new values are inserted and n_em is updated. If there is not sufficient
+    #     remaining capacity, the arrays of em_obj_in are appended to the existing arrays. The complexity allows was
+    #     developed to improve the speed of calculations by initializing the arrays.
+    #
+    #     :param em_object_in: an emission object
+    #     """
+    #     if len(self.flux) - em_object_in.n_em - self.n_em >= 0:
+    #         self.flux[self.n_em: self.n_em + em_object_in.n_em] = em_object_in.flux
+    #         self.reparable[self.n_em: self.n_em + em_object_in.n_em] = em_object_in.reparable
+    #         self.endtime[self.n_em: self.n_em + em_object_in.n_em] = em_object_in.endtime
+    #         self.site_index[self.n_em: self.n_em + em_object_in.n_em] = em_object_in.site_index
+    #         self.comp_index[self.n_em: self.n_em + em_object_in.n_em] = em_object_in.comp_index
+    #         self.repair_cost[self.n_em: self.n_em + em_object_in.n_em] = em_object_in.repair_cost
+    #     else:
+    #         self.flux = np.append(self.flux[:self.n_em], em_object_in.flux)
+    #         self.reparable = np.append(self.reparable[:self.n_em], em_object_in.reparable)
+    #         self.endtime = np.append(self.endtime[:self.n_em], em_object_in.endtime)
+    #         self.site_index = np.append(self.site_index[:self.n_em], em_object_in.site_index)
+    #         self.comp_index = np.append(self.comp_index[:self.n_em], em_object_in.comp_index)
+    #         self.repair_cost = np.append(self.repair_cost[:self.n_em], em_object_in.repair_cost)
+    #
+    #     self.n_em += em_object_in.n_em
+    #
+    # def delete_leaks(self, indexes_to_delete):
+    #     """
+    #     Delete all parameters associated with leaks at indexes 'indexes_to_delete'
+    #
+    #     :param indexes_to_delete: A list of leak indexes to delete, or the string 'all'
+    #     """
+    #     if type(indexes_to_delete) is str:
+    #         if indexes_to_delete == 'all':
+    #             indexes_to_delete = list(range(0, self.n_em))
+    #         else:
+    #             raise ValueError('indexes_to_delete must be a scalar, an array or the str "all"')
+    #     self.flux[indexes_to_delete] = 0
+    #
+    # def clear_zeros(self):
+    #     """
+    #     This function removes all leaks from the leak object that have zero flux. This is in contrast to the
+    #     delete_leaks method, which sets the flux to zero for specified leak indexes. These methods are implemented
+    #     separately for computation efficiency: delete_leaks is called frequently, and only changes the flux value at
+    #     a few indexes. clear_zeros is called less frequently and creates a new copy of the leak attribute arrays with
+    #     the 0 flux entries omitted.
+    #
+    #     :return: None
+    #     """
+    #     indexes_to_delete = np.argwhere(self.flux[:self.n_em] == 0)
+    #     self.flux = np.delete(self.flux, indexes_to_delete)
+    #     self.reparable = np.delete(self.reparable, indexes_to_delete)
+    #     self.endtime = np.delete(self.endtime, indexes_to_delete)
+    #     self.site_index = np.delete(self.site_index, indexes_to_delete)
+    #     self.comp_index = np.delete(self.comp_index, indexes_to_delete)
+    #     self.repair_cost = np.delete(self.repair_cost, indexes_to_delete)
+    #     try:
+    #         self.n_em -= len(indexes_to_delete)
+    #     except TypeError:
+    #         self.n_em -= 1
+    #
+    # def sort_by_site(self):
+    #     """
+    #     sorts all of the leak attributes based on the site they are associated with.
+    #
+    #     :return: None
+    #     """
+    #     sortorder = np.argsort(self.site_index[:self.n_em])
+    #     self.flux[:self.n_em] = self.flux[:self.n_em][sortorder]
+    #     self.reparable[:self.n_em] = self.reparable[:self.n_em][sortorder]
+    #     self.endtime[:self.n_em] = self.endtime[:self.n_em][sortorder]
+    #     self.site_index[:self.n_em] = self.site_index[:self.n_em][sortorder]
+    #     self.comp_index[:self.n_em] = self.comp_index[:self.n_em][sortorder]
+    #     self.repair_cost[:self.n_em] = self.repair_cost[:self.n_em][sortorder]
 
 
-def bootstrap_emission_maker(n_leaks_in, comp_name, site, time, capacity=0, reparable=True):
+def bootstrap_emission_maker(n_em_in, comp_name, site, time, start_time=None, reparable=True):
     """
-    Create leaks using a bootstrap method
+    Create leaks using a bootstrap method.
 
-    :param n_leaks_in: number of leaks to generate
+    :param n_em_in: number of leaks to generate
     :param comp_name: key to a Component object in site.comp_dict
     :param site: a Site object
     :param time: a Time object
-    :param capacity: the size of array to make to store leaks (if zero, the arrays are given a size equal to
-        n_leaks_in).
+    :param start_time: the times at which each emission begins
     :param reparable: Specifies whether emissions should be reparable or not (boolean)
     """
+    if start_time is None:
+        start_time = np.ones(n_em_in) * time.current_time
     comp = site.comp_dict[comp_name]['parameters']
     leak_params = comp.emission_params
     detection_methods = list(leak_params.leak_sizes.keys())
@@ -148,7 +200,7 @@ def bootstrap_emission_maker(n_leaks_in, comp_name, site, time, capacity=0, repa
     # Generate the appropriate number of leaks from the distribution associated with each detection method
     for method in detection_methods:
         counter += 1
-        n_leaks_key = leaks_per_well[counter] / sum(leaks_per_well) * n_leaks_in
+        n_leaks_key = leaks_per_well[counter] / sum(leaks_per_well) * n_em_in
         flux.extend(np.random.choice(leak_params.leak_sizes[method], int(n_leaks_key)))
         round_err.append(n_leaks_key % 1)
     # Add leaks omitted due to inability to add fractional leaks
@@ -171,8 +223,8 @@ def bootstrap_emission_maker(n_leaks_in, comp_name, site, time, capacity=0, repa
     else:
         end_times = np.inf
     repair_costs = np.random.choice(comp.repair_cost_dist.repair_costs, len(flux))
-    return Emission(flux=flux, reparable=reparable, capacity=capacity,
-                    site_index=site_indexes, comp_index=comp_indexes, endtime=end_times, repair_cost=repair_costs)
+    return Emission(flux=flux, reparable=reparable, start_time=start_time,
+                    site_index=site_indexes, comp_index=comp_indexes, end_time=end_times, repair_cost=repair_costs)
 
 
 def comp_indexes_fcn(site, comp_name, n_inds):
@@ -220,7 +272,7 @@ def emission_objects_generator(dist_type, emission_data_path, custom_emission_ma
     return emission_size_maker, emission_params, em_per_well, em_per_comp
 
 
-def permitted_emission(n_emit, sizes, duration, time, site, comp_name):
+def permitted_emission(n_emit, sizes, duration, time, site, comp_name, start_time):
     """
     Creates an emission object specifying new permitted emissions
 
@@ -230,13 +282,15 @@ def permitted_emission(n_emit, sizes, duration, time, site, comp_name):
     :param time: a Time object
     :param site: a Site object
     :param comp_name: Name of the component to be considered from within site.comp_dict
+    :param start_times: array of times at which emissions start
     :return: an Emission object
     """
     flux = np.random.choice(sizes, n_emit)
+    start_time = np.random.uniform(0, time.end_time, n_emit)
     reparable = False
     endtime = time.current_time + duration
     site_indexes = np.random.randint(site.site_inds[0], site.site_inds[1], len(flux))
     comp_indexes = comp_indexes_fcn(site, comp_name, len(flux))
     repair_cost = np.zeros(len(flux))
-    return Emission(flux=flux, reparable=reparable, endtime=endtime,
-                    site_index=site_indexes, comp_index=comp_indexes, repair_cost=repair_cost)
+    return Emission(flux=flux, reparable=reparable, end_time=endtime,
+                    site_index=site_indexes, comp_index=comp_indexes, repair_cost=repair_cost, start_time=start_time)

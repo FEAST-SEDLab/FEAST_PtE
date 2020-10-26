@@ -17,6 +17,7 @@ import time
 n_montecarlo = 1
 a = time.time()
 
+
 def define_emitters():
     """
     Defines all emitters to be used in the simulation using the Component class
@@ -175,7 +176,7 @@ def define_detection_methods(timeobj):
         detection_probability_points=points,  # g/s
         detection_probabilities=probs,
         dispatch_object=rep0,
-        site_queue=[]
+        site_queue=[],
     )
     ogi_no_survey = Dm.comp_survey.CompSurvey(
         timeobj,
@@ -187,7 +188,7 @@ def define_detection_methods(timeobj):
         detection_probability_points=points,
         detection_probabilities=probs,
         dispatch_object=copy.copy(rep0),
-        site_queue=[]
+        site_queue=[],
     )
     points = np.logspace(-3, 1, 100)
     # 0.474
@@ -203,7 +204,8 @@ def define_detection_methods(timeobj):
         detection_probability_points=points,
         detection_probabilities=probs,
         dispatch_object=ogi_no_survey,
-        site_queue=[]
+        site_queue=[],
+        ophrs={'begin': 8, 'end': 17}
     )
     cont_monitor = Dm.site_monitor.SiteMonitor(
         timeobj,
@@ -212,7 +214,8 @@ def define_detection_methods(timeobj):
         time_to_detect_days=[np.infty, 1, 0, np.infty, 5, 0, np.infty, np.infty, np.infty],
         detection_variables={'flux': 'mean', 'wind speed': 'mean'},
         site_queue=list(range(gas_field.n_sites)),
-        dispatch_object=copy.deepcopy(rep0)
+        dispatch_object=copy.deepcopy(rep0),
+        ophrs={'begin': 8, 'end': 17}
     )
     return ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7
 

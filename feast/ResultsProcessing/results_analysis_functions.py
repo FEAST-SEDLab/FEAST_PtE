@@ -54,38 +54,38 @@ def npv_calculator(filepath, discount_rate, gas_price):
             null_npv          NPV of each LDAR program compared to a scenario with only the Null LDAR program [k$/well]
     """
     sample = load(open(filepath, 'rb'))
-    # site_count = sample.gas_field.site_count
-    progs = list(sample.ldar_program_dict.keys())
     # The 'Null' LDAR program is special here because null_npv is calculated with respect to it
-    if 'Null' not in progs:
+    if 'Null' not in sample.ldar_program_dict:
         raise NameError('tech_dict must contain a "Null" detection method to use npv_calculator')
     null_emissions = np.array(sample.ldar_program_dict['Null'].emissions_timeseries)
     time = np.linspace(0, sample.time.n_timesteps * sample.time.delta_t, sample.time.n_timesteps)
     discount_array = (1 + discount_rate)**(time / 365)
     # Initialize all arrays
-    gas_value_n = np.zeros(len(progs) - 1)
-    find_cost = np.zeros([len(progs), sample.time.n_timesteps])
-    find_cost_null = np.zeros([len(progs) - 1, sample.time.n_timesteps])
-    repair_cost_null = np.zeros([len(progs) - 1, sample.time.n_timesteps])
+    gas_value_n = np.zeros(len(sample.ldar_program_dict) - 1)
+    find_cost = np.zeros([len(sample.ldar_program_dict), sample.time.n_timesteps])
+    find_cost_null = np.zeros([len(sample.ldar_program_dict) - 1, sample.time.n_timesteps])
+    repair_cost_null = np.zeros(len(sample.ldar_program_dict) - 1)
     # Store the cost of repairs in the null module
-    null_repair_cost = sample.ldar_program_dict['Null'].repair_cost / discount_array
+    em = sample.ldar_program_dict['Null'].emissions.emissions
+    em_tc = em.loc[em.end_time < time[-1], ['end_time', 'repair_cost']]
+    null_repair_cost = np.sum(em_tc['repair_cost'] / ((1 + discount_rate)**(em_tc['end_time'] / 365)))
     # Calculate costs associated with each LDAR program
     null_correct = 0
-    for index in range(0, len(progs)):
-        find_cost[index, :] = sample.ldar_program_dict[progs[index]].find_cost / discount_array
-        if progs[index] != 'Null':
-            ind = index - null_correct
-            repair_cost_null[ind, :] = sample.ldar_program_dict[progs[index]].repair_cost / discount_array - \
-                null_repair_cost
-            gas_value_n[ind] = sum((null_emissions - sample.ldar_program_dict[progs[index]].emissions_timeseries) /
-                                   discount_array) * sample.time.delta_t * 24 * 3600 * gas_price
-            find_cost_null[ind, :] = sample.ldar_program_dict[progs[index]].find_cost / discount_array
-        else:
-            null_correct += 1
+    index = 0
+    for pr_name, program in sample.ldar_program_dict.items():
+        find_cost[index, :] = program.find_cost / discount_array
+        if pr_name != 'Null':
+            em = program.emissions.emissions
+            em_tc = em.loc[em.end_time < time[-1], ['end_time', 'repair_cost']]
+            repair_cost_null[index] = np.sum(em_tc['repair_cost'] / ((1 + discount_rate)**(em_tc['end_time'] / 365)))
+            repair_cost_null[index] -= null_repair_cost
+            gas_value_n[index] = sum((null_emissions - program.emissions_timeseries) / discount_array) * \
+                sample.time.delta_t * 24 * 3600 * gas_price
+            find_cost_null[index, :] = (program.find_cost - sample.ldar_program_dict['Null'].find_cost) / discount_array
+            index += 1
     # consolidate costs into totals
     find_n = np.sum(find_cost_null, 1)
-    n_repair = np.sum(repair_cost_null, 1)
-    null_npv = {'Repair': n_repair, 'Finding': find_n, 'Gas': gas_value_n}
-    tot_n = gas_value_n - n_repair - find_n
+    null_npv = {'Repair': repair_cost_null, 'Finding': find_n, 'Gas': gas_value_n}
+    tot_n = gas_value_n - repair_cost_null - find_n
     null_npv['Total'] = tot_n
     return null_npv

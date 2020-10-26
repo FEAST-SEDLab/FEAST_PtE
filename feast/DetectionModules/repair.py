@@ -28,9 +28,9 @@ class Repair:
         :return: None
         """
         if len(self.to_repair) > 0:
-            rep_cond = np.array(self.to_repair)[emissions.reparable[self.to_repair]]
-            rep_cond = rep_cond[emissions.endtime[rep_cond] > time.current_time + self.repair_delay]
-            emissions.endtime[rep_cond] = time.current_time + self.repair_delay
+            rep_cond = emissions.emissions.reparable & emissions.emissions.index.isin(self.to_repair) & \
+                       (emissions.emissions.end_time > time.current_time + self.repair_delay)
+            emissions.emissions.loc[rep_cond, 'end_time'] = time.current_time + self.repair_delay
             self.to_repair = []
 
     def action(self, site_inds=None, emit_inds=None):
