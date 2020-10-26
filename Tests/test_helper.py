@@ -8,17 +8,19 @@ def basic_gas_field():
     n_sites = 100
     site_dict = {}
     comp_fug = feast.EmissionSimModules.infrastructure_classes.Component(
+        repair_cost_path='../ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p',
+        emission_data_path='../ExampleData/DataObjectInstances/production_emissions.p',
+        base_reparable=True,
         name='Fugitive emitters',
-        emission_data_path='production_emissions.p',
         emission_per_comp=0.0026,
-        emission_production_rate=5.4 / 650 / 365
+        emission_production_rate=5.4 / 650 / 365,
     )
     basicpad = feast.EmissionSimModules.infrastructure_classes.Site(
         # Simulates two wells, one tank, total components=11302
         name='basic pad',
         comp_dict={
             'Fugitive': {'number': 100, 'parameters': comp_fug},
-        }
+        },
     )
     site_dict['basic pad'] = {'number': n_sites, 'parameters': basicpad}
     timeobj = feast.EmissionSimModules.simulation_classes.Time(delta_t=1, end_time=2)

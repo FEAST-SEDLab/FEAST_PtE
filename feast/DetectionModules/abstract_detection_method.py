@@ -1,6 +1,5 @@
 import copy
 import numpy as np
-from ..EmissionSimModules.simulation_functions import set_kwargs_attrs
 from scipy import interpolate as interp
 
 
@@ -8,28 +7,24 @@ class DetectionMethod:
     """
     DetectionMethod is an abstract super class that defines the form required for all detection methods
     """
-    def __init__(self, time, **kwargs):
+    def __init__(self, time, detection_variables={}, op_envelope={}):
         """
-        Inputs:
-            time         a time object (Defined in simulation_classes)
-            kwargs       optional input dict that will override default parameters
+        :param time: a Time object
         """
         self.find_cost = np.zeros(time.n_timesteps)
         self.repair_cost = np.zeros(time.n_timesteps)
-        self.op_envelope = {}
-        self.detection_variables = {}  # Dict with format {name: interpolation mode}
-        self.hull = None
+        self.op_envelope = op_envelope
+        self.detection_variables = detection_variables  # Dict with format {name: interpolation mode}
         self.site_queue = []
-        # Set all attributes defined in kwargs, regardless of whether they already exist
-        set_kwargs_attrs(self, kwargs, only_existing=True)
         if type(self.detection_variables) is not dict:
             raise TypeError("Detection_variables must be a dict of form {name: interpolation mode,}")
 
     def check_time(self, time):
         """
         Determines whether or not the detection method is active during the present time step
-        :param time:
-        :return:
+
+        :param time: A Time object
+        :return: True if check_time passes, False otherwise
         """
         oktime = self.ophrs['begin'] <= np.mod(time.current_time, 1) * 24 < self.ophrs['end']
         # accounts for a delta_t that is greater than the daily working hours
@@ -38,20 +33,26 @@ class DetectionMethod:
 
     def check_op_envelope(self, gas_field, time, site_index=None):
         """
-        Returns false if an operating envelope condition fails
-        The method supports 8 classes of operating envelope conditions:
-        1.) A meteorological condition based on min-max values that apply to the whole field (eg. temperature)
-        2.) A meteorological condition based on min-max values that are site-specific (eg. wind direction)
-        3.) A meteorological condition based on a fail list that applies to the whole field (eg. precipitation type)
-        4.) A meteorological condition based on a fail list that is site specific (possible but not expected)
-        5.) A site condition based on min-max values that apply to the whole field (eg site production)
-        6.) A site condition based on min-max values that are site-specific (possible but not expected)
-        7.) A site condition based on a fail list that applies to the whole field (eg. site type)
-        8.) A site condition based on a fail list that is site specific (possible but not expected).
-        :param gas_field:
-        :param time:
-        :param site_index:
-        :return:
+        Returns the status of the operating envelope. The method supports 8 types of operating envelope conditions:
+
+        1. A meteorological condition based on min-max values that apply to the whole field (eg. temperature)
+        2. A meteorological condition based on min-max values that are site-specific (eg. wind direction)
+        3. A meteorological condition based on a fail list that applies to the whole field (eg. precipitation type)
+        4. A meteorological condition based on a fail list that is site specific (possible but not expected)
+        5. A site condition based on min-max values that apply to the whole field (eg site production)
+        6. A site condition based on min-max values that are site-specific (possible but not expected)
+        7. A site condition based on a fail list that applies to the whole field (eg. site type)
+        8. A site condition based on a fail list that is site specific (possible but not expected).
+
+        :param gas_field: A feast GasField object
+        :param time: A feast Time object
+        :param site_index: Index to a specific site
+        :return status: A string specifying the result of the operating envelope check. Can be one of 4 strings:
+
+        #. 'field pass'
+        #. 'field fail'
+        #. 'site pass'
+        #. 'site fail
         """
         status = 'field pass'
         # iterate across all operating envelope conditions
@@ -67,6 +68,7 @@ class DetectionMethod:
                 site = gas_field.sites[self.find_site_name(gas_field, site_index)]
                 condition = site.op_env_params[name]
             if params['class'] == 1 and not self.check_min_max_condition(condition, params):
+                # TODO: change to status=
                 return 'field fail'
             elif params['class'] in [2, 6]:
                 status = 'site pass'
@@ -87,17 +89,22 @@ class DetectionMethod:
                 status = 'site pass'
                 if condition in params['enum_fail_list']:
                     status = 'site fail'
+
+        # TODO: if 'site fail' in status:
+        #     self.op_env_fail_count.append([time.current_time, 1])
+        # TODO: if 'field fail' in status:
         return status
 
     def choose_sites(self, gas_field, time, n_sites, clear_sites=True):
         """
         Identifies sites to survey at this time step
-        :param gas_field:
-        :param time:
+
+        :param gas_field: A GasField object
+        :param time: A Time object
         :param n_sites: Max number of sites to survey at this time step
-        :param clear_sites: If true, clear sites selected from the queue. If False, leave sites in the queue
-                            (eg. continuous monitors)
-        :return:
+        :param clear_sites: If true, clear sites selected from the queue. If False, leave sites in the queue.
+            Leaving sites in the queue is useful for SiteMonitor type detection methods.
+        :return: None
         """
         site_inds = []
         queue_ind = 0
@@ -132,6 +139,7 @@ class DetectionMethod:
         min and max lists each with length 1. The function returns True if the condition is between the min and max
         values, False otherwise. If the min and max values are array-like, the function returns true if the condition is
         between any pair of min-max values.
+
         :param condition: condition to check (must be a number)
         :param params: a dict with 'min' and 'max' keys. The min and max values can be numbers or array-like.
         :return:
@@ -150,10 +158,10 @@ class DetectionMethod:
     @staticmethod
     def find_site_name(gas_field, site_index):
         """
-        Determines the key for a site based on  its index
-        :param gas_field:
-        :param site_index:
-        :return:
+        Determines the key for a site based on its index
+        :param gas_field: a GasField object
+        :param site_index: an integer indicating the index of the site to be considered
+        :return: the key for the site identified by site_index, or -1 if the key cannot be found.
         """
         for sitename, site in gas_field.sites.items():
             if site['parameters'].site_inds[0] <= site_index < site['parameters'].site_inds[1]:
@@ -164,10 +172,11 @@ class DetectionMethod:
     def find_comp_name(gas_field, sitename, comp_index):
         """
         Determines the key for a component based on its index and site
-        :param gas_field:
-        :param sitename:
-        :param comp_index
-        :return:
+
+        :param gas_field: a GasField object
+        :param sitename: name of the site containing the component
+        :param comp_index: index of the component to consider
+        :return: The key for the component identified by comp_index, or -1 if the component is not found.
         """
         for compname, comp in gas_field.sites[sitename]['parameters'].comp_dict.items():
             if comp.comp_inds[0] <= comp_index < comp.comp_inds[1]:
@@ -177,9 +186,10 @@ class DetectionMethod:
     def get_current_conditions(self, time, gas_field, emissions, em_indexes):
         """
         Extracts conditions specified in self.detection_variables
-        :param time: simulation time object
-        :param gas_field: simulation gas field object
-        :param emissions: emissions object
+
+        :param time: a Time object
+        :param gas_field: a GasField object
+        :param emissions: an Emissions object
         :param em_indexes: indexes of emissions to consider
         :return conditions: an array (n_emissions, n_variables) of conditions for use in the PoD calculation
         """
@@ -196,12 +206,13 @@ class DetectionMethod:
     @staticmethod
     def empirical_interpolator(test_conditions, test_results, sim_conditions):
         """
-        calculates the probabiity of detection analytically
+        Calculates the probabiity of detection by interpolating the value of test_results between test_conditions.
+
         :param test_conditions: conditions to be interpolated from
         :param test_results: results associated with each condition listed in test_conditions
         :param sim_conditions: Nxk array of current conditions, where N is the number of emissions to consider,
             and k is the number of conditions
-        :return:
+        :return: an array of the probabilities of detection (dimension N)
         """
         probs = interp.griddata(test_conditions, test_results, sim_conditions)
         # griddata returns NaN for vars outside the convex hull of the interpolation data points when using default
@@ -214,8 +225,9 @@ class DetectionMethod:
     def extend_site_queue(self, site_inds):
         """
         Add new sites to the site_queue if they are not already in the queue
+
         :param site_inds: List of indexes to add to the queue
-        :return:
+        :return: None
         """
         for si in site_inds:
             if si not in self.site_queue:

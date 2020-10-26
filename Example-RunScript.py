@@ -29,7 +29,8 @@ def define_emitters():
         emission_data_path='ExampleData/DataObjectInstances/production_emissions.p',
         emission_per_comp=0.00231,  # Fraction of components expected to be emitting at the beginning of the simulation.
         emission_production_rate=5.4 / 650 / 365,  # number of new emissions per component per day
-        repair_cost_path='ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p'
+        repair_cost_path='ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p',
+        base_reparable=True
     )
 
     # Generates miscelaneous emissions that cannot be repaired
@@ -145,18 +146,6 @@ def define_gas_field(timeobj, site_dict):
     return gas_field
 
 
-def define_repair_methods():
-    """
-    Define repair methods to be used in LDAR programs
-    :return rep0: A repair method with 0 delay between detection and repair
-    :return rep7: A repair method with a delay of 7 days between detection and repair
-    """
-    rep0 = Dm.repair.Repair(repair_delay=0)
-    rep7 = Dm.repair.Repair(repair_delay=7)
-
-    return rep0, rep7
-
-
 def define_detection_methods(timeobj):
     """
     Define detection methods to be used in LDAR programs
@@ -164,9 +153,13 @@ def define_detection_methods(timeobj):
     :return ogi: A component survey method representing OGI with periodic surveys
     :return ogi_no_survey: A component survey method representing OGI deployed by a site-level detection method
     :return plane: A site survey method representing a plane based detection program with periodic surveys
-     :return cont_monitor: A site monitor method representing continuous monitors deployed at a site
+    :return cont_monitor: A site monitor method representing continuous monitors deployed at a site
+    :return rep0: A repair method with 0 delay between detection and repair
+    :return rep7: A repair method with a delay of 7 days between detection and repair
     """
     points = np.logspace(-3, 1, 100)  # emission rates
+    rep0 = Dm.repair.Repair(repair_delay=0)
+    rep7 = Dm.repair.Repair(repair_delay=7)
     probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.02)) / (0.8 * np.sqrt(2))) for f
                                   in points])
     probs[0] = 0
@@ -178,7 +171,9 @@ def define_detection_methods(timeobj):
         labor=100,
         detection_variables={'flux': 'mean'},
         detection_probability_points=points,  # g/s
-        detection_probabilities=probs
+        detection_probabilities=probs,
+        dispatch_object=rep0,
+        site_queue=[]
     )
     ogi_no_survey = Dm.comp_survey.CompSurvey(
         timeobj,
@@ -189,6 +184,8 @@ def define_detection_methods(timeobj):
         detection_variables={'flux': 'mean'},
         detection_probability_points=points,
         detection_probabilities=probs,
+        dispatch_object=copy.copy(rep0),
+        site_queue=[]
     )
     points = np.logspace(-3, 1, 100)
     # 0.474
@@ -202,7 +199,9 @@ def define_detection_methods(timeobj):
         site_cost=100,
         detection_variables={'flux': 'mean'},
         detection_probability_points=points,
-        detection_probabilities=probs
+        detection_probabilities=probs,
+        dispatch_object=ogi_no_survey,
+        site_queue=[]
     )
     cont_monitor = Dm.site_monitor.SiteMonitor(
         timeobj,
@@ -210,8 +209,10 @@ def define_detection_methods(timeobj):
                                [0.5, 5.1], [1.0, 5.1], [1.1, 5.1]],
         time_to_detect_days=[np.infty, 1, 0, np.infty, 5, 0, np.infty, np.infty, np.infty],
         detection_variables={'flux': 'mean', 'wind speed': 'mean'},
+        site_queue=list(range(gas_field.n_sites)),
+        dispatch_object=copy.deepcopy(rep0)
     )
-    return ogi, ogi_no_survey, plane_survey, cont_monitor
+    return ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7
 
 
 def define_ldar_programs(timeobj, gas_field, ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7):
@@ -279,8 +280,7 @@ timeobj = define_time_settings()
 for ind in range(n_montecarlo):
     print('Iteration number: {:0.0f}'.format(ind))
     gas_field = define_gas_field(timeobj, site_dict)
-    rep0, rep7 = define_repair_methods()
-    ogi, ogi_no_survey, plane_survey, cont_monitor = define_detection_methods(timeobj)
+    ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7 = define_detection_methods(timeobj)
     ldar_dict = define_ldar_programs(timeobj, gas_field, ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7)
 
     feast.field_simulation.field_simulation(

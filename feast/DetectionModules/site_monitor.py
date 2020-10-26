@@ -1,48 +1,62 @@
+"""
+The site_monitor module defines the site monitor detection class, SiteMonitor.
+"""
+
 import numpy as np
 from .abstract_detection_method import DetectionMethod
-from ..EmissionSimModules.simulation_functions import set_kwargs_attrs
-
 
 class SiteMonitor(DetectionMethod):
     """
-    This class specifies a site level continuous monitoring method
+    This class specifies a site level continuous monitoring method. A site monitor continuously observes
+    emissions from an entire site and determines when an action should be dispatched at the site.
     The method has three essential characteristics:
-    1.) A list of the sites where the method applies
-    2.) A time-to-detect surface specified as a list of conditions and associated mean detection times.
-    3.) A dict of the variables used to define the time-to-detect surface (the attribute is specified in the
-    DetectionMethod class inherited here)
-    """
-    def __init__(self, time, **kwargs):
 
-        DetectionMethod.__init__(self, time)
-        self.dispatch_object = None
+    1. A list of the sites where the method applies
+    2. A time-to-detect surface specified as a list of conditions and associated mean detection times
+    3. The ability to dispatch a follow up action
+    """
+    def __init__(self, time, dispatch_object, time_to_detect_points, time_to_detect_days,
+                 ophrs={'begin': 0, 'end': 24}, capital=0, site_queue=[], **kwargs):
+        """
+        :param time: a Time object
+        :param dispatch_object: the object to dispatch for follow up actions
+        :param time_to_detect_points: The conditions at which the time to detection was measured. (NxM array,
+            where N is the number of distinct conditions and M is the number of variables (up to two)).
+        :param time_to_detect_days: The list of probabilities of detection associated with every point in
+            detection_probability_points (array of shape N, where N is the number of conditions with an associated
+            probability of detection).
+        :param ophrs: The times of day when the SiteMonitor is operational. Should be a dict:\n
+            {'begin': hour integer, 'end': hour integer}
+        :param capital: The total cost of installing the site monitor system in the simulation (float--$)
+        :param site_queue: A list of sites where the site monitor system is installed
+        """
+
+        DetectionMethod.__init__(self, time, **kwargs)
+        self.dispatch_object = dispatch_object
 
         # --------------- Process Variables -------------------
-        self.ophrs = {'begin': 0, 'end': 24}
-        self.capital = 0
-        self.site_queue = []  # list of sites where this method applies
+        self.ophrs = ophrs
+        self.capital = capital
+        self.site_queue = site_queue  # list of sites where this method applies
 
         # --------------- Detection Variables -----------------
-        self.time_to_detect_points = None  # conditions for which the mean time to detect is specified
-        self.time_to_detect_days = None  # Mean detection times given the conditions listed in _points
+        self.time_to_detect_points = time_to_detect_points  # conditions for which the mean time to detect is specified
+        self.time_to_detect_days = time_to_detect_days  # Mean detection times given the conditions listed in _points
 
         # -------------- Internal variables -----------------
-
-        # Set all attributes defined in kwargs
-        set_kwargs_attrs(self, kwargs, only_existing=True)
         if type(self.site_queue) is not list:
             self.site_queue = list(self.site_queue)
         self.time_to_detect_points = np.array(self.time_to_detect_points)
         self.time_to_detect_days = np.array(self.time_to_detect_days)
-        # -------------- Set calculated parameters --------------
 
     @staticmethod
     def prob_detection(time, ttd):
         """
         Calculates the probability of detection during a timestep of length time.delta_t and a mean time to detection
         ttd
+
         :param time: Simulation time object
-        :param ttd: mean time to detection (days)
+        :param ttd: mean time to detection (float--days)
         :return: the probability of detection during this timestep
         """
         if ttd == 0:
@@ -52,12 +66,13 @@ class SiteMonitor(DetectionMethod):
 
     def detect_prob_curve(self, time, gas_field, site_inds, emissions):
         """
-        Determines which sites are passed to the dispatch method
+        Determines which sites are passed to the dispatch method.
         In this case, the sites to pass are determined by calculating a probability of detection based on the
-        simulation time resolution delta_t and the mean time to detection
-        :param time: Simulation time object
-        :param gas_field: Simulation gas_field object
-        :param site_inds: The set of sites to be considered
+        simulation time resolution (time.delta_t) and the mean time to detection
+
+        :param time: simulation Time object
+        :param gas_field: simulation GasField object
+        :param site_inds: the set of sites to be considered
         :param emissions: an object storing all emissions in the simulation
         :return detect: the indexes of detected leaks
         """
@@ -69,7 +84,7 @@ class SiteMonitor(DetectionMethod):
         for site_ind in site_inds:
             vals = np.zeros([1, len(self.detection_variables)])
             ind = 0
-            cond = np.where(emissions.site_index[:emissions.n_leaks] == site_ind)[0]
+            cond = np.where(emissions.site_index[:emissions.n_em] == site_ind)[0]
             for v, im in self.detection_variables.items():
                 if v in gas_field.met:
                     vals[0, ind] = gas_field.get_met(time, v, interp_modes=im, ophrs=self.ophrs)[v]
@@ -87,9 +102,10 @@ class SiteMonitor(DetectionMethod):
     def detect(self, time, gas_field, emissions, find_cost):
         """
         The detection method implements a continuous monitor detection method model
-        Inputs:
-            time        an object of type Time (defined in feast_classes)
-            gas_field   an object of type GasField (defined in feast_classes)
+
+        :param time: a Time object
+        :param gas_field: a GasField object
+        :return: None
         """
         # enforces the operating hours
         if self.check_time(time):
@@ -103,8 +119,9 @@ class SiteMonitor(DetectionMethod):
     def action(self, site_inds=None, emit_inds=None):
         """
         Action to add sites to queue. Expected to be called by another detection method or by an LDAR program
+
         :param site_inds: List of sites to add to the queue
         :param emit_inds: Not used.
-        :return:
+        :return: None
         """
         self.extend_site_queue(site_inds)

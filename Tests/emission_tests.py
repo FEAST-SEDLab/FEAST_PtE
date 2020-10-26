@@ -12,8 +12,9 @@ def test_component():
     comp = ic.Component(
         emission_production_rate=1e-5,
         dist_type='bootstrap',
-        emission_data_path='production_emissions.p',
-        repair_cost_path='fernandez_leak_repair_costs_2006.p'
+        emission_data_path='../ExampleData/DataObjectInstances/production_emissions.p',
+        repair_cost_path='../ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p',
+        base_reparable=True
     )
     if comp.emission_production_rate != 1e-5:
         raise ValueError("Component() is not storing the emission production rate correctly")
@@ -21,9 +22,6 @@ def test_component():
         raise ValueError("Component() is not computing emission_per_comp from the input emission data correctly")
     if np.abs(comp.null_repair_rate - comp.emission_production_rate / comp.emission_per_comp) > 1e-5:
         raise ValueError("Component() is not computing the correct null_repair_rate for the steady state assumption")
-    comp = ic.Component()
-    if comp.emission_production_rate != 0:
-        raise ValueError("Component() is not defaulting to zero emissions")
 
 
 def test_gas_field():
@@ -35,7 +33,7 @@ def test_gas_field():
     if gf.sites['basic pad']['parameters'].site_inds != [0, 100]:
         raise ValueError("gas_field.__init__() is not defining gf.site_inds correctly")
     comp = gf.sites['basic pad']['parameters'].comp_dict['Fugitive']['parameters']
-    if gf.new_emissions.n_leaks > comp.emission_production_rate * 2 * gf.n_comps * 5 or gf.new_emissions.n_leaks == 0:
+    if gf.new_emissions.n_em > comp.emission_production_rate * 2 * gf.n_comps * 5 or gf.new_emissions.n_em == 0:
         raise ValueError("gas_field.__init__() is not generating new leaks as expected")
 
     np.random.seed(0)
@@ -43,7 +41,8 @@ def test_gas_field():
     site_dict = {}
     comp_fug = feast.EmissionSimModules.infrastructure_classes.Component(
         name='Fugitive emitters',
-        emission_data_path='production_emissions.p',
+        emission_data_path='../ExampleData/DataObjectInstances/production_emissions.p',
+        repair_cost_path='../ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p',
         emission_per_comp=0.0026,
         emission_production_rate=5.4 / 650 / 365
     )
@@ -105,7 +104,8 @@ def test_gasfield_leak_maker():
 def test_bootstrap_emission_maker():
     comp_fug = feast.EmissionSimModules.infrastructure_classes.Component(
         name='Fugitive emitters',
-        emission_data_path='production_emissions.p',
+        emission_data_path='../ExampleData/DataObjectInstances/production_emissions.p',
+        repair_cost_path='../ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p',
         emission_per_comp=0.0026,
         emission_production_rate=5.4 / 650 / 365
     )
@@ -131,7 +131,8 @@ def test_bootstrap_emission_maker():
 def test_gasfield_emission_size_maker():
     comp_fug = feast.EmissionSimModules.infrastructure_classes.Component(
         name='Fugitive emitters',
-        emission_data_path='production_emissions.p',
+        emission_data_path='../ExampleData/DataObjectInstances/production_emissions.p',
+        repair_cost_path='../ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p',
         emission_per_comp=0.0026,
         emission_production_rate=5.4 / 650 / 365
     )
@@ -166,6 +167,7 @@ def test_emission_obj():
     comp_fug = feast.EmissionSimModules.infrastructure_classes.Component(
         name='Fugitive emitters',
         emission_data_path='temp_dat.p',
+        repair_cost_path='../ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p',
         emission_per_comp=0.00231,
         emission_production_rate=5.4 / 650 / 365
     )
@@ -202,7 +204,7 @@ def test_emission_class():
         endtime=et,
         capacity=100,
     )
-    if leak.n_leaks != 7:
+    if leak.n_em != 7:
         raise ValueError("leak_class_function.Leak is not initializing the number of leaks correctly")
     leak2 = feast.EmissionSimModules.emission_class_functions.Emission(
         flux=np.ones(100),
@@ -214,7 +216,7 @@ def test_emission_class():
     if len(leak2.flux) != 100:
         raise ValueError("leak_class_function.Leak is not initializing the array capacity correctly")
     leak.extend(leak2)
-    if leak.n_leaks != 107:
+    if leak.n_em != 107:
         raise ValueError("leak_class_function.Leak.extend is not updating n_leaks correctly")
     if np.min(leak.flux) != 0:
         raise ValueError("leak_class_function.Leak.extend is not preserving the minimum leak flux")
@@ -237,14 +239,14 @@ def test_emission_class():
         raise ValueError("leak_class_function.Leak.delete is not setting flux to zero")
     if leak.site_index[2] != si[2]:
         raise ValueError("leak_class_function.Leak.delete is changing the site index of an emission when it should not")
-    if leak.n_leaks != 107:
+    if leak.n_em != 107:
         raise ValueError("leak_class_function.Leak.delete is changing n_leaks when it should not")
     leak.clear_zeros()
-    if leak.n_leaks != 105:  # Started with 107, but one with 0 flux, then removed one with leak.delete
+    if leak.n_em != 105:  # Started with 107, but one with 0 flux, then removed one with leak.delete
         raise ValueError("leak_class_function.Leak.clear_zeros is not updating n_leaks correctly")
     if len(leak.flux) != 105:
         raise ValueError("leak_class_function.Leak.clear_zeros is not deleting elements correctly")
-    if np.min(leak.flux[:leak.n_leaks]) <= 0:
+    if np.min(leak.flux[:leak.n_em]) <= 0:
         raise ValueError("leak_class_function.Leak.clear_zeros is not removing the correct elements flux")
     if len(leak.flux) != len(leak.site_index):
         raise ValueError("leak_class_function.Leak.clear_zeros is not removing the correct elements from site_index")

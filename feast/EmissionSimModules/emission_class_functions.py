@@ -1,30 +1,25 @@
 """
-Leak data, leak distribution properties, and leak objects are created in this module
+A class for storing emission properties and functions for modifying emission proporeties throughout a simulation are
+defined in this module.
 """
 import pickle
 import numpy as np
-from os.path import dirname, abspath
-import os
-
-# Constants:
-g = 9.8  # g is the strength of gravity [m/s^2]
-RHO_AIR = 1225  # density of air [g/m^3]
-RHO_METHANE = 681  # density of methane at atmospheric pressure [g/m^3]
 
 
 class Emission:
     """
-        Stores a list of leaks
+    Stores all properties of all emissions that exist at a particular instant in a simulation.
     """
     def __init__(self, flux=(), capacity=0,
                  reparable=True, site_index=(), comp_index=(), endtime=np.infty, repair_cost=()):
         """
-        Inputs:
-        flux                leak size (g/s)
-        capacity            Expected total number of leaks to be stored in this instance of Leak (allows for faster
-                            extend method)
-        reparable           Indicates whether an emission is reparable leak or a permanent vent
-        endtime             time when emission will stop if not repaired
+        :param flux: An array of emission rates (array of floats--gram/second)
+        :param capacity: The size of the arrays to initialize at the beginning of a simulation in FEAST (int)
+        :param reparable: An array of True/False values to indicate whether or not an emission is reparable
+        :param site_index: An array indicating the index of the site that contains every emission
+        :param comp_index: An array indicating the index of the component that is the source of each emission
+        :param endtime: An array the time when every emission will end (days)
+        :param repair_cost: An array storing the cost of repairing every emission ($)
         """
         try:
             length_in = len(flux)
@@ -60,39 +55,43 @@ class Emission:
             self.comp_index[0:length_in] = comp_index
             self.endtime[0:length_in] = endtime
             self.repair_cost[0:length_in] = repair_cost
-        self.n_leaks = length_in
+        self.n_em = length_in
 
-    def extend(self, leak_obj_in):
+    def extend(self, em_object_in):
         """
-        Add a new leak
-        Inputs:
-            leak_obj_in     a Leak object
+        The function extends the existing attributes of self with the attributes of em_object_in. If the arrays
+        in self have capacity, n_em the new values are inserted and n_em is updated. If there is not sufficient
+        remaining capacity, the arrays of em_obj_in are appended to the existing arrays. The complexity allows was
+        developed to improve the speed of calculations by initializing the arrays.
+
+        :param em_object_in: an emission object
         """
-        if len(self.flux) - leak_obj_in.n_leaks - self.n_leaks >= 0:
-            self.flux[self.n_leaks: self.n_leaks + leak_obj_in.n_leaks] = leak_obj_in.flux
-            self.reparable[self.n_leaks: self.n_leaks+leak_obj_in.n_leaks] = leak_obj_in.reparable
-            self.endtime[self.n_leaks: self.n_leaks+leak_obj_in.n_leaks] = leak_obj_in.endtime
-            self.site_index[self.n_leaks: self.n_leaks + leak_obj_in.n_leaks] = leak_obj_in.site_index
-            self.comp_index[self.n_leaks: self.n_leaks + leak_obj_in.n_leaks] = leak_obj_in.comp_index
-            self.repair_cost[self.n_leaks: self.n_leaks + leak_obj_in.n_leaks] = leak_obj_in.repair_cost
+        if len(self.flux) - em_object_in.n_em - self.n_em >= 0:
+            self.flux[self.n_em: self.n_em + em_object_in.n_em] = em_object_in.flux
+            self.reparable[self.n_em: self.n_em + em_object_in.n_em] = em_object_in.reparable
+            self.endtime[self.n_em: self.n_em + em_object_in.n_em] = em_object_in.endtime
+            self.site_index[self.n_em: self.n_em + em_object_in.n_em] = em_object_in.site_index
+            self.comp_index[self.n_em: self.n_em + em_object_in.n_em] = em_object_in.comp_index
+            self.repair_cost[self.n_em: self.n_em + em_object_in.n_em] = em_object_in.repair_cost
         else:
-            self.flux = np.append(self.flux[:self.n_leaks], leak_obj_in.flux)
-            self.reparable = np.append(self.reparable[:self.n_leaks], leak_obj_in.reparable)
-            self.endtime = np.append(self.endtime[:self.n_leaks], leak_obj_in.endtime)
-            self.site_index = np.append(self.site_index[:self.n_leaks], leak_obj_in.site_index)
-            self.comp_index = np.append(self.comp_index[:self.n_leaks], leak_obj_in.comp_index)
-            self.repair_cost = np.append(self.repair_cost[:self.n_leaks], leak_obj_in.repair_cost)
+            self.flux = np.append(self.flux[:self.n_em], em_object_in.flux)
+            self.reparable = np.append(self.reparable[:self.n_em], em_object_in.reparable)
+            self.endtime = np.append(self.endtime[:self.n_em], em_object_in.endtime)
+            self.site_index = np.append(self.site_index[:self.n_em], em_object_in.site_index)
+            self.comp_index = np.append(self.comp_index[:self.n_em], em_object_in.comp_index)
+            self.repair_cost = np.append(self.repair_cost[:self.n_em], em_object_in.repair_cost)
 
-        self.n_leaks += leak_obj_in.n_leaks
+        self.n_em += em_object_in.n_em
 
     def delete_leaks(self, indexes_to_delete):
         """
         Delete all parameters associated with leaks at indexes 'indexes_to_delete'
-        indexes_to_delete       A list of leak indexes to delete, or the string 'all'
+
+        :param indexes_to_delete: A list of leak indexes to delete, or the string 'all'
         """
         if type(indexes_to_delete) is str:
             if indexes_to_delete == 'all':
-                indexes_to_delete = list(range(0, self.n_leaks))
+                indexes_to_delete = list(range(0, self.n_em))
             else:
                 raise ValueError('indexes_to_delete must be a scalar, an array or the str "all"')
         self.flux[indexes_to_delete] = 0
@@ -101,12 +100,13 @@ class Emission:
         """
         This function removes all leaks from the leak object that have zero flux. This is in contrast to the
         delete_leaks method, which sets the flux to zero for specified leak indexes. These methods are implemented
-        separately for computation efficiency: delete_leaks is called frequently, and only changes the flux value of
-        a few indeces. clear_zeros is called less frequently and creates a new copy of the leak attribute arrays with th
-        e 0 flux leaks omitted.
-        :return:
+        separately for computation efficiency: delete_leaks is called frequently, and only changes the flux value at
+        a few indexes. clear_zeros is called less frequently and creates a new copy of the leak attribute arrays with
+        the 0 flux entries omitted.
+
+        :return: None
         """
-        indexes_to_delete = np.argwhere(self.flux[:self.n_leaks] == 0)
+        indexes_to_delete = np.argwhere(self.flux[:self.n_em] == 0)
         self.flux = np.delete(self.flux, indexes_to_delete)
         self.reparable = np.delete(self.reparable, indexes_to_delete)
         self.endtime = np.delete(self.endtime, indexes_to_delete)
@@ -114,32 +114,36 @@ class Emission:
         self.comp_index = np.delete(self.comp_index, indexes_to_delete)
         self.repair_cost = np.delete(self.repair_cost, indexes_to_delete)
         try:
-            self.n_leaks -= len(indexes_to_delete)
+            self.n_em -= len(indexes_to_delete)
         except TypeError:
-            self.n_leaks -= 1
+            self.n_em -= 1
 
     def sort_by_site(self):
         """
         sorts all of the leak attributes based on the site they are associated with.
-        :return:
+
+        :return: None
         """
-        sortorder = np.argsort(self.site_index[:self.n_leaks])
-        self.flux[:self.n_leaks] = self.flux[:self.n_leaks][sortorder]
-        self.reparable[:self.n_leaks] = self.reparable[:self.n_leaks][sortorder]
-        self.endtime[:self.n_leaks] = self.endtime[:self.n_leaks][sortorder]
-        self.site_index[:self.n_leaks] = self.site_index[:self.n_leaks][sortorder]
-        self.comp_index[:self.n_leaks] = self.comp_index[:self.n_leaks][sortorder]
-        self.repair_cost[:self.n_leaks] = self.repair_cost[:self.n_leaks][sortorder]
+        sortorder = np.argsort(self.site_index[:self.n_em])
+        self.flux[:self.n_em] = self.flux[:self.n_em][sortorder]
+        self.reparable[:self.n_em] = self.reparable[:self.n_em][sortorder]
+        self.endtime[:self.n_em] = self.endtime[:self.n_em][sortorder]
+        self.site_index[:self.n_em] = self.site_index[:self.n_em][sortorder]
+        self.comp_index[:self.n_em] = self.comp_index[:self.n_em][sortorder]
+        self.repair_cost[:self.n_em] = self.repair_cost[:self.n_em][sortorder]
 
 
 def bootstrap_emission_maker(n_leaks_in, comp_name, site, time, capacity=0, reparable=True):
     """
     Create leaks using a bootstrap method
-    n_leaks_in      number of leaks to generate
-    comp_name       key to a Component object in site.comp_dict
-    site            a Site object
-    time            a time object
-    capacity        the size of array to make to store leaks (if zero, the arrays are given a size equal to n_leaks_in).
+
+    :param n_leaks_in: number of leaks to generate
+    :param comp_name: key to a Component object in site.comp_dict
+    :param site: a Site object
+    :param time: a Time object
+    :param capacity: the size of array to make to store leaks (if zero, the arrays are given a size equal to
+        n_leaks_in).
+    :param reparable: Specifies whether emissions should be reparable or not (boolean)
     """
     comp = site.comp_dict[comp_name]['parameters']
     leak_params = comp.emission_params
@@ -184,6 +188,7 @@ def bootstrap_emission_maker(n_leaks_in, comp_name, site, time, capacity=0, repa
 def comp_indexes_fcn(site, comp_name, n_inds):
     """
     Returns an array of indexes to associate with new emissions
+
     :param site: a EmissionSimModules.simulation_classes.Site object
     :param comp_name: name of a component contained in Site.comp_dict
     :param n_inds: Integer of indexes to generate
@@ -196,10 +201,10 @@ def comp_indexes_fcn(site, comp_name, n_inds):
 
 def emission_objects_generator(dist_type, emission_data_path, custom_emission_maker=None):
     """
-    leak_objects is a parent function that will be called to initialize gas fields
-    Inputs:
-        dist_type           Type of leak distribution to be used
-        leak_data_path      Path to a leak data file
+    emission_objects_generator is a parent function that will be called to initialize gas fields
+
+    :param dist_type: Type of leak distribution to be used
+    :param leak_data_path: Path to a leak data file
     """
     rsc_path = emission_data_path
     with open(rsc_path, 'rb') as f:
@@ -227,14 +232,15 @@ def emission_objects_generator(dist_type, emission_data_path, custom_emission_ma
 
 def permitted_emission(n_emit, sizes, duration, time, site, comp_name):
     """
-    Creates a leak object specifying new permitted emissions
+    Creates an emission object specifying new permitted emissions
+
     :param n_emit: number of emissions to create
     :param sizes: a list of leak sizes from which to specify the emission rate
     :param duration: a float defining the duration of the emission
     :param time: a Time object
     :param site: a Site object
     :param comp_name: Name of the component to be considered from within site.comp_dict
-    :return: A Leak object
+    :return: an Emission object
     """
     flux = np.random.choice(sizes, n_emit)
     reparable = False
