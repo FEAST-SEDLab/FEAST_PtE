@@ -3,6 +3,7 @@ This module defines the component level survey based detection class, CompSurvey
 """
 import numpy as np
 from .abstract_detection_method import DetectionMethod
+from ..EmissionSimModules.result_classes import ResultDiscrete
 
 
 class CompSurvey(DetectionMethod):
@@ -82,7 +83,7 @@ class CompSurvey(DetectionMethod):
         detect = em_surveyed[scores <= probs]
         return detect
 
-    def emitters_surveyed(self, time, gas_field, emissions, find_cost):
+    def emitters_surveyed(self, time, gas_field, emissions):
         """
         Determines which emitters are surveyed during the current time step.
         Accounts for the number of components surveyed per timestep, the number of components at each site, and the
@@ -91,11 +92,9 @@ class CompSurvey(DetectionMethod):
         :param time: a Time object
         :param gas_field: a GasField object
         :param emissions: a DataFrame of current emissions
-        :param find_cost: the find_cost array associated with the ldar program
         :return emitter_inds: emission_id of emissions to evaluate at this timestep (list of ints)
         """
         remaining_comps = self.comps_per_timestep
-        find_cost[time.time_index] += self.comps_per_timestep / self.survey_speed * self.labor
         # only considering nonzero leaks is important because cleaning leaks that have been set to 0 from the leak
         # set happens periodically in the simulation and would otherwise cause indexing errors
         emitter_inds = []
@@ -109,13 +108,14 @@ class CompSurvey(DetectionMethod):
                 site_inds = self.choose_sites(gas_field, time, 1)
                 if len(site_inds) > 0:
                     self.site_survey_index = site_inds[0]
+                    self.deployment_count.append_entry([time.current_time, 1])
                 else:
                     self.site_survey_index = None
                     break
-            else:
+            else:  # This condition allows a method to wait for conditions to change at the current site for
+                # op_env_wait_time
                 op_env = self.check_op_envelope(gas_field, time, self.site_survey_index)
                 if 'fail' in op_env:
-                    # TODO: append time.current_time, n site failures
                     if self.mid_site_fail_time > time.current_time:
                         self.mid_site_fail_time = time.current_time
                     break
@@ -128,13 +128,16 @@ class CompSurvey(DetectionMethod):
             emitter_inds.extend(emissions.index[site_cond & comp_cond])
             if remaining_comps + self.comp_survey_index > gas_field.sites[site_name]['parameters'].max_comp_ind:
                 remaining_comps -= (gas_field.sites[site_name]['parameters'].max_comp_ind - self.comp_survey_index)
+                n_comps = gas_field.sites[site_name]['parameters'].max_comp_ind - self.comp_survey_index
                 self.comp_survey_index = 0
+                self.deployment_cost.append_entry([time.current_time, n_comps / self.survey_speed * self.labor])
             else:
                 self.comp_survey_index += remaining_comps
+                self.deployment_cost.append_entry([time.current_time, remaining_comps / self.survey_speed * self.labor])
                 remaining_comps = 0
         return emitter_inds
 
-    def detect(self, time, gas_field, emissions, find_cost):
+    def detect(self, time, gas_field, emissions):
         """
         The detect method checks that the current time is within operating hours, selects emitters to inspect,
         determines which emissions are detected and dispatches the follow up action for detected emissions.
@@ -142,17 +145,13 @@ class CompSurvey(DetectionMethod):
         :param time: a Time object
         :param gas_field: a GasField object
         :param emissions: a DataFrame of current emissions
-        :param find_cost: an array of finding costs
         """
         # enforces the operating hours
         if self.check_time(time):
-            emitter_inds = self.emitters_surveyed(time, gas_field, emissions, find_cost)
-            # TODO: append time.current_time, number of components surveyed to self.comp_survey_count
-            # TODO append time.current_time, cost at this time step
-            # TODO: append time.current_time, number of sites surveyed to self.site_survey_count
+            emitter_inds = self.emitters_surveyed(time, gas_field, emissions)
             if len(emitter_inds) > 0:
                 detect = self.detect_prob_curve(time, gas_field, np.array(emitter_inds), emissions)
-                # TODO: append time.current_time, len(detect) to self.detection_count
+                self.detection_count.append_entry([time.current_time, len(detect)])
                 # Deploy follow up action
                 self.dispatch_object.action(None, detect)
 

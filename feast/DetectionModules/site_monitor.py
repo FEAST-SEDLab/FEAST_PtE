@@ -38,7 +38,7 @@ class SiteMonitor(DetectionMethod):
 
         # --------------- Process Variables -------------------
         self.ophrs = ophrs
-        self.capital = capital
+        self.deployment_cost.append_entry([time.current_time, capital])
         self.site_queue = site_queue or []  # list of sites where this method applies
 
         # --------------- Detection Variables -----------------
@@ -100,12 +100,13 @@ class SiteMonitor(DetectionMethod):
         detect = np.array(site_inds)[scores <= probs]
         return detect
 
-    def detect(self, time, gas_field, emissions, find_cost):
+    def detect(self, time, gas_field, emissions):
         """
         The detection method implements a continuous monitor detection method model
 
         :param time: a Time object
         :param gas_field: a GasField object
+        :param emissions: a DataFrame containing emission data to evaluate
         :return: None
         """
         # enforces the operating hours
@@ -114,6 +115,7 @@ class SiteMonitor(DetectionMethod):
             site_inds = self.choose_sites(gas_field, time, len(self.site_queue), clear_sites=False)
             if len(site_inds) > 0:
                 detect = self.detect_prob_curve(time, gas_field, site_inds, emissions)
+                self.detection_count.append_entry(time.current_time, len(detect))
                 # Deploy follow up action
                 self.dispatch_object.action(detect, None)
 

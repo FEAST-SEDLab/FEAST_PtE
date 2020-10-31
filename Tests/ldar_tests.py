@@ -32,6 +32,10 @@ def test_repair():
         if emission.emissions.end_time[ind] != expected[ind]:
             raise ValueError("DetectionModules.repair.Repair is not adjusting "
                              "emission endtimes correctly at index {:0.0f}".format(ind))
+    if repair_proc.repair_count.get_sum_val(0, 10) != 2:
+        raise ValueError("Repair.repair_count is not updated correctly.")
+    if repair_proc.repair_cost.get_sum_val(0, 10) != 2:
+        raise ValueError("Repair.repai_cost is not updated correctly")
 
 
 def test_check_time():
@@ -71,7 +75,6 @@ def test_check_time():
 def test_comp_survey():
     gas_field = basic_gas_field()
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
-    find_cost = np.zeros(time.n_timesteps)
     rep = Dm.repair.Repair(repair_delay=0)
     points = np.logspace(-3, 1, 100)
     probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.02)) / (0.8 * np.sqrt(2))) for f
@@ -90,7 +93,11 @@ def test_comp_survey():
     )
     emissions = gas_field.emissions.get_current_emissions(time)
     tech.action(list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)))
-    tech.detect(time, gas_field, emissions, find_cost)
+    tech.detect(time, gas_field, emissions)
+    if tech.deployment_count.get_sum_val(0, 1) != 14:
+        raise ValueError("deployment count is not updated correctly in comp_survey")
+    if np.abs(tech.deployment_cost.get_sum_val(0, 1) - 9 * 100) > 1e-5:
+        raise ValueError("CompSurvey is not calculating deployment costs correctly")
     if np.max(emissions.site_index[emissions.index.isin(rep.to_repair)]) != 13:
         raise ValueError("tech.detect repairing emissions at incorrect sites")
     expected_detected_ids = [54, 55, 75, 66, 87, 62, 58, 84, 5, 25, 43, 71, 13, 79, 97]
@@ -110,7 +117,6 @@ def test_comp_survey_emitters_surveyed():
     gas_field.met_data_path = 'TMY-DataExample.csv'
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
     gas_field.met_data_maker()
-    find_cost = np.zeros(time.n_timesteps)
     rep = Dm.repair.Repair(repair_delay=0)
     wind_dirs_mins = np.zeros(gas_field.n_sites)
     wind_dirs_maxs = np.ones(gas_field.n_sites) * 90
@@ -135,12 +141,12 @@ def test_comp_survey_emitters_surveyed():
     )
     tech.action(list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)))
     emissions = gas_field.emissions.get_current_emissions(time)
-    emitter_inds = tech.emitters_surveyed(time, gas_field, emissions, find_cost)
+    emitter_inds = tech.emitters_surveyed(time, gas_field, emissions)
     if emitter_inds:
         # emitter_inds is expected to be []
         raise ValueError("CompSurvey.emitters_surveyed is not returning expected emitter indexes")
     wind_dirs_maxs[11] = 200
-    emitter_inds = tech.emitters_surveyed(time, gas_field, emissions, find_cost)
+    emitter_inds = tech.emitters_surveyed(time, gas_field, emissions)
     if emitter_inds != [71]:
         # The wind direction op envelope was updated to pass at site 11 only. Site 11 has one emission at index 71.
         raise ValueError("CompSurvey.emitters_surveyed is not returning expected indexes")
@@ -149,8 +155,6 @@ def test_comp_survey_emitters_surveyed():
 def test_site_survey():
     gas_field = basic_gas_field()
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
-    find_cost = np.zeros(time.n_timesteps)
-    # Test __init__
     points = np.logspace(-3, 1, 100)
     probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.474)) / (1.36 * np.sqrt(2))) for f
                                   in points])
@@ -183,17 +187,21 @@ def test_site_survey():
     # test detect_prob_curve
     detect = tech.detect_prob_curve(time, gas_field, [0, 1, 2], emissions)
     if detect != np.array([0]):
-        raise ValueError("site_detect.detect_prob_curve not returning expected sites.")
+        raise ValueError("SiteSurvey.detect_prob_curve not returning expected sites.")
     # test sites_surveyed with empty queue
-    sites_surveyed = tech.sites_surveyed(gas_field, time, find_cost)
+    sites_surveyed = tech.sites_surveyed(gas_field, time)
     if sites_surveyed:
         raise ValueError("sites_surveyed returning sites when it should not")
-    if find_cost[0] > 0:
-        raise ValueError("sites_surveyed updating find_cost when it should not")
     # test detect
     np.random.seed(0)
     tech.site_queue = [0, 1, 2]
-    tech.detect(time, gas_field, emissions, np.zeros(time.n_timesteps))
+    tech.detect(time, gas_field, emissions)
+    if tech.deployment_count.get_sum_val(0, 1) != 3:
+        raise ValueError("SiteSurvey is not counting deployments correctly")
+    if tech.detection_count.get_sum_val(0, 1) != 1:
+        raise ValueError("SiteSurvey is not counting detections correctly.")
+    if tech.deployment_cost.get_sum_val(0, 1) != 300:
+        raise ValueError("SiteSurvey is not calculating survey costs correctly")
     if tech.dispatch_object.site_queue != [0]:
         raise ValueError("site_detect.detect not updating dispatch object sites to survey correctly")
     # test action and sites_surveyed with
@@ -201,11 +209,9 @@ def test_site_survey():
     if tech.site_queue != list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)):
         raise ValueError("action is not updating site_queue as expected")
     # test sites_surveyed with full queue
-    sites_surveyed = tech.sites_surveyed(gas_field, time, find_cost)
+    sites_surveyed = tech.sites_surveyed(gas_field, time)
     if (sites_surveyed != np.linspace(0, 99, 100, dtype=int)).any():
         raise ValueError("sites_surveyed not identifying the correct sites")
-    if find_cost[0] != 10000:
-        raise ValueError("sites_surveyed not updating find_cost as expected.")
 
 
 def test_sitedetect_sites_surveyed():
@@ -213,7 +219,6 @@ def test_sitedetect_sites_surveyed():
     gas_field.met_data_path = 'TMY-DataExample.csv'
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
     gas_field.met_data_maker()
-    find_cost = np.zeros(time.n_timesteps)
     wind_dirs_mins = np.zeros(gas_field.n_sites)
     wind_dirs_maxs = np.ones(gas_field.n_sites) * 90
     wind_dirs_maxs[50] = 270
@@ -247,11 +252,9 @@ def test_sitedetect_sites_surveyed():
     )
     tech.site_queue = list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int))
     np.random.seed(0)
-    sites_surveyed = tech.sites_surveyed(gas_field, time, find_cost)
+    sites_surveyed = tech.sites_surveyed(gas_field, time)
     if sites_surveyed != [50]:
         raise ValueError("sites_surveyed is not returning sites correctly")
-    if find_cost[0] != 100:
-        raise ValueError("sites_surveyed incorrectly updating find_cost")
 
 
 def test_ldar_program():
@@ -303,8 +306,6 @@ def test_ldar_program():
     ogi_survey = Dm.ldar_program.LDARProgram(
         time, copy.deepcopy(gas_field), {'ogi': ogi}
     )
-    if len(ogi_survey.find_cost) != 10:
-        raise ValueError("find_cost not set to the correct length")
     em = ogi_survey.emissions.get_current_emissions(time)
     if np.sum(em.flux) != 100:
         raise ValueError("Unexpected emission rate in LDAR program initialization")
@@ -431,6 +432,8 @@ def test_check_op_envelope():
     op_env = tech.check_op_envelope(gas_field, time, 0)
     if op_env != 'site fail':
         raise ValueError("check_op_envelope is not returning 'site fail' as expected")
+    if len(tech.op_env_site_fails.get_vals(0, 1)) != 1 or tech.op_env_site_fails.get_vals(0, 1)[0] != 1:
+        raise ValueError("DetectionMethod.op_env_site_fails is not updated correctly")
     wind_dirs_mins = np.zeros([gas_field.n_sites, 2])
     wind_dirs_mins[:, 1] = 145
     wind_dirs_maxs = np.ones([gas_field.n_sites, 2]) * 90
@@ -443,6 +446,8 @@ def test_check_op_envelope():
     op_env = tech.check_op_envelope(gas_field, time, 0)
     if op_env != 'field fail':
         raise ValueError("check_op_envelope is not retruning 'field fail' as expected")
+    if tech.op_env_field_fails.get_sum_val(0, 1) != 1:
+        raise ValueError("DetectionMethod.op_env_field_fails is not updated correctly")
 
 
 def test_get_current_conditions():
@@ -552,6 +557,7 @@ def test_site_monitor():
         time_to_detect_days=[np.infty, 1, 0],
         detection_variables={'flux': 'mean'},
         dispatch_object=rep,
+        capital=1000
     )
     site_inds = list(range(0, 10))
     emissions = copy.copy(gas_field.emissions.get_current_emissions(time))
@@ -575,6 +581,8 @@ def test_site_monitor():
             ttd = 0
     if np.abs(np.mean(ttd_list) - 1) > 0.5:
         raise ValueError("Mean time to detection deviates from expected value by >5 sigma in site_monitor test")
+    if cm.deployment_cost.get_sum_val(0, 1) != 1000:
+        raise ValueError("SiteMonitor deployment cost is not calculated correctly.")
 
 
 test_repair()

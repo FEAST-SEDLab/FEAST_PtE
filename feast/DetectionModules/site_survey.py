@@ -100,39 +100,37 @@ class SiteSurvey(DetectionMethod):
         detect = np.array(site_inds)[scores <= probs]
         return detect
 
-    def sites_surveyed(self, gas_field, time, find_cost):
+    def sites_surveyed(self, gas_field, time):
         """
         Determines which sites are surveyed during the current time step.
         Accounts for the number of sites surveyed per timestep
 
         :param gas_field:
         :param time:
-        :param find_cost: the find_cost array associated with the ldar program
         :return site_inds: the indexes of sites to be surveyed during this timestep.
         """
         n_sites = np.min([self.sites_per_timestep, len(self.site_queue)])
         # Determines the sites to survey based on operating envelope
         site_inds = self.choose_sites(gas_field, time, n_sites)
-        find_cost[time.time_index] += len(site_inds) * self.site_cost
+        self.deployment_count.append_entry([time.current_time, len(site_inds)])
+        self.deployment_cost.append_entry([time.current_time, len(site_inds) * self.site_cost])
         return site_inds
 
-    def detect(self, time, gas_field, emissions, find_cost):
+    def detect(self, time, gas_field, emissions):
         """
         The detection method implements a survey-based detection method model
 
         :param time: an object of type Time (defined in feast_classes)
         :param gas_field: an object of type GasField (defined in feast_classes)
         :param emissions: an Emissions object
-        :param find_cost: an array in which to record the cost of SiteSurvey operations
         :return: None
         """
         # enforces the operating hours
         if self.check_time(time):
-            site_inds = self.sites_surveyed(gas_field, time, find_cost)
-            # TODO: append number of sites and time.current_time to site_survey_count
+            site_inds = self.sites_surveyed(gas_field, time)
             if len(site_inds) > 0:
                 detect = self.detect_prob_curve(time, gas_field, site_inds, emissions)
-                # TODO: append len(detect) and time.current_time to detection_count
+                self.detection_count.append_entry([time.current_time, len(detect)])
                 # Deploy follow up action
                 self.dispatch_object.action(detect, None)
 

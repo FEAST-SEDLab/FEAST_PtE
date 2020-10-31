@@ -200,18 +200,30 @@ class GasField:
                 self.emission_maker(n_leaks, new_leaks, compname, n_comp, time, site)
         return new_leaks
 
-    def met_data_maker(self):
+    def met_data_maker(self, start_hr=0):
+        """
+        Creates a dict to store met data derived from a Typical Meteorological Year file. The data may be rotated so
+        that the simulation begins at any hour in the TMY file.
+        :param start_hr: The hour at which the simulation should begin.
+        :return: None
+        """
+        if not 0 <= start_hr < 8760:
+            raise ValueError("start_hr must satisfy 0 <= start_hr < 8760")
+        start_hr = int(start_hr)
+        sort_order = np.linspace(0, 8759, 8760, dtype=int)
+        sort_order = np.mod(sort_order + start_hr, 8760)
         if self.met_data_path:
             met_dat = pd.read_csv(self.met_data_path, header=1)
-            self.met['wind speed'] = met_dat['wind speed (m/s)']
-            self.met['wind direction'] = met_dat['wind direction (degrees clockwise from North)']
-            self.met['temperature'] = met_dat['temperature (Celsius)']
-            self.met['relative humidity'] = met_dat['relative humidity (%)']
-            self.met['precipitation'] = met_dat['precipitation (mm)']
-            self.met['albedo'] = met_dat['albedo (-)']
-            self.met['ceiling height'] = met_dat['ceiling height (m)']
-            self.met['cloud cover'] = met_dat['cloud cover (%)']
-            self.met['solar intensity'] = met_dat['solar intensity (direct normal irradiance--W/m^2)']
+            self.met['wind speed'] = np.array(met_dat['wind speed (m/s)'][sort_order])
+            self.met['wind direction'] = np.array(met_dat['wind direction (degrees clockwise from North)'][sort_order])
+            self.met['temperature'] = np.array(met_dat['temperature (Celsius)'][sort_order])
+            self.met['relative humidity'] = np.array(met_dat['relative humidity (%)'][sort_order])
+            self.met['precipitation'] = np.array(met_dat['precipitation (mm)'][sort_order])
+            self.met['albedo'] = np.array(met_dat['albedo (-)'][sort_order])
+            self.met['ceiling height'] = np.array(met_dat['ceiling height (m)'][sort_order])
+            self.met['cloud cover'] = np.array(met_dat['cloud cover (%)'][sort_order])
+            self.met['solar intensity'] = np.array(met_dat['solar intensity (direct normal irradiance--W/m^2)'][
+                                                       sort_order])
 
     def get_met(self, time, parameter_names, interp_modes='mean', ophrs=None):
         """

@@ -34,7 +34,7 @@ def test_results_analysis():
         )
         sc = Esm.simulation_classes.Scenario(time=timeobj, gas_field=gf, ldar_program_dict={'ogi': ogi_survey})
         sc.run(display_status=False, dir_out='ResultsTemp')
-    null_npv, emissions, costs, techs = raf.results_analysis('ResultsTemp', 0.08, 2e-4)
+    null_npv, emissions, techs = raf.results_analysis('ResultsTemp', 0.08, 2e-4)
     if len(null_npv.keys()) != 4:
         raise ValueError("results analysis function returning the wrong number of keys")
     if null_npv['Finding'].shape != (1, 3):
@@ -128,7 +128,7 @@ def test_npv_calculator():
 
 
 def test_ResultsAggregate():
-    res = Esm.simulation_classes.ResultAggregate(units='g/s')
+    res = Esm.result_classes.ResultAggregate(units='g/s')
     if res.units != 'g/s':
         raise ValueError("ResultsAggregate is not initializing self.units correctly")
     if res.time_value:
@@ -148,7 +148,7 @@ def test_ResultsAggregate():
 
 
 def test_ResultsDiscrete():
-    res = Esm.simulation_classes.ResultDiscrete(units='g/s')
+    res = Esm.result_classes.ResultDiscrete(units='g/s')
     if res.units != 'g/s':
         raise ValueError("ResultsDiscrete is not initializing self.units correctly")
     if res.time_value:
@@ -166,7 +166,7 @@ def test_ResultsDiscrete():
 
 
 def test_ResultsContinuous():
-    res = Esm.simulation_classes.ResultContinuous(units='g/s')
+    res = Esm.result_classes.ResultContinuous(units='g/s')
     if res.units != 'g/s':
         raise ValueError("ResultsDiscrete is not initializing self.units correctly")
     res.append_entry([0, 6.2])

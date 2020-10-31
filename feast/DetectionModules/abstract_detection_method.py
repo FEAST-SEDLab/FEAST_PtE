@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import interpolate as interp
-from feast.EmissionSimModules import simulation_classes as sc
+from feast.EmissionSimModules import result_classes as rc
 
 
 class DetectionMethod:
@@ -11,14 +11,15 @@ class DetectionMethod:
         """
         :param time: a Time object
         """
-        self.find_cost = np.zeros(time.n_timesteps)
-        self.repair_cost = np.zeros(time.n_timesteps)
         self.op_envelope = op_envelope or {}
         self.ophrs = ophrs or {}
         self.detection_variables = detection_variables or {}  # Dict with format {name: interpolation mode}
         self.site_queue = []
-        self.op_env_site_fails = sc.ResultDiscrete()
-        self.op_env_field_fails = sc.ResultDiscrete()
+        self.op_env_site_fails = rc.ResultDiscrete(units='Count')
+        self.op_env_field_fails = rc.ResultDiscrete(units='Count')
+        self.deployment_count = rc.ResultDiscrete(units='Count')
+        self.deployment_cost = rc.ResultDiscrete(units='USD')
+        self.detection_count = rc.ResultDiscrete(units='Count')
         if type(self.detection_variables) is not dict:
             raise TypeError("Detection_variables must be a dict of form {name: interpolation mode,}")
 

@@ -57,6 +57,12 @@ def test_gas_field():
 
     if met_dat['wind speed'] != 4.1:
         raise ValueError("gas_field.get_met not returning the correct values when max is specified")
+    wd = gf.get_met(timeobj, ['wind direction'], interp_modes=['mean'], ophrs={'begin': 10, 'end': 11})
+    gf.met_data_maker(100)
+    wd2 = gf.get_met(timeobj, ['wind direction'], interp_modes=['mean'], ophrs={'begin': 10, 'end': 11})
+    if wd2 == wd:
+        raise ValueError("gas_field.met_data_maker is not changing the start hour correctly")
+
 
 
 def test_gasfield_leak_maker():
