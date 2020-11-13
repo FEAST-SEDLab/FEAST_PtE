@@ -288,7 +288,7 @@ for ind in range(n_montecarlo):
     ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7 = define_detection_methods(timeobj)
     ldar_dict = define_ldar_programs(timeobj, gas_field, ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7)
     scenario = sc.Scenario(time=timeobj, gas_field=gas_field, ldar_program_dict=ldar_dict)
-    scenario.run(dir_out='ExampleRunScriptResults', display_status=True)
+    scenario.run(dir_out='ExampleRunScriptResults', display_status=True, save_method='pickle')
 
 b = time.time()
 print("run time {:0.2f} seconds".format(b - a))

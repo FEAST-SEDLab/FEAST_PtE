@@ -73,7 +73,7 @@
 
 
 \title{FEAST}
-\date{Nov 10, 2020}
+\date{Nov 12, 2020}
 \release{3.1}
 \author{Chandler Kemp and Clay Bell}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -93,9 +93,147 @@
 \chapter{FEAST modules}
 \label{\detokenize{index:feast-modules}}
 
-\section{field\_simulation}
-\label{\detokenize{index:module-feast.field_simulation}}\label{\detokenize{index:field-simulation}}\index{feast.field\_simulation (module)@\spxentry{feast.field\_simulation}\spxextra{module}}
-A high level module for running simulations of multiple natural gas production sites and associated infrastructure.
+\section{MEET\_1\_importer}
+\label{\detokenize{index:module-feast.MEET_1_importer}}\label{\detokenize{index:meet-1-importer}}\index{feast.MEET\_1\_importer (module)@\spxentry{feast.MEET\_1\_importer}\spxextra{module}}\index{gas\_comp\_to\_dict() (in module feast.MEET\_1\_importer)@\spxentry{gas\_comp\_to\_dict()}\spxextra{in module feast.MEET\_1\_importer}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:feast.MEET_1_importer.gas_comp_to_dict}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{gas\_comp\_to\_dict}}}{\emph{gc}, \emph{delta\_t}}{}
+converts a gas\_comp DataFrame to a dict specifying the start time, top time, emission rate, location,
+emission type and emission ID for every emitter in gas\_comp. If an emission changes its emission rate,
+it is recorded as stopping and restarting at the time of the change. LDAR programs will treat the emission
+correctly due to the emission ID that persists after the change in emission rate.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{gc}} \textendash{} a gas\_comp DataFrame as created by the function load\_gas\_comp\_file
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{delta\_t}} \textendash{} The time resolution of the gas\_comp file (seconds)
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+the dict containing emitter data from the gas\_comp file
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{gascomp\_reader() (in module feast.MEET\_1\_importer)@\spxentry{gascomp\_reader()}\spxextra{in module feast.MEET\_1\_importer}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:feast.MEET_1_importer.gascomp_reader}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{gascomp\_reader}}}{\emph{path\_to\_gas\_comp}, \emph{feast\_delta\_t}, \emph{duration}, \emph{comps\_per\_site}, \emph{rep\_cost\_path}, \emph{met\_data\_path=None}, \emph{met\_start\_hr=None}}{}
+Read a MEET 1.0 GasComp result file and return a feast Time object and GasField object specifying all of the
+emissions to occur in a FEAST simulation
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{path\_to\_gas\_comp}} \textendash{} path to a gas\_comp file
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{feast\_delta\_t}} \textendash{} time resolution of the FEAST simulation (days). FEAST will represent emissions with the     precision of the original MEET simulation, but will invoke LDAR events as though they occur instantaneously with     the time resolution specified here.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{duration}} \textendash{} duration of the simulation to run in FEAST (days)
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{comps\_per\_site}} \textendash{} A dict of form \{loc: number of components\}. This will specify the number of components to     be inspected for leaks at every site
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{rep\_cost\_path}} \textendash{} Path to a repair cost data file. The FEAST will randomly assign these repair costs to leaks     simulated in MEET.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{met\_data\_path}} \textendash{} Path to a meteorological data file (if left as None, FEAST will run without met data)
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{met\_start\_hr}} \textendash{} FEAST will rotate the meteorological data to begin at the hour specified by an integer here.
+
+\end{itemize}
+
+\item[{Return time\_obj}] \leavevmode
+a FEAST Time object to specify a simulation
+
+\item[{Return gas\_field}] \leavevmode
+a FEAST GasField object
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{gc\_dat\_to\_gas\_field() (in module feast.MEET\_1\_importer)@\spxentry{gc\_dat\_to\_gas\_field()}\spxextra{in module feast.MEET\_1\_importer}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:feast.MEET_1_importer.gc_dat_to_gas_field}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{gc\_dat\_to\_gas\_field}}}{\emph{feast\_delta\_t}, \emph{duration}, \emph{comps\_per\_site}, \emph{rep\_cost\_path}, \emph{met\_data\_path=None}, \emph{met\_start\_hr=None}, \emph{size=0}, \emph{loc=0}, \emph{start=0}, \emph{stop=0}, \emph{emtype=0}, \emph{em\_id=None}}{}
+Ports data from a data\_dict returned by the funcation gas\_comp\_to\_dict into a FEAST GasField
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{feast\_delta\_t}} \textendash{} FEAST time resolution (days)
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{duration}} \textendash{} FEAST simulation duration (days)
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{comps\_per\_site}} \textendash{} A dict of form \{loc: number of components\}. This will specify the number of components to     be inspected for leaks at every site
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{rep\_cost\_path}} \textendash{} Path to a repair cost data file. The FEAST will randomly assign these repair costs to leaks     simulated in MEET
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{met\_data\_path}} \textendash{} Path to a meteorological data file (if left as None, FEAST will run without met data)
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{met\_start\_hr}} \textendash{} FEAST will rotate the meteorological data to begin at the hour specified by an integer here.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{size}} \textendash{} an array of emission sizes (g/s)
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{loc}} \textendash{} an array of site ids
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{start}} \textendash{} an array of emission start times (days)
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{stop}} \textendash{} an array of emission stop times (days)
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{emtype}} \textendash{} an array of emission types (reparable or no)
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{em\_id}} \textendash{} an array of emission IDs
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+a FEAST Time object
+
+\item[{Returns}] \leavevmode
+a FEAST GasField object
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{load\_gas\_comp\_file() (in module feast.MEET\_1\_importer)@\spxentry{load\_gas\_comp\_file()}\spxextra{in module feast.MEET\_1\_importer}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:feast.MEET_1_importer.load_gas_comp_file}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{load\_gas\_comp\_file}}}{\emph{path\_to\_gas\_comp}}{}
+Loads a gas\_comp.csv file generated by MEET 1.0
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\sphinxstyleliteralstrong{\sphinxupquote{path\_to\_gas\_comp}} \textendash{} a path (str) to a gas\_comp file
+
+\item[{Returns}] \leavevmode
+a DataFrame of the gas\_comp file
+
+\item[{Returns}] \leavevmode
+the time resolution of meet simulation (seconds)
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 
 
 \section{input\_data\_classes}
@@ -1063,7 +1201,7 @@ This module defines the Repair class. Repair may be called by detection objects 
 \index{Repair (class in feast.DetectionModules.repair)@\spxentry{Repair}\spxextra{class in feast.DetectionModules.repair}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.DetectionModules.repair.Repair}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{Repair}}}{\emph{repair\_delay=0}}{}
+\phantomsection\label{\detokenize{index:feast.DetectionModules.repair.Repair}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{Repair}}}{\emph{repair\_delay=0}, \emph{name=None}}{}
 Bases: \sphinxcode{\sphinxupquote{object}}
 
 Defines a repair process. A repair process determines when emissions are ended by an LDAR program and the
@@ -1574,6 +1712,153 @@ A class to store the number and type of components associated with a site.
 
 
 
+\subsection{result\_classes}
+\label{\detokenize{index:module-feast.EmissionSimModules.result_classes}}\label{\detokenize{index:result-classes}}\index{feast.EmissionSimModules.result\_classes (module)@\spxentry{feast.EmissionSimModules.result\_classes}\spxextra{module}}
+result\_classes defines classes that are used to store event counts and continuous variable data for saving.
+\index{ResultAggregate (class in feast.EmissionSimModules.result\_classes)@\spxentry{ResultAggregate}\spxextra{class in feast.EmissionSimModules.result\_classes}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.result_classes.ResultAggregate}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{ResultAggregate}}}{\emph{units=None}, \emph{time\_value=None}}{}
+Bases: \sphinxcode{\sphinxupquote{object}}
+
+A super class designed to store aggregate results during a simulation.
+Time and value pairs are stored in a list.
+\index{append\_entry() (ResultAggregate method)@\spxentry{append\_entry()}\spxextra{ResultAggregate method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.result_classes.ResultAggregate.append_entry}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{append\_entry}}}{\emph{time\_value}}{}
+Add a new entry to the ResultAggregate object
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\sphinxstyleliteralstrong{\sphinxupquote{time\_value}} \textendash{} an ordered pair following this pattern: {[}time, value{]}
+
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_vals() (ResultAggregate method)@\spxentry{get\_vals()}\spxextra{ResultAggregate method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.result_classes.ResultAggregate.get_vals}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_vals}}}{\emph{t\_start=0}, \emph{t\_end=inf}}{}
+Returns all values associated with times between t\_start and t\_end.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{t\_start}} \textendash{} Time to begin the sum
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{t\_end}} \textendash{} time to end the sum
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+All values associated with time
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+
+\end{fulllineitems}
+
+\index{ResultContinuous (class in feast.EmissionSimModules.result\_classes)@\spxentry{ResultContinuous}\spxextra{class in feast.EmissionSimModules.result\_classes}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.result_classes.ResultContinuous}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{ResultContinuous}}}{\emph{**kwargs}}{}
+Bases: {\hyperref[\detokenize{index:feast.EmissionSimModules.result_classes.ResultAggregate}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{feast.EmissionSimModules.result\_classes.ResultAggregate}}}}}
+
+Designed to store continuous rates that endure between consecutive time recordings as opposed to discrete
+variables that occur at a specific time. For example, emission rate can be recorded as a continuous data type.
+\index{get\_time\_integrated() (ResultContinuous method)@\spxentry{get\_time\_integrated()}\spxextra{ResultContinuous method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.result_classes.ResultContinuous.get_time_integrated}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_time\_integrated}}}{\emph{start\_time=0}, \emph{end\_time=None}, \emph{unit\_factor=1}}{}
+Calculates the integral of value over the time period start\_time:end\_time
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{start\_time}} \textendash{} Beginning of the integration period
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{end\_time}} \textendash{} End of the integration period
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{unit\_factor}} \textendash{} A factor that may be used to ensure that the units of value are consistent with the units of
+time. For example, if time is measured in days and emissions are measured in g/s, a conversion factor of
+3600 * 24 should be used to convert gram/second*days to grams.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+The integrated value
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+
+\end{fulllineitems}
+
+\index{ResultDiscrete (class in feast.EmissionSimModules.result\_classes)@\spxentry{ResultDiscrete}\spxextra{class in feast.EmissionSimModules.result\_classes}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.result_classes.ResultDiscrete}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{ResultDiscrete}}}{\emph{**kwargs}}{}
+Bases: {\hyperref[\detokenize{index:feast.EmissionSimModules.result_classes.ResultAggregate}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{feast.EmissionSimModules.result\_classes.ResultAggregate}}}}}
+
+Designed to store discrete values associated with specific times, as opposed to continuous rates that persist
+between consecutive data points. For example, the number of sites surveyed can be recorded as a discrete data type.
+\index{get\_cumulative\_vals() (ResultDiscrete method)@\spxentry{get\_cumulative\_vals()}\spxextra{ResultDiscrete method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.result_classes.ResultDiscrete.get_cumulative_vals}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_cumulative\_vals}}}{\emph{t\_start=0}, \emph{t\_end=inf}}{}
+Returns a cumulative sum of the attribute “value”
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{t\_start}} \textendash{} Time to begin the cumulative sum
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{t\_end}} \textendash{} time to end the cumulative sum
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+Array of times in between t\_start and t\_end, cumulative sum of the attribute “value”
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{get\_sum\_val() (ResultDiscrete method)@\spxentry{get\_sum\_val()}\spxextra{ResultDiscrete method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.result_classes.ResultDiscrete.get_sum_val}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_sum\_val}}}{\emph{t\_start=0}, \emph{t\_end=inf}}{}
+Returns the sum of values between t\_start and t\_end
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{t\_start}} \textendash{} Time to begin the sum
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{t\_end}} \textendash{} time to end the sum
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+sum of values between t\_start and t\_end
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+
+\end{fulllineitems}
+
+
+
 \subsection{simulation\_classes}
 \label{\detokenize{index:module-feast.EmissionSimModules.simulation_classes}}\label{\detokenize{index:simulation-classes}}\index{feast.EmissionSimModules.simulation\_classes (module)@\spxentry{feast.EmissionSimModules.simulation\_classes}\spxextra{module}}
 simulation\_classes stores the classes used to represent time, results and financial settings in simulations.
@@ -1623,7 +1908,7 @@ None
 \index{run() (Scenario method)@\spxentry{run()}\spxextra{Scenario method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.EmissionSimModules.simulation_classes.Scenario.run}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{run}}}{\emph{dir\_out=\textquotesingle{}Results\textquotesingle{}}, \emph{display\_status=True}}{}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.simulation_classes.Scenario.run}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{run}}}{\emph{dir\_out=\textquotesingle{}Results\textquotesingle{}}, \emph{display\_status=True}, \emph{save\_method=\textquotesingle{}json\textquotesingle{}}}{}
 run generates a single realization of a scenario.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -1645,11 +1930,17 @@ None
 \index{save() (Scenario method)@\spxentry{save()}\spxextra{Scenario method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.EmissionSimModules.simulation_classes.Scenario.save}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{save}}}{\emph{dir\_out}}{}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.simulation_classes.Scenario.save}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{save}}}{\emph{dir\_out}, \emph{method=\textquotesingle{}json\textquotesingle{}}}{}
 Save results to a file
 \begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{dir\_out}} \textendash{} Name of directory in which to save output file.
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{method}} \textendash{} Specifies how results should be saved
+
+\end{itemize}
 
 \end{description}\end{quote}
 
@@ -1696,9 +1987,10 @@ Instances of the time class store all time related information during a simulati
 \item\relax\sphinxstyleindexentry{feast.DetectionModules.site\_survey}\sphinxstyleindexpageref{index:\detokenize{module-feast.DetectionModules.site_survey}}
 \item\relax\sphinxstyleindexentry{feast.EmissionSimModules.emission\_class\_functions}\sphinxstyleindexpageref{index:\detokenize{module-feast.EmissionSimModules.emission_class_functions}}
 \item\relax\sphinxstyleindexentry{feast.EmissionSimModules.infrastructure\_classes}\sphinxstyleindexpageref{index:\detokenize{module-feast.EmissionSimModules.infrastructure_classes}}
+\item\relax\sphinxstyleindexentry{feast.EmissionSimModules.result\_classes}\sphinxstyleindexpageref{index:\detokenize{module-feast.EmissionSimModules.result_classes}}
 \item\relax\sphinxstyleindexentry{feast.EmissionSimModules.simulation\_classes}\sphinxstyleindexpageref{index:\detokenize{module-feast.EmissionSimModules.simulation_classes}}
-\item\relax\sphinxstyleindexentry{feast.field\_simulation}\sphinxstyleindexpageref{index:\detokenize{module-feast.field_simulation}}
 \item\relax\sphinxstyleindexentry{feast.input\_data\_classes}\sphinxstyleindexpageref{index:\detokenize{module-feast.input_data_classes}}
+\item\relax\sphinxstyleindexentry{feast.MEET\_1\_importer}\sphinxstyleindexpageref{index:\detokenize{module-feast.MEET_1_importer}}
 \end{sphinxtheindex}
 
 \renewcommand{\indexname}{Index}

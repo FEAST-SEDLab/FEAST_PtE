@@ -76,7 +76,7 @@ class Scenario:
 
         if not os.path.exists(dir_out):
             os.makedirs(dir_out)
-        n_realization = len([real for real in os.listdir('ResultsTemp') if '.json' in real])
+        n_realization = len([real for real in os.listdir(dir_out) if '.json' in real])
         file_out = dir_out + '/realization' + str(n_realization)
         res_dict = {}
         for prog_name, prog in self.ldar_program_dict.items():

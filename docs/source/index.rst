@@ -15,9 +15,9 @@ Welcome to FEAST's documentation!
 FEAST modules
 ==================
 
-field_simulation
-----------------
-.. automodule:: feast.field_simulation
+MEET_1_importer
+------------------
+.. automodule:: feast.MEET_1_importer
    :members:
 
 input_data_classes
@@ -75,6 +75,12 @@ emission
 infrastructure_classes
 **********************
 .. automodule:: feast.EmissionSimModules.infrastructure_classes
+   :members:
+   :show-inheritance:
+
+result_classes
+*****************
+.. automodule:: feast.EmissionSimModules.result_classes
    :members:
    :show-inheritance:
 

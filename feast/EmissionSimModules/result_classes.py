@@ -17,6 +17,7 @@ class ResultAggregate:
     def get_vals(self, t_start=0, t_end=np.infty):
         """
         Returns all values associated with times between t_start and t_end.
+
         :param t_start: Time to begin the sum
         :param t_end: time to end the sum
         :return: All values associated with time
@@ -30,6 +31,7 @@ class ResultAggregate:
     def append_entry(self, time_value):
         """
         Add a new entry to the ResultAggregate object
+
         :param time_value: an ordered pair following this pattern: [time, value]
         :return: None
         """
@@ -48,6 +50,7 @@ class ResultDiscrete(ResultAggregate):
     def get_cumulative_vals(self, t_start=0, t_end=np.infty):
         """
         Returns a cumulative sum of the attribute "value"
+
         :param t_start: Time to begin the cumulative sum
         :param t_end: time to end the cumulative sum
         :return: Array of times in between t_start and t_end, cumulative sum of the attribute "value"
@@ -59,6 +62,7 @@ class ResultDiscrete(ResultAggregate):
     def get_sum_val(self, t_start=0, t_end=np.infty):
         """
         Returns the sum of values between t_start and t_end
+
         :param t_start: Time to begin the sum
         :param t_end: time to end the sum
         :return: sum of values between t_start and t_end
@@ -77,6 +81,7 @@ class ResultContinuous(ResultAggregate):
     def get_time_integrated(self, start_time=0, end_time=None, unit_factor=1):
         """
         Calculates the integral of value over the time period start_time:end_time
+
         :param start_time: Beginning of the integration period
         :param end_time: End of the integration period
         :param unit_factor: A factor that may be used to ensure that the units of value are consistent with the units of

@@ -1,6 +1,6 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.7) (preloaded format=pdflatex 2020.8.17)  10 NOV 2020 11:35
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.7) (preloaded format=pdflatex 2020.8.17)  12 NOV 2020 16:59
 entering extended mode
-**exit()
+**./feast.tex
 (feast.tex
 LaTeX2e <2020-02-02> patch level 5
 L3 programming layer <2020-08-07> (sphinxmanual.cls
@@ -677,7 +677,7 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ]
 Chapter 1.
 LaTeX Font Info:    Trying to load font information for T1+pcr on input line 10
-7.
+0.
 (C:\Users\chand\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
@@ -687,98 +687,99 @@ LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 1
 (C:\Users\chand\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 )
-Underfull \hbox (badness 10000) in paragraph at lines 129--129
+Underfull \hbox (badness 10000) in paragraph at lines 125--125
+[]\T1/ptm/m/it/10 path_to_gas_comp\T1/ptm/m/n/10 , \T1/ptm/m/it/10 feast_delta_
+t\T1/ptm/m/n/10 , \T1/ptm/m/it/10 du-ra-tion\T1/ptm/m/n/10 , \T1/ptm/m/it/10 co
+mps_per_site\T1/ptm/m/n/10 , \T1/ptm/m/it/10 rep_cost_path\T1/ptm/m/n/10 ,
+ []
+
+[1
+
+]
+Underfull \hbox (badness 10000) in paragraph at lines 267--267
 []\T1/ptm/m/it/10 notes=\TS1/ptm/m/it/10 '\T1/ptm/m/it/10 No notes pro-vided\TS
 1/ptm/m/it/10 '\T1/ptm/m/n/10 , \T1/ptm/m/it/10 raw_file_name=None\T1/ptm/m/n/1
 0 , \T1/ptm/m/it/10 data_prep_file=None\T1/ptm/m/n/10 ,
  []
 
-[1
-
-] [2] [3] [4]
+[2] [3] [4] [5]
 LaTeX Font Info:    Font shape `T1/pcr/m/it' in size <10> not available
-(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 548.
- [5] [6] [7] [8] [9] [10] [11]
-Underfull \hbox (badness 10000) in paragraph at lines 1337--1337
+(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 686.
+ [6] [7] [8] [9] [10] [11] [12]
+Underfull \hbox (badness 10000) in paragraph at lines 1475--1475
 []\T1/ptm/m/it/10 repair_cost_path=None, emis-sion_data_path=None, base_reparab
 le=None,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1337--1337
+Underfull \hbox (badness 10000) in paragraph at lines 1475--1475
 \T1/ptm/m/it/10 cus-tom_emission_maker=None, emis-sion_production_rate=0, emis-
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1337--1337
+Underfull \hbox (badness 10000) in paragraph at lines 1475--1475
 \T1/ptm/m/it/10 episodic_emission_duration=0, vent_sizes=[0], vent_period=inf,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1337--1337
+Underfull \hbox (badness 10000) in paragraph at lines 1475--1475
 \T1/ptm/m/it/10 vent_starts=array([], dtype=float64), vent_duration=0, name=\TS
 1/ptm/m/it/10 '\T1/ptm/m/it/10 default\TS1/ptm/m/it/10 '\T1/ptm/m/it/10 ,
  []
 
-[12] [13] [14] [15] [16
-
-]
-Overfull \hbox (60.6225pt too wide) in paragraph at lines 1691--1692
+[13] [14] [15] [16] [17] [18]
+Overfull \hbox (60.6225pt too wide) in paragraph at lines 1982--1983
 []\T1/pcr/m/n/10 feast.DetectionModules.abstract_detection_method\T1/ptm/m/n/10
  ,
  []
 
 
-Overfull \hbox (66.6225pt too wide) in paragraph at lines 1697--1698
+Overfull \hbox (66.6225pt too wide) in paragraph at lines 1988--1989
 []\T1/pcr/m/n/10 feast.EmissionSimModules.emission_class_functions\T1/ptm/m/n/1
 0 ,
  []
 
 
-Overfull \hbox (54.6225pt too wide) in paragraph at lines 1698--1699
+Overfull \hbox (54.6225pt too wide) in paragraph at lines 1989--1990
 []\T1/pcr/m/n/10 feast.EmissionSimModules.infrastructure_classes\T1/ptm/m/n/10 
 ,
  []
 
 
-Overfull \hbox (30.6225pt too wide) in paragraph at lines 1699--1700
+Overfull \hbox (6.6225pt too wide) in paragraph at lines 1990--1991
+[]\T1/pcr/m/n/10 feast.EmissionSimModules.result_classes\T1/ptm/m/n/10 ,
+ []
+
+
+Overfull \hbox (30.6225pt too wide) in paragraph at lines 1991--1992
 []\T1/pcr/m/n/10 feast.EmissionSimModules.simulation_classes\T1/ptm/m/n/10 ,
  []
 
-[17
+[19
+
 
 
 ]
 No file feast.ind.
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1706.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1706.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1998.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1998.
 (feast.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1706.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1706.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1998.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1998.
 
-
-
-Package rerunfilecheck Warning: File `feast.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `feast.out':
-(rerunfilecheck)             Before: 75ACEC9E00239F862DB8966083F8EE4D;836
-(rerunfilecheck)             After:  DE2F2A4F98DABDD3CF038547C6C94901;830.
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1706.
+Package rerunfilecheck Info: File `feast.out' has not changed.
+(rerunfilecheck)             Checksum: 5BB2630AA877C5C394C85B9B4C7D662D;828.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1998.
  ) 
 Here is how much of TeX's memory you used:
- 13732 strings out of 481212
- 202043 string characters out of 2905973
- 481420 words of memory out of 3000000
- 28875 multiletter control sequences out of 15000+200000
+ 13750 strings out of 481212
+ 202446 string characters out of 2905973
+ 481059 words of memory out of 3000000
+ 28880 multiletter control sequences out of 15000+200000
  579492 words of font info for 83 fonts, out of 3000000 for 9000
  1142 hyphenation exceptions out of 8191
- 44i,11n,49p,729b,665s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 44i,11n,49p,734b,663s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Users/chand/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}<C:
 /Users/chand/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrb8a.pfb><
 C:/Users/chand/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb
@@ -790,9 +791,9 @@ ic/uhvr8a.pfb><C:/Users/chand/AppData/Local/Programs/MiKTeX/fonts/type1/urw/tim
 es/utmb8a.pfb><C:/Users/chand/AppData/Local/Programs/MiKTeX/fonts/type1/urw/tim
 es/utmr8a.pfb><C:/Users/chand/AppData/Local/Programs/MiKTeX/fonts/type1/urw/tim
 es/utmri8a.pfb>
-Output written on feast.pdf (21 pages, 166089 bytes).
+Output written on feast.pdf (23 pages, 177140 bytes).
 PDF statistics:
- 296 PDF objects out of 1000 (max. 8388607)
- 118 named destinations out of 1000 (max. 500000)
+ 323 PDF objects out of 1000 (max. 8388607)
+ 133 named destinations out of 1000 (max. 500000)
  69 words of extra memory for PDF output out of 10000 (max. 10000000)
 
