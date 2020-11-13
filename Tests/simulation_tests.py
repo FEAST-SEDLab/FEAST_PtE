@@ -33,7 +33,7 @@ def test_results_analysis():
             timeobj, copy.deepcopy(gf), {'ogi': ogi}
         )
         sc = Esm.simulation_classes.Scenario(time=timeobj, gas_field=gf, ldar_program_dict={'ogi': ogi_survey})
-        sc.run(display_status=False, dir_out='ResultsTemp')
+        sc.run(display_status=False, dir_out='ResultsTemp', save_method='pickle')
     null_npv, emissions, techs = raf.results_analysis('ResultsTemp', 0.08, 2e-4)
     if len(null_npv.keys()) != 4:
         raise ValueError("results analysis function returning the wrong number of keys")
@@ -114,7 +114,7 @@ def test_npv_calculator():
         timeobj, copy.deepcopy(gas_field), {'ogi': ogi}
     )
     sc = Esm.simulation_classes.Scenario(time=timeobj, gas_field=gas_field, ldar_program_dict={'ogi': ogi_survey})
-    sc.run(dir_out='ResultsTemp', display_status=False)
+    sc.run(dir_out='ResultsTemp', display_status=False, save_method='pickle')
     npv = feast.ResultsProcessing.results_analysis_functions.npv_calculator('ResultsTemp/realization0.p', 0.08, 2e-4)
     if npv['Repair'] != 2000:
         raise ValueError("npv_calculator not returning the expected repair cost")

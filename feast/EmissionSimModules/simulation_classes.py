@@ -4,7 +4,7 @@
 import os
 import pickle
 from ..DetectionModules.ldar_program import LDARProgram
-import numpy as np
+import json
 
 
 class Time:
@@ -38,7 +38,7 @@ class Scenario:
         self.gas_field = gas_field
         self.ldar_program_dict = ldar_program_dict
 
-    def run(self, dir_out="Results", display_status=True):
+    def run(self, dir_out="Results", display_status=True, save_method='json'):
         """
         run generates a single realization of a scenario.
 
@@ -64,20 +64,42 @@ class Scenario:
             self.time.current_time += self.time.delta_t
 
         # -------------- Save results --------------
-        self.save(dir_out)
+        self.save(dir_out, method=save_method)
 
-    def save(self, dir_out):
+    def save(self, dir_out, method='json'):
         """
         Save results to a file
 
         :param dir_out: Name of directory in which to save output file.
+        :param method: Specifies how results should be saved
         """
 
         if not os.path.exists(dir_out):
             os.makedirs(dir_out)
-        n_realization = len(os.listdir(dir_out))
-        file_out = dir_out + '/realization' + str(n_realization) + '.p'
-        pickle.dump(self, open(file_out, 'wb'))
+        n_realization = len([real for real in os.listdir('ResultsTemp') if '.json' in real])
+        file_out = dir_out + '/realization' + str(n_realization)
+        res_dict = {}
+        for prog_name, prog in self.ldar_program_dict.items():
+            res_dict[prog_name] = {
+                'emission timeseries': prog.emissions_timeseries,
+                'vent timeseries': prog.vents_timeseries,
+            }
+            for tech_name, tech in prog.tech_dict.items():
+                res_dict[prog_name][tech_name] = {}
+                res_dict[prog_name][tech_name]['deployment costs'] = tech.deployment_cost.__dict__
+                res_dict[prog_name][tech_name]['deployment count'] = tech.deployment_count.__dict__
+                res_dict[prog_name][tech_name]['op env site fails'] = tech.op_env_site_fails.__dict__
+                res_dict[prog_name][tech_name]['op env field fails'] = tech.op_env_field_fails.__dict__
+            for rep_name, rep in prog.repair.items():
+                res_dict[prog_name][rep_name] = {}
+                res_dict[prog_name][rep_name]['repair cost'] = rep.repair_cost.__dict__
+                res_dict[prog_name][rep_name]['repair count'] = rep.repair_count.__dict__
+        with open(file_out + '.json', 'w') as f:
+            json.dump(res_dict, f)
+        if method not in ['json', 'pickle']:
+            raise ValueError("The specified save method does not exist. Results were saved to a JSON file.")
+        if method == 'pickle':
+            pickle.dump(self, open(file_out + '.p', 'wb'))
 
     def check_timestep(self):
         """

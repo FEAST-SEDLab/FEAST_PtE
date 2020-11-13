@@ -115,7 +115,8 @@ class SiteMonitor(DetectionMethod):
             site_inds = self.choose_sites(gas_field, time, len(self.site_queue), clear_sites=False)
             if len(site_inds) > 0:
                 detect = self.detect_prob_curve(time, gas_field, site_inds, emissions)
-                self.detection_count.append_entry(time.current_time, len(detect))
+                if len(detect) > 0:
+                    self.detection_count.append_entry([time.current_time, len(detect)])
                 # Deploy follow up action
                 self.dispatch_object.action(detect, None)
 

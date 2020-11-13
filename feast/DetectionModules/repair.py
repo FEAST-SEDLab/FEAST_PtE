@@ -11,11 +11,14 @@ class Repair:
     Defines a repair process. A repair process determines when emissions are ended by an LDAR program and the
     associated costs.
     """
-    def __init__(self, repair_delay=0):
+    def __init__(self, repair_delay=0, name=None):
         """
         :param repair_delay: The time between when an emission is passed to Repair and when it is removed from the
             simulation (float--days)
         """
+        if name is None:
+            name = 'repair'
+        self.name = name
         self.repair_delay = repair_delay
         self.to_repair = []
         self.repair_count = ResultDiscrete(units='Count')
@@ -34,7 +37,7 @@ class Repair:
             rep_cond = emissions.emissions.reparable & emissions.emissions.index.isin(self.to_repair) & \
                        (emissions.emissions.end_time > time.current_time + self.repair_delay)
             emissions.emissions.loc[rep_cond, 'end_time'] = time.current_time + self.repair_delay
-            self.repair_count.append_entry([time.current_time + self.repair_delay, np.sum(rep_cond)])
+            self.repair_count.append_entry([time.current_time + self.repair_delay, int(np.sum(rep_cond))])
             self.repair_cost.append_entry([time.current_time + self.repair_delay,
                                            np.sum(emissions.emissions.loc[rep_cond, 'repair_cost'])])
             self.to_repair = []

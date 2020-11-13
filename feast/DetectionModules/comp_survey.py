@@ -151,7 +151,8 @@ class CompSurvey(DetectionMethod):
             emitter_inds = self.emitters_surveyed(time, gas_field, emissions)
             if len(emitter_inds) > 0:
                 detect = self.detect_prob_curve(time, gas_field, np.array(emitter_inds), emissions)
-                self.detection_count.append_entry([time.current_time, len(detect)])
+                if len(detect) > 0:
+                    self.detection_count.append_entry([time.current_time, len(detect)])
                 # Deploy follow up action
                 self.dispatch_object.action(None, detect)
 

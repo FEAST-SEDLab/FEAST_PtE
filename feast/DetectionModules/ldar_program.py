@@ -26,10 +26,10 @@ class LDARProgram:
         self.emissions_timeseries = []
         self.vents_timeseries = []
         self.tech_dict = tech_dict
-        self.repair = []
-        for tech in tech_dict.values():
+        self.repair = {}
+        for tech_name, tech in tech_dict.items():
             if type(tech.dispatch_object) is Repair:
-                self.repair.append(tech.dispatch_object)
+                self.repair[tech_name + ' ' + tech.dispatch_object.name] = tech.dispatch_object
 
     def action(self, time, gas_field):
         """
@@ -43,5 +43,5 @@ class LDARProgram:
                     and np.mod(time.current_time, tech.survey_interval) < time.delta_t:
                 tech.action(list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)))
             tech.detect(time, gas_field, self.emissions.get_current_emissions(time))
-        for rep in self.repair:
+        for rep in self.repair.values():
             rep.repair(time, self.emissions)

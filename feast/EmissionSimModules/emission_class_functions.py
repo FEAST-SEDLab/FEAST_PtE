@@ -34,7 +34,8 @@ class Emission:
             rep_array = np.zeros(length_in, dtype=np.bool)
         else:
             rep_array = np.array(reparable)
-        emission_id = emission_id or np.linspace(0, length_in - 1, length_in, dtype=int)
+        if emission_id is None:
+            emission_id = np.linspace(0, length_in - 1, length_in, dtype=int)
         try:
             if len(end_time) == length_in:
                 end_time = np.array(end_time)

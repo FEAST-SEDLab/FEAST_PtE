@@ -73,7 +73,7 @@
 
 
 \title{FEAST}
-\date{Oct 05, 2020}
+\date{Nov 10, 2020}
 \release{3.1}
 \author{Chandler Kemp and Clay Bell}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -96,63 +96,6 @@
 \section{field\_simulation}
 \label{\detokenize{index:module-feast.field_simulation}}\label{\detokenize{index:field-simulation}}\index{feast.field\_simulation (module)@\spxentry{feast.field\_simulation}\spxextra{module}}
 A high level module for running simulations of multiple natural gas production sites and associated infrastructure.
-\index{check\_timestep() (in module feast.field\_simulation)@\spxentry{check\_timestep()}\spxextra{in module feast.field\_simulation}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.field_simulation.check_timestep}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{check\_timestep}}}{\emph{gas\_field}, \emph{time}}{}
-Prints a warning if time.delta\_t is greater than the duration of some permitted emissions
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{gas\_field}} \textendash{} a GasField object
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{time}} \textendash{} a Time object
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-None
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{field\_simulation() (in module feast.field\_simulation)@\spxentry{field\_simulation()}\spxextra{in module feast.field\_simulation}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.field_simulation.field_simulation}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{field\_simulation}}}{\emph{gas\_field}, \emph{dir\_out=\textquotesingle{}Results\textquotesingle{}}, \emph{time=None}, \emph{ldar\_program\_dict=None}, \emph{econ\_set=None}, \emph{display\_status=True}}{}
-field\_simulation generates a single realization of a scenario. The scenario is defined by the gas\_field,
-ldar\_program\_dict and time objects passed to the function.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{gas\_field}} \textendash{} a GasField object
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{dir\_out}} \textendash{} path to a directory in which to save results (string)
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{time}} \textendash{} a Time object
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{ldar\_program\_dict}} \textendash{} a dict of LDAR programs to simulate \{‘name’: LDARProgram\}
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{econ\_set}} \textendash{} a FinanceSettings object
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{display\_status}} \textendash{} if True, display a status update whenever 10\% of the time steps are completed
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-None
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
 
 
 \section{input\_data\_classes}
@@ -161,8 +104,8 @@ This module defines all classes used to store input data.
 \index{DataFile (class in feast.input\_data\_classes)@\spxentry{DataFile}\spxextra{class in feast.input\_data\_classes}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.input_data_classes.DataFile}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{DataFile}}}{\emph{notes=\textquotesingle{}No notes provided\textquotesingle{}}, \emph{raw\_file\_name=None}, \emph{**kwargs}}{}
-DataFile is an abstract super class used that all data file types inherit from FEAST.
+\phantomsection\label{\detokenize{index:feast.input_data_classes.DataFile}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{DataFile}}}{\emph{notes=\textquotesingle{}No notes provided\textquotesingle{}}, \emph{raw\_file\_name=None}, \emph{data\_prep\_file=None}}{}
+DataFile is an abstract super class that all data file types inherit from FEAST.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
@@ -172,7 +115,7 @@ DataFile is an abstract super class used that all data file types inherit from F
 \sphinxstyleliteralstrong{\sphinxupquote{raw\_file\_name}} \textendash{} path (or list of paths) to a raw input file(s)
 
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{kwargs}} \textendash{} Any entries provided to kwargs will define new attributes for the class eg. \{‘name’: value\}
+\sphinxstyleliteralstrong{\sphinxupquote{data\_prep\_file}} \textendash{} path to the file used to process input data and create the DataFile object
 
 \end{itemize}
 
@@ -235,6 +178,25 @@ None
 
 \end{fulllineitems}
 
+
+\end{fulllineitems}
+
+\index{ProductionData (class in feast.input\_data\_classes)@\spxentry{ProductionData}\spxextra{class in feast.input\_data\_classes}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:feast.input_data_classes.ProductionData}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{ProductionData}}}{\emph{site\_prod=None}, \emph{**kwargs}}{}
+Stores an array of production rates that may be associated with gas production sites
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{prod\_dat}} \textendash{} an array of production rates
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{kwargs}} \textendash{} pass through
+
+\end{itemize}
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -311,16 +273,6 @@ Runs the detect method for every tech in tech\_dict and runs the repair method
 
 \end{fulllineitems}
 
-\index{end\_emissions() (LDARProgram method)@\spxentry{end\_emissions()}\spxextra{LDARProgram method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.DetectionModules.ldar_program.LDARProgram.end_emissions}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{end\_emissions}}}{\emph{time}}{}
-Sets the emissions to zero for all emissions that have exceeded their duration
-:param time: a Time object defined in simulation\_classes
-:return repair\_costs:
-
-\end{fulllineitems}
-
 
 \end{fulllineitems}
 
@@ -330,7 +282,7 @@ Sets the emissions to zero for all emissions that have exceeded their duration
 \label{\detokenize{index:module-feast.DetectionModules.abstract_detection_method}}\label{\detokenize{index:abstract-detection-method}}\index{feast.DetectionModules.abstract\_detection\_method (module)@\spxentry{feast.DetectionModules.abstract\_detection\_method}\spxextra{module}}\index{DetectionMethod (class in feast.DetectionModules.abstract\_detection\_method)@\spxentry{DetectionMethod}\spxextra{class in feast.DetectionModules.abstract\_detection\_method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.DetectionModules.abstract_detection_method.DetectionMethod}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{DetectionMethod}}}{\emph{time}}{}
+\phantomsection\label{\detokenize{index:feast.DetectionModules.abstract_detection_method.DetectionMethod}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{DetectionMethod}}}{\emph{time}, \emph{detection\_variables=None}, \emph{op\_envelope=None}, \emph{ophrs=None}}{}
 DetectionMethod is an abstract super class that defines the form required for all detection methods
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode
@@ -556,7 +508,7 @@ Determines the key for a site based on its index
 \index{get\_current\_conditions() (DetectionMethod method)@\spxentry{get\_current\_conditions()}\spxextra{DetectionMethod method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.DetectionModules.abstract_detection_method.DetectionMethod.get_current_conditions}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_current\_conditions}}}{\emph{time}, \emph{gas\_field}, \emph{emissions}, \emph{em\_indexes}}{}
+\phantomsection\label{\detokenize{index:feast.DetectionModules.abstract_detection_method.DetectionMethod.get_current_conditions}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_current\_conditions}}}{\emph{time}, \emph{gas\_field}, \emph{emissions}, \emph{em\_id}}{}
 Extracts conditions specified in self.detection\_variables
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -567,10 +519,10 @@ Extracts conditions specified in self.detection\_variables
 \sphinxstyleliteralstrong{\sphinxupquote{gas\_field}} \textendash{} a GasField object
 
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{emissions}} \textendash{} an Emissions object
+\sphinxstyleliteralstrong{\sphinxupquote{emissions}} \textendash{} a DataFrame of current emissions
 
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{em\_indexes}} \textendash{} indexes of emissions to consider
+\sphinxstyleliteralstrong{\sphinxupquote{em\_id}} \textendash{} emission indexes to consider
 
 \end{itemize}
 
@@ -592,7 +544,7 @@ This module defines the component level survey based detection class, CompSurvey
 \index{CompSurvey (class in feast.DetectionModules.comp\_survey)@\spxentry{CompSurvey}\spxextra{class in feast.DetectionModules.comp\_survey}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.DetectionModules.comp_survey.CompSurvey}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{CompSurvey}}}{\emph{time}, \emph{dispatch\_object}, \emph{survey\_interval}, \emph{survey\_speed}, \emph{labor}, \emph{site\_queue}, \emph{detection\_probability\_points}, \emph{detection\_probabilities}, \emph{detection\_variables}, \emph{comp\_survey\_index=0}, \emph{site\_survey\_index=0}, \emph{op\_env\_wait\_time=7}, \emph{ophrs=\{\textquotesingle{}begin\textquotesingle{}: 8}, \emph{\textquotesingle{}end\textquotesingle{}: 17\}}}{}
+\phantomsection\label{\detokenize{index:feast.DetectionModules.comp_survey.CompSurvey}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{CompSurvey}}}{\emph{time}, \emph{dispatch\_object}, \emph{survey\_interval}, \emph{survey\_speed}, \emph{labor}, \emph{site\_queue}, \emph{detection\_probability\_points}, \emph{detection\_probabilities}, \emph{ophrs}, \emph{comp\_survey\_index=0}, \emph{site\_survey\_index=0}, \emph{op\_env\_wait\_time=7}, \emph{**kwargs}}{}
 Bases: {\hyperref[\detokenize{index:feast.DetectionModules.abstract_detection_method.DetectionMethod}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{feast.DetectionModules.abstract\_detection\_method.DetectionMethod}}}}}
 
 This class specifies a component level, survey based detection method.
@@ -640,10 +592,6 @@ The ability to call a follow up action
 \sphinxstyleliteralstrong{\sphinxupquote{detection\_probabilities}} \textendash{} Set of probabilities that were measured (array)
 
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{detection\_variables}} \textendash{} dict of variables used in the detection\_probabilities \{‘name’: ‘interpolation
-method’\}
-
-\item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{comp\_survey\_index}} \textendash{} Index of the component to be surveyed next (int)
 
 \item {} 
@@ -685,7 +633,7 @@ None
 \index{detect() (CompSurvey method)@\spxentry{detect()}\spxextra{CompSurvey method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.DetectionModules.comp_survey.CompSurvey.detect}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{detect}}}{\emph{time}, \emph{gas\_field}, \emph{emissions}, \emph{find\_cost}}{}
+\phantomsection\label{\detokenize{index:feast.DetectionModules.comp_survey.CompSurvey.detect}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{detect}}}{\emph{time}, \emph{gas\_field}, \emph{emissions}}{}
 The detect method checks that the current time is within operating hours, selects emitters to inspect,
 determines which emissions are detected and dispatches the follow up action for detected emissions.
 \begin{quote}\begin{description}
@@ -696,6 +644,9 @@ determines which emissions are detected and dispatches the follow up action for 
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{gas\_field}} \textendash{} a GasField object
 
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{emissions}} \textendash{} a DataFrame of current emissions
+
 \end{itemize}
 
 \end{description}\end{quote}
@@ -705,7 +656,7 @@ determines which emissions are detected and dispatches the follow up action for 
 \index{detect\_prob\_curve() (CompSurvey method)@\spxentry{detect\_prob\_curve()}\spxextra{CompSurvey method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.DetectionModules.comp_survey.CompSurvey.detect_prob_curve}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{detect\_prob\_curve}}}{\emph{time}, \emph{gas\_field}, \emph{cond}, \emph{emissions}}{}
+\phantomsection\label{\detokenize{index:feast.DetectionModules.comp_survey.CompSurvey.detect_prob_curve}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{detect\_prob\_curve}}}{\emph{time}, \emph{gas\_field}, \emph{em\_surveyed}, \emph{emissions}}{}
 This function determines which leaks are found given an array of indexes defined by “cond.”
 The method uses attributes of the DetectionMethod and interpolation.
 \begin{quote}\begin{description}
@@ -717,10 +668,10 @@ The method uses attributes of the DetectionMethod and interpolation.
 \sphinxstyleliteralstrong{\sphinxupquote{gas\_field}} \textendash{} a GasField object
 
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{cond}} \textendash{} The array of indexes to be considered (array of ints)
+\sphinxstyleliteralstrong{\sphinxupquote{em\_surveyed}} \textendash{} Array of emission\_id to consider
 
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{emissions}} \textendash{} an Emission object storing all emissions in the simulation
+\sphinxstyleliteralstrong{\sphinxupquote{emissions}} \textendash{} a DataFrame of current emissions
 
 \end{itemize}
 
@@ -734,7 +685,7 @@ the indexes of detected leaks (array of ints)
 \index{emitters\_surveyed() (CompSurvey method)@\spxentry{emitters\_surveyed()}\spxextra{CompSurvey method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.DetectionModules.comp_survey.CompSurvey.emitters_surveyed}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{emitters\_surveyed}}}{\emph{time}, \emph{gas\_field}, \emph{emissions}, \emph{find\_cost}}{}
+\phantomsection\label{\detokenize{index:feast.DetectionModules.comp_survey.CompSurvey.emitters_surveyed}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{emitters\_surveyed}}}{\emph{time}, \emph{gas\_field}, \emph{emissions}}{}
 Determines which emitters are surveyed during the current time step.
 Accounts for the number of components surveyed per timestep, the number of components at each site, and the
 component and site at which the survey left off in the previous time step
@@ -747,15 +698,12 @@ component and site at which the survey left off in the previous time step
 \sphinxstyleliteralstrong{\sphinxupquote{gas\_field}} \textendash{} a GasField object
 
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{emissions}} \textendash{} an Emissions object
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{find\_cost}} \textendash{} the find\_cost array associated with the ldar program
+\sphinxstyleliteralstrong{\sphinxupquote{emissions}} \textendash{} a DataFrame of current emissions
 
 \end{itemize}
 
 \item[{Return emitter\_inds}] \leavevmode
-indexes of emissions to evaluate at this timestep (list of ints)
+emission\_id of emissions to evaluate at this timestep (list of ints)
 
 \end{description}\end{quote}
 
@@ -772,7 +720,7 @@ The site\_survey module defines the site level level survey based detection clas
 \index{SiteSurvey (class in feast.DetectionModules.site\_survey)@\spxentry{SiteSurvey}\spxextra{class in feast.DetectionModules.site\_survey}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.DetectionModules.site_survey.SiteSurvey}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{SiteSurvey}}}{\emph{time}, \emph{dispatch\_object}, \emph{sites\_per\_day}, \emph{site\_cost}, \emph{detection\_probability\_points}, \emph{detection\_probabilities}, \emph{op\_envelope=\{\}}, \emph{ophrs=\{\textquotesingle{}begin\textquotesingle{}: 0}, \emph{\textquotesingle{}end\textquotesingle{}: 24\}}, \emph{site\_queue={[}{]}}, \emph{survey\_interval=None}}{}
+\phantomsection\label{\detokenize{index:feast.DetectionModules.site_survey.SiteSurvey}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{SiteSurvey}}}{\emph{time}, \emph{dispatch\_object}, \emph{sites\_per\_day}, \emph{site\_cost}, \emph{detection\_probability\_points}, \emph{detection\_probabilities}, \emph{op\_envelope=None}, \emph{ophrs=None}, \emph{site\_queue=None}, \emph{survey\_interval=None}, \emph{**kwargs}}{}
 Bases: {\hyperref[\detokenize{index:feast.DetectionModules.abstract_detection_method.DetectionMethod}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{feast.DetectionModules.abstract\_detection\_method.DetectionMethod}}}}}
 
 SiteSurvey specifies a site level, survey based detection method. A site level detection method is sensitive to
@@ -867,7 +815,7 @@ None
 \index{detect() (SiteSurvey method)@\spxentry{detect()}\spxextra{SiteSurvey method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.DetectionModules.site_survey.SiteSurvey.detect}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{detect}}}{\emph{time}, \emph{gas\_field}, \emph{emissions}, \emph{find\_cost}}{}
+\phantomsection\label{\detokenize{index:feast.DetectionModules.site_survey.SiteSurvey.detect}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{detect}}}{\emph{time}, \emph{gas\_field}, \emph{emissions}}{}
 The detection method implements a survey\sphinxhyphen{}based detection method model
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -879,9 +827,6 @@ The detection method implements a survey\sphinxhyphen{}based detection method mo
 
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{emissions}} \textendash{} an Emissions object
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{find\_cost}} \textendash{} an array in which to record the cost of SiteSurvey operations
 
 \end{itemize}
 
@@ -925,7 +870,7 @@ the indexes of detected leaks
 \index{sites\_surveyed() (SiteSurvey method)@\spxentry{sites\_surveyed()}\spxextra{SiteSurvey method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.DetectionModules.site_survey.SiteSurvey.sites_surveyed}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{sites\_surveyed}}}{\emph{gas\_field}, \emph{time}, \emph{find\_cost}}{}
+\phantomsection\label{\detokenize{index:feast.DetectionModules.site_survey.SiteSurvey.sites_surveyed}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{sites\_surveyed}}}{\emph{gas\_field}, \emph{time}}{}
 Determines which sites are surveyed during the current time step.
 Accounts for the number of sites surveyed per timestep
 \begin{quote}\begin{description}
@@ -935,9 +880,6 @@ Accounts for the number of sites surveyed per timestep
 
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{time}} \textendash{} 
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{find\_cost}} \textendash{} the find\_cost array associated with the ldar program
 
 \end{itemize}
 
@@ -959,7 +901,7 @@ The site\_monitor module defines the site monitor detection class, SiteMonitor.
 \index{SiteMonitor (class in feast.DetectionModules.site\_monitor)@\spxentry{SiteMonitor}\spxextra{class in feast.DetectionModules.site\_monitor}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.DetectionModules.site_monitor.SiteMonitor}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{SiteMonitor}}}{\emph{time}, \emph{dispatch\_object}, \emph{time\_to\_detect\_points}, \emph{time\_to\_detect\_days}, \emph{ophrs=\{\textquotesingle{}begin\textquotesingle{}: 0}, \emph{\textquotesingle{}end\textquotesingle{}: 24\}}, \emph{capital=0}, \emph{site\_queue={[}{]}}}{}
+\phantomsection\label{\detokenize{index:feast.DetectionModules.site_monitor.SiteMonitor}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{SiteMonitor}}}{\emph{time}, \emph{dispatch\_object}, \emph{time\_to\_detect\_points}, \emph{time\_to\_detect\_days}, \emph{ophrs=None}, \emph{capital=0}, \emph{site\_queue=None}, \emph{**kwargs}}{}
 Bases: {\hyperref[\detokenize{index:feast.DetectionModules.abstract_detection_method.DetectionMethod}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{feast.DetectionModules.abstract\_detection\_method.DetectionMethod}}}}}
 
 This class specifies a site level continuous monitoring method. A site monitor continuously observes
@@ -1035,7 +977,7 @@ None
 \index{detect() (SiteMonitor method)@\spxentry{detect()}\spxextra{SiteMonitor method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.DetectionModules.site_monitor.SiteMonitor.detect}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{detect}}}{\emph{time}, \emph{gas\_field}, \emph{emissions}, \emph{find\_cost}}{}
+\phantomsection\label{\detokenize{index:feast.DetectionModules.site_monitor.SiteMonitor.detect}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{detect}}}{\emph{time}, \emph{gas\_field}, \emph{emissions}}{}
 The detection method implements a continuous monitor detection method model
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -1044,6 +986,9 @@ The detection method implements a continuous monitor detection method model
 
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{gas\_field}} \textendash{} a GasField object
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{emissions}} \textendash{} a DataFrame containing emission data to evaluate
 
 \end{itemize}
 
@@ -1189,7 +1134,7 @@ defined in this module.
 \index{Emission (class in feast.EmissionSimModules.emission\_class\_functions)@\spxentry{Emission}\spxextra{class in feast.EmissionSimModules.emission\_class\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.EmissionSimModules.emission_class_functions.Emission}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{Emission}}}{\emph{flux=()}, \emph{capacity=0}, \emph{reparable=True}, \emph{site\_index=()}, \emph{comp\_index=()}, \emph{endtime=inf}, \emph{repair\_cost=()}}{}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.emission_class_functions.Emission}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{Emission}}}{\emph{flux=()}, \emph{reparable=True}, \emph{site\_index=()}, \emph{comp\_index=()}, \emph{start\_time=0}, \emph{end\_time=inf}, \emph{repair\_cost=()}, \emph{emission\_id=None}}{}
 Bases: \sphinxcode{\sphinxupquote{object}}
 
 Stores all properties of all emissions that exist at a particular instant in a simulation.
@@ -1197,9 +1142,6 @@ Stores all properties of all emissions that exist at a particular instant in a s
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{flux}} \textendash{} An array of emission rates (array of floats\textendash{}gram/second)
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{capacity}} \textendash{} The size of the arrays to initialize at the beginning of a simulation in FEAST (int)
 
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{reparable}} \textendash{} An array of True/False values to indicate whether or not an emission is reparable
@@ -1211,7 +1153,13 @@ Stores all properties of all emissions that exist at a particular instant in a s
 \sphinxstyleliteralstrong{\sphinxupquote{comp\_index}} \textendash{} An array indicating the index of the component that is the source of each emission
 
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{endtime}} \textendash{} An array the time when every emission will end (days)
+\sphinxstyleliteralstrong{\sphinxupquote{start\_time}} \textendash{} An array specifying the time when every emission begins
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{end\_time}} \textendash{} An array specifying the time when every emission will end (days)
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{emission\_id}} \textendash{} 
 
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{repair\_cost}} \textendash{} An array storing the cost of repairing every emission (\$)
@@ -1219,62 +1167,47 @@ Stores all properties of all emissions that exist at a particular instant in a s
 \end{itemize}
 
 \end{description}\end{quote}
-\index{clear\_zeros() (Emission method)@\spxentry{clear\_zeros()}\spxextra{Emission method}}
+\index{em\_rate\_in\_range() (Emission method)@\spxentry{em\_rate\_in\_range()}\spxextra{Emission method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.EmissionSimModules.emission_class_functions.Emission.clear_zeros}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{clear\_zeros}}}{}{}
-This function removes all leaks from the leak object that have zero flux. This is in contrast to the
-delete\_leaks method, which sets the flux to zero for specified leak indexes. These methods are implemented
-separately for computation efficiency: delete\_leaks is called frequently, and only changes the flux value at
-a few indexes. clear\_zeros is called less frequently and creates a new copy of the leak attribute arrays with
-the 0 flux entries omitted.
-\begin{quote}\begin{description}
-\item[{Returns}] \leavevmode
-None
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{delete\_leaks() (Emission method)@\spxentry{delete\_leaks()}\spxextra{Emission method}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.EmissionSimModules.emission_class_functions.Emission.delete_leaks}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{delete\_leaks}}}{\emph{indexes\_to\_delete}}{}
-Delete all parameters associated with leaks at indexes ‘indexes\_to\_delete’
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
-\sphinxstyleliteralstrong{\sphinxupquote{indexes\_to\_delete}} \textendash{} A list of leak indexes to delete, or the string ‘all’
-
-\end{description}\end{quote}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.emission_class_functions.Emission.em_rate_in_range}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{em\_rate\_in\_range}}}{\emph{t0}, \emph{t1}, \emph{reparable=None}}{}
+Returns the sum of emissions that existed between t0 and t1 integrated over the time period
+:param t0: beginning of interval (days)
+:param t1: end of interval (days)
+:param reparable: boolean condition. If set, only returns emissions with a matching reparable property
+:return: Average emission rate between t1 and t0 (g/s)
 
 \end{fulllineitems}
 
 \index{extend() (Emission method)@\spxentry{extend()}\spxextra{Emission method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.EmissionSimModules.emission_class_functions.Emission.extend}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{extend}}}{\emph{em\_object\_in}}{}
-The function extends the existing attributes of self with the attributes of em\_object\_in. If the arrays
-in self have capacity, n\_em the new values are inserted and n\_em is updated. If there is not sufficient
-remaining capacity, the arrays of em\_obj\_in are appended to the existing arrays. The complexity allows was
-developed to improve the speed of calculations by initializing the arrays.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
-\sphinxstyleliteralstrong{\sphinxupquote{em\_object\_in}} \textendash{} an emission object
-
-\end{description}\end{quote}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.emission_class_functions.Emission.extend}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{extend}}}{\emph{*args}}{}
+Extends the existing emissions data frame with all of the entries in args
+:param args: a list of Emission objects
+:return:
 
 \end{fulllineitems}
 
-\index{sort\_by\_site() (Emission method)@\spxentry{sort\_by\_site()}\spxextra{Emission method}}
+\index{get\_current\_emissions() (Emission method)@\spxentry{get\_current\_emissions()}\spxextra{Emission method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.EmissionSimModules.emission_class_functions.Emission.sort_by_site}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{sort\_by\_site}}}{}{}
-sorts all of the leak attributes based on the site they are associated with.
-\begin{quote}\begin{description}
-\item[{Returns}] \leavevmode
-None
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.emission_class_functions.Emission.get_current_emissions}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_current\_emissions}}}{\emph{time}}{}
+Returns all emissions that exist at time.current\_time
+:param time: a Time object
+:return: a DataFrame of current emissions
 
-\end{description}\end{quote}
+\end{fulllineitems}
+
+\index{get\_emissions\_in\_range() (Emission method)@\spxentry{get\_emissions\_in\_range()}\spxextra{Emission method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.emission_class_functions.Emission.get_emissions_in_range}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_emissions\_in\_range}}}{\emph{t0}, \emph{t1}, \emph{reparable=None}}{}
+Returns all emissions that existed between t0 and t1
+:param t0: beginning of interval (days)
+:param t1: end of interval (days)
+:param reparable: boolean condition. If set, only returns emissions with a matching reparable property
+:return: a DataFrame of all emissions that existed at any time in the interval t0:t1
 
 \end{fulllineitems}
 
@@ -1284,12 +1217,12 @@ None
 \index{bootstrap\_emission\_maker() (in module feast.EmissionSimModules.emission\_class\_functions)@\spxentry{bootstrap\_emission\_maker()}\spxextra{in module feast.EmissionSimModules.emission\_class\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.EmissionSimModules.emission_class_functions.bootstrap_emission_maker}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{bootstrap\_emission\_maker}}}{\emph{n\_leaks\_in}, \emph{comp\_name}, \emph{site}, \emph{time}, \emph{capacity=0}, \emph{reparable=True}}{}
-Create leaks using a bootstrap method
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.emission_class_functions.bootstrap_emission_maker}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{bootstrap\_emission\_maker}}}{\emph{n\_em\_in}, \emph{comp\_name}, \emph{site}, \emph{time}, \emph{start\_time=None}, \emph{reparable=True}}{}
+Create leaks using a bootstrap method.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{n\_leaks\_in}} \textendash{} number of leaks to generate
+\sphinxstyleliteralstrong{\sphinxupquote{n\_em\_in}} \textendash{} number of leaks to generate
 
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{comp\_name}} \textendash{} key to a Component object in site.comp\_dict
@@ -1301,8 +1234,7 @@ Create leaks using a bootstrap method
 \sphinxstyleliteralstrong{\sphinxupquote{time}} \textendash{} a Time object
 
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{capacity}} \textendash{} the size of array to make to store leaks (if zero, the arrays are given a size equal to
-n\_leaks\_in).
+\sphinxstyleliteralstrong{\sphinxupquote{start\_time}} \textendash{} the times at which each emission begins
 
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{reparable}} \textendash{} Specifies whether emissions should be reparable or not (boolean)
@@ -1360,7 +1292,7 @@ emission\_objects\_generator is a parent function that will be called to initial
 \index{permitted\_emission() (in module feast.EmissionSimModules.emission\_class\_functions)@\spxentry{permitted\_emission()}\spxextra{in module feast.EmissionSimModules.emission\_class\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.EmissionSimModules.emission_class_functions.permitted_emission}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{permitted\_emission}}}{\emph{n\_emit}, \emph{sizes}, \emph{duration}, \emph{time}, \emph{site}, \emph{comp\_name}}{}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.emission_class_functions.permitted_emission}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{permitted\_emission}}}{\emph{n\_emit}, \emph{sizes}, \emph{duration}, \emph{time}, \emph{site}, \emph{comp\_name}, \emph{start\_time}}{}
 Creates an emission object specifying new permitted emissions
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -1382,6 +1314,9 @@ Creates an emission object specifying new permitted emissions
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{comp\_name}} \textendash{} Name of the component to be considered from within site.comp\_dict
 
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{start\_times}} \textendash{} array of times at which emissions start
+
 \end{itemize}
 
 \item[{Returns}] \leavevmode
@@ -1399,7 +1334,7 @@ This module stores component, gasfield and site classes to represent infrastruct
 \index{Component (class in feast.EmissionSimModules.infrastructure\_classes)@\spxentry{Component}\spxextra{class in feast.EmissionSimModules.infrastructure\_classes}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.EmissionSimModules.infrastructure_classes.Component}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{Component}}}{\emph{repair\_cost\_path, emission\_data\_path, base\_reparable, custom\_emission\_maker=None, emission\_production\_rate=0, emission\_per\_comp=None, episodic\_emission\_sizes={[}0{]}, episodic\_emission\_per\_day=0, episodic\_emission\_duration=0, vent\_sizes={[}0{]}, vent\_period=inf, vent\_starts=array({[}{]}, dtype=float64), vent\_duration=0, name=\textquotesingle{}default\textquotesingle{}, null\_repair\_rate=None, dist\_type=\textquotesingle{}bootstrap\textquotesingle{}}}{}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.infrastructure_classes.Component}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{Component}}}{\emph{repair\_cost\_path=None, emission\_data\_path=None, base\_reparable=None, custom\_emission\_maker=None, emission\_production\_rate=0, emission\_per\_comp=None, episodic\_emission\_sizes={[}0{]}, episodic\_emission\_per\_day=0, episodic\_emission\_duration=0, vent\_sizes={[}0{]}, vent\_period=inf, vent\_starts=array({[}{]}, dtype=float64), vent\_duration=0, name=\textquotesingle{}default\textquotesingle{}, null\_repair\_rate=None, dist\_type=\textquotesingle{}bootstrap\textquotesingle{}}}{}
 Bases: \sphinxcode{\sphinxupquote{object}}
 
 A class to store parameters defining a component (for example, name, leak production rate, leak size
@@ -1466,7 +1401,7 @@ assumption is enforced based on emission\_production\_rate and emission\_per\_co
 \index{GasField (class in feast.EmissionSimModules.infrastructure\_classes)@\spxentry{GasField}\spxextra{class in feast.EmissionSimModules.infrastructure\_classes}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.EmissionSimModules.infrastructure_classes.GasField}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{GasField}}}{\emph{time=None}, \emph{sites=None}, \emph{initial\_emissions=None}, \emph{new\_emissions=None}, \emph{start\_times=None}, \emph{met\_data\_path=None}}{}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.infrastructure_classes.GasField}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{GasField}}}{\emph{time=None}, \emph{sites=None}, \emph{emissions=None}, \emph{met\_data\_path=None}}{}
 Bases: \sphinxcode{\sphinxupquote{object}}
 
 GasField accommodates all data that defines a gas field at the beginning of a simulation.
@@ -1479,13 +1414,7 @@ GasField accommodates all data that defines a gas field at the beginning of a si
 \sphinxstyleliteralstrong{\sphinxupquote{sites}} \textendash{} a dict of sites like this: \{‘name’: \{‘number’: n\_sites, ‘parameters’: site\_object\}\}
 
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{initial\_emissions}} \textendash{} A FEAST emission object defining emissions at the beginning of the simulation
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{new\_emissions}} \textendash{} A list of FEAST emission objects with length time.n\_timesteps
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{start\_times}} \textendash{} The times at which new emissions begin
+\sphinxstyleliteralstrong{\sphinxupquote{emissions}} \textendash{} A FEAST emission object to be used during the simulations
 
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{met\_data\_path}} \textendash{} A path to a met data file
@@ -1507,7 +1436,7 @@ Defines emissions that emerge during a simulation
 
 \begin{fulllineitems}
 \phantomsection\label{\detokenize{index:feast.EmissionSimModules.infrastructure_classes.GasField.emission_maker}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{static }}\sphinxbfcode{\sphinxupquote{emission\_maker}}}{\emph{n\_leaks}, \emph{new\_leaks}, \emph{comp\_name}, \emph{n\_comp}, \emph{time}, \emph{site}, \emph{n\_episodic=None}}{}
-Updates an Emission object with new values returned by emission\_size\_maker
+Updates an Emission object with new values returned by emission\_size\_maker and assigns unique indexes to them
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
@@ -1530,6 +1459,9 @@ Updates an Emission object with new values returned by emission\_size\_maker
 
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{n\_episodic}} \textendash{} number of episodic emissions to create
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{start\_time}} \textendash{} time at which the new emissions begin emitting
 
 \end{itemize}
 
@@ -1588,10 +1520,19 @@ Create emissions that exist at the beginning of the simulation
 \item[{Parameters}] \leavevmode
 \sphinxstyleliteralstrong{\sphinxupquote{time}} \textendash{} 
 
-\item[{Returns}] \leavevmode
-
-
+\item[{Return initial\_emissions}] \leavevmode
 \end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{met\_data\_maker() (GasField method)@\spxentry{met\_data\_maker()}\spxextra{GasField method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.infrastructure_classes.GasField.met_data_maker}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{met\_data\_maker}}}{\emph{start\_hr=0}}{}
+Creates a dict to store met data derived from a Typical Meteorological Year file. The data may be rotated so
+that the simulation begins at any hour in the TMY file.
+:param start\_hr: The hour at which the simulation should begin.
+:return: None
 
 \end{fulllineitems}
 
@@ -1609,10 +1550,25 @@ Counts components for each site and assigns appropriate indexes
 \index{Site (class in feast.EmissionSimModules.infrastructure\_classes)@\spxentry{Site}\spxextra{class in feast.EmissionSimModules.infrastructure\_classes}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.EmissionSimModules.infrastructure_classes.Site}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{Site}}}{\emph{name=\textquotesingle{}default\textquotesingle{}}, \emph{comp\_dict=None}, \emph{site\_em\_dist=False}, \emph{prod\_dat=None}}{}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.infrastructure_classes.Site}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{Site}}}{\emph{name=\textquotesingle{}default\textquotesingle{}}, \emph{comp\_dict=None}, \emph{prod\_dat=None}}{}
 Bases: \sphinxcode{\sphinxupquote{object}}
 
 A class to store the number and type of components associated with a site.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{name}} \textendash{} The name of the site object (a string)
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{comp\_dict}} \textendash{} A dict of components at the site, for example:
+\{‘name’: \{‘number’: 650, ‘parameters’: Component()\}\}
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{prod\_dat}} \textendash{} 
+
+\end{itemize}
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -1621,34 +1577,13 @@ A class to store the number and type of components associated with a site.
 \subsection{simulation\_classes}
 \label{\detokenize{index:module-feast.EmissionSimModules.simulation_classes}}\label{\detokenize{index:simulation-classes}}\index{feast.EmissionSimModules.simulation\_classes (module)@\spxentry{feast.EmissionSimModules.simulation\_classes}\spxextra{module}}
 simulation\_classes stores the classes used to represent time, results and financial settings in simulations.
-\index{FinanceSettings (class in feast.EmissionSimModules.simulation\_classes)@\spxentry{FinanceSettings}\spxextra{class in feast.EmissionSimModules.simulation\_classes}}
+\index{Scenario (class in feast.EmissionSimModules.simulation\_classes)@\spxentry{Scenario}\spxextra{class in feast.EmissionSimModules.simulation\_classes}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.EmissionSimModules.simulation_classes.FinanceSettings}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{FinanceSettings}}}{\emph{gas\_price=0}, \emph{discount\_rate=0}}{}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.simulation_classes.Scenario}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{Scenario}}}{\emph{time}, \emph{gas\_field}, \emph{ldar\_program\_dict}}{}
 Bases: \sphinxcode{\sphinxupquote{object}}
 
-Finance settings stores the natural gas price and discount rate to be used in cost modeling.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{gas\_price}} \textendash{} The value of recovered gas (\$/gram). 2e\sphinxhyphen{}4 \$/g=\$5/mcf methane at STP.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{discount\_rate}} \textendash{} The rate at which future cash flows are discounted
-
-\end{itemize}
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{Results (class in feast.EmissionSimModules.simulation\_classes)@\spxentry{Results}\spxextra{class in feast.EmissionSimModules.simulation\_classes}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.EmissionSimModules.simulation_classes.Results}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{Results}}}{\emph{time}, \emph{gas\_field}, \emph{ldar\_program\_dict}, \emph{econ\_set}}{}
-Bases: \sphinxcode{\sphinxupquote{object}}
-
-Class in which to save results
+A class to store all data specifying a scenario and the methods to run and save a realization
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
@@ -1660,16 +1595,57 @@ Class in which to save results
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{ldar\_program\_dict}} \textendash{} dict of detection methods and associated data
 
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{econ\_set}} \textendash{} Economic settings defined for the simulation
-
 \end{itemize}
 
 \end{description}\end{quote}
-\index{save() (Results method)@\spxentry{save()}\spxextra{Results method}}
+\index{check\_timestep() (Scenario method)@\spxentry{check\_timestep()}\spxextra{Scenario method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.EmissionSimModules.simulation_classes.Results.save}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{save}}}{\emph{dir\_out}}{}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.simulation_classes.Scenario.check_timestep}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{check\_timestep}}}{}{}
+Prints a warning if time.delta\_t is greater than the duration of some permitted emissions
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{gas\_field}} \textendash{} a GasField object
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{time}} \textendash{} a Time object
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{run() (Scenario method)@\spxentry{run()}\spxextra{Scenario method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.simulation_classes.Scenario.run}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{run}}}{\emph{dir\_out=\textquotesingle{}Results\textquotesingle{}}, \emph{display\_status=True}}{}
+run generates a single realization of a scenario.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{dir\_out}} \textendash{} path to a directory in which to save results (string)
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{display\_status}} \textendash{} if True, display a status update whenever 10\% of the time steps are completed
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{save() (Scenario method)@\spxentry{save()}\spxextra{Scenario method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:feast.EmissionSimModules.simulation_classes.Scenario.save}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{save}}}{\emph{dir\_out}}{}
 Save results to a file
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode

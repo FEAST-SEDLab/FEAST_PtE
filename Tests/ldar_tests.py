@@ -389,7 +389,7 @@ def test_scenario_run():
     )
     scenario = sc.Scenario(time=timeobj, gas_field=gas_field, ldar_program_dict={'tiered': tiered_survey,
                                                                                  'ogi': ogi_survey})
-    scenario.run(dir_out='ResultsTemp', display_status=False)
+    scenario.run(dir_out='ResultsTemp', display_status=False, save_method='pickle')
     with open('ResultsTemp/realization0.p', 'rb') as f:
         res = pickle.load(f)
     if res.ldar_program_dict['tiered'].emissions_timeseries[-1] >= \
@@ -551,13 +551,30 @@ def test_site_monitor():
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
     gas_field.met_data_maker()
     rep = Dm.repair.Repair(repair_delay=0)
+    ogi = Dm.comp_survey.CompSurvey(
+        time,
+        survey_interval=50,
+        survey_speed=150,
+        ophrs={'begin': 8, 'end': 17},
+        labor=100,
+        dispatch_object=rep,
+        op_envelope={
+            # 'wind speed': {'class': 1, 'min': 1, 'max': 10},
+            # 'wind direction': {'class': 2, 'min': wind_dirs_mins, 'max': wind_dirs_maxs}
+        },
+        site_queue=[],
+        detection_probability_points=[1, 2],
+        detection_probabilities=[0, 1]
+    )
     cm = Dm.site_monitor.SiteMonitor(
         time,
         time_to_detect_points=np.array([0.99, 1.0, 1.01]),
         time_to_detect_days=[np.infty, 1, 0],
         detection_variables={'flux': 'mean'},
-        dispatch_object=rep,
-        capital=1000
+        dispatch_object=ogi,
+        capital=1000,
+        ophrs={'begin': 0, 'end': 24},
+        site_queue=list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int))
     )
     site_inds = list(range(0, 10))
     emissions = copy.copy(gas_field.emissions.get_current_emissions(time))
@@ -583,6 +600,7 @@ def test_site_monitor():
         raise ValueError("Mean time to detection deviates from expected value by >5 sigma in site_monitor test")
     if cm.deployment_cost.get_sum_val(0, 1) != 1000:
         raise ValueError("SiteMonitor deployment cost is not calculated correctly.")
+    cm.detect(time, gas_field, emissions)
 
 
 test_repair()

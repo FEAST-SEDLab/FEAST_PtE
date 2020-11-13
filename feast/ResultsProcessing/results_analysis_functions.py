@@ -15,9 +15,9 @@ def results_analysis(directory, discount_rate, gas_price):
         costs                 Array of costs associated with each LDAR program (no discounting, all costs summed)
         techs           list of detection program names
     """
-    files = [f for f in listdir(directory) if isfile(join(directory, f))]
+    files = [f for f in listdir(directory) if isfile(join(directory, f)) and '.p' in f]
     n_realizations = len(files)
-    sample = load(open(directory + '/' + files[0], 'rb'))
+    sample = load(open(join(directory, files[0]), 'rb'))
     n_prog = len(sample.ldar_program_dict)
     # Initialize an array to store a time series of emissions for every LDAR program in every realization
     emissions_timeseries = np.zeros([n_prog, sample.time.n_timesteps, n_realizations])
