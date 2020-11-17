@@ -87,7 +87,7 @@ def gc_dat_to_gas_field(feast_delta_t, duration, comps_per_site, rep_cost_path, 
         repair_cost=rep_costs_in,
         start_time=start,
         comp_index=comp_ind,
-        emission_id = em_id
+        emission_id=em_id
     )
     gas_field = EmissionSimModules.infrastructure_classes.GasField(
         sites=site_dict,
