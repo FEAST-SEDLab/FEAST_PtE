@@ -71,13 +71,9 @@ class Scenario:
         Save results to a file
 
         :param dir_out: Name of directory in which to save output file.
-        :param method: Specifies how results should be saved
+        :param method: Specifies how results should be saved. Can be 'json' or 'pickle'
         """
-
-        if not os.path.exists(dir_out):
-            os.makedirs(dir_out)
-        n_realization = len([real for real in os.listdir(dir_out) if '.json' in real])
-        file_out = dir_out + '/realization' + str(n_realization)
+        file_out = self.real_filename(dir_out)
         res_dict = {}
         for prog_name, prog in self.ldar_program_dict.items():
             res_dict[prog_name] = {
@@ -86,6 +82,10 @@ class Scenario:
             }
             for tech_name, tech in prog.tech_dict.items():
                 res_dict[prog_name][tech_name] = {}
+                # todo
+                # for attr_name, attr in tech.__dict__.items():
+                #     if feast.EmissionSimModules.result_classes.ResultDiscrete in attr.__bases__:
+                #         print(attr_name, attr.__class__)
                 res_dict[prog_name][tech_name]['deployment costs'] = tech.deployment_cost.__dict__
                 res_dict[prog_name][tech_name]['deployment count'] = tech.deployment_count.__dict__
                 res_dict[prog_name][tech_name]['op env site fails'] = tech.op_env_site_fails.__dict__
@@ -94,12 +94,36 @@ class Scenario:
                 res_dict[prog_name][rep_name] = {}
                 res_dict[prog_name][rep_name]['repair cost'] = rep.repair_cost.__dict__
                 res_dict[prog_name][rep_name]['repair count'] = rep.repair_count.__dict__
-        with open(file_out + '.json', 'w') as f:
-            json.dump(res_dict, f)
-        if method not in ['json', 'pickle']:
-            raise ValueError("The specified save method does not exist. Results were saved to a JSON file.")
-        if method == 'pickle':
+        if method == 'json':
+            with open(file_out + '.json', 'w') as f:
+                json.dump(res_dict, f)
+        elif method == 'pickle':
             pickle.dump(self, open(file_out + '.p', 'wb'))
+        else:
+            with open(file_out + '.json', 'w') as f:
+                json.dump(res_dict, f)
+            pickle.dump(self, open(file_out + '.p', 'wb'))
+            if method != 'all':
+                print("Warning: The specified save method does not exist. Results were saved to a JSON and a pickle "
+                      "file.")
+
+    @staticmethod
+    def real_filename(dir_out):
+        """
+        Creates a unique file prefix based on the directory specified by dir_out and the number of files in that
+        directory.
+
+        :param dir_out: directory in which to store results
+        :return: file name prefix to store results under
+        """
+        if not os.path.exists(dir_out):
+            os.makedirs(dir_out)
+        unique_reals = []
+        for real in os.listdir(dir_out):
+            if real.split('.')[0] not in unique_reals:
+                unique_reals.append(real)
+        file_out = dir_out + '/realization' + str(len(unique_reals))
+        return file_out
 
     def check_timestep(self):
         """

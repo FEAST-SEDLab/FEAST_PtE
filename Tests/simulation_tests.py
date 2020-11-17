@@ -7,6 +7,7 @@ from feast import DetectionModules as Dm
 from feast import EmissionSimModules as Esm
 from feast.ResultsProcessing import results_analysis_functions as raf
 from Tests.test_helper import basic_gas_field
+import pandas as pd
 
 
 def test_results_analysis():
@@ -33,6 +34,8 @@ def test_results_analysis():
             timeobj, copy.deepcopy(gf), {'ogi': ogi}
         )
         sc = Esm.simulation_classes.Scenario(time=timeobj, gas_field=gf, ldar_program_dict={'ogi': ogi_survey})
+        # todo: test 'json' save method
+        # sc2 = copy.deepcopy(sc)
         sc.run(display_status=False, dir_out='ResultsTemp', save_method='pickle')
     null_npv, emissions, techs = raf.results_analysis('ResultsTemp', 0.08, 2e-4)
     if len(null_npv.keys()) != 4:
@@ -46,6 +49,8 @@ def test_results_analysis():
     for f in os.listdir('ResultsTemp'):
         os.remove(os.path.join('ResultsTemp', f))
     os.rmdir('ResultsTemp')
+    # sc2.run(display_status=False, dir_out='ResultsTemp', save_method='json')
+    # res = pd.read_json(os.path.join('ResultsTemp', 'realization0.json'))
 
 
 def test_npv_calculator():

@@ -15,7 +15,7 @@ def gascomp_reader(path_to_gas_comp, feast_delta_t, duration, comps_per_site, re
     the time resolution specified here.
     :param duration: duration of the simulation to run in FEAST (days)
     :param comps_per_site: A dict of form {loc: number of components}. This will specify the number of components to \
-    be inspected for leaks at every site
+    be inspected for leaks at every site. Must have a key for every location ID in the gas_comp file.
     :param rep_cost_path: Path to a repair cost data file. The FEAST will randomly assign these repair costs to leaks \
     simulated in MEET.
     :param met_data_path: Path to a meteorological data file (if left as None, FEAST will run without met data)
@@ -56,6 +56,8 @@ def gc_dat_to_gas_field(feast_delta_t, duration, comps_per_site, rep_cost_path, 
     n_site = len(np.unique(loc))
     if len(comps_per_site) != n_site:
         raise ValueError("comps_per_site must be a dict or array like with len() == n_site ")
+    if duration > np.max(stop):
+        raise ValueError("Requested FEAST simulation duration is longer than the MEET simulation.")
     timeobj = EmissionSimModules.simulation_classes.Time(delta_t=feast_delta_t, end_time=duration)
     reparable_cond = emtype == 'FUGITIVE'
     site_dict = {}
