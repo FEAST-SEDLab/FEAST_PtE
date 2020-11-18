@@ -91,7 +91,10 @@ class DetectionMethod:
                 #     np.sum(np.random.choice(gas_field.repair_cost_dist.repair_costs,
                 #                             np.sum(self.leaks.reparable[detect])))
                 # Delete found leaks that are reparable
-                self.leaks.endtime[detect[self.leaks.reparable[detect]]] = time.current_time + self.repair_delay
+                update_endtime = np.min([self.leaks.endtime[detect[self.leaks.reparable[detect]]],
+                                         np.ones(np.sum(self.leaks.reparable[detect])) * time.current_time +
+                                         self.repair_delay], axis=0)
+                self.leaks.endtime[detect[self.leaks.reparable[detect]]] = update_endtime
             if end_survey:
                 self.insurvey = False
                 self.site_survey_index = 0
