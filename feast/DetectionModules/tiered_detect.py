@@ -113,7 +113,7 @@ class TieredDetect(DetectionMethod):
             gas_field   an object of type GasField (defined in feast_classes)
         """
         if time.current_time % self.survey_interval < time.delta_t:
-            self.secondary_comps_surveyed += self.secondary_time_booked / self.secondary_comps_hr
+            self.secondary_comps_surveyed += self.secondary_time_booked * self.secondary_comps_hr
             self.secondary_time_booked = 0
             self.insurvey = True
         if self.insurvey:

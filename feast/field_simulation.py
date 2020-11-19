@@ -2,6 +2,8 @@ from .GeneralClassesFunctions import simulation_classes
 from . import DetectionModules as Dm
 from .GeneralClassesFunctions.simulation_functions import save_results
 import numpy as np
+import os
+import pickle
 
 
 def check_timestep(gas_field, time):
@@ -24,7 +26,7 @@ def check_timestep(gas_field, time):
 
 
 def field_simulation(gas_field=None, dir_out='Results', time=None,
-                     econ_set=None, tech_dict=None, detection_techs=None, display_status=True):
+                     econ_set=None, tech_dict=None, detection_techs=None, display_status=True, save_method='all'):
     """
     field_simulation generates a single realization of scenario. The scenario is defined by the input values.
     gas_field           a GasField object
@@ -80,5 +82,25 @@ def field_simulation(gas_field=None, dir_out='Results', time=None,
         time.current_time += time.delta_t
 
     # -------------- Save results --------------
-    results = simulation_classes.Results(time, gas_field, tech_dict, econ_set)
-    save_results(dir_out, results)
+    if save_method=='all':
+        results = simulation_classes.Results(time, gas_field, tech_dict, econ_set)
+        save_results(dir_out, results)
+    else:
+        res_out = {}
+        for tech in tech_dict:
+            res_out[tech] = {
+                'emissions': np.sum(tech_dict[tech].emissions),
+                'vents': np.sum(tech_dict[tech].vents),
+                'find_cost': np.sum(tech_dict[tech].find_cost),
+                'repair_cost': np.sum(tech_dict[tech].repair_cost),
+            }
+            if 'secondary_comps_surveyed' in dir(tech_dict[tech]):
+                res_out[tech]['comps_surveyed'] = tech_dict[tech].secondary_comps_surveyed
+                res_out[tech]['sites_surveyed'] = tech_dict[tech].secondary_sites_surveyed
+
+        if not os.path.exists(dir_out):
+            os.makedirs(dir_out)
+        n_realization = len(os.listdir(dir_out))
+        file_out = os.path.join(dir_out, 'realization' + str(n_realization) + '.p')
+        with open(file_out, 'wb') as f:
+            pickle.dump(res_out, f)
