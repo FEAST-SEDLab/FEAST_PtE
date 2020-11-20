@@ -59,8 +59,7 @@ class Component:
         self.vent_starts = vent_starts
         # ---- Distribution of leak repair costs
         if self.repair_cost_path:
-            rsc_path = self.repair_cost_path
-            with open(rsc_path, 'rb') as f:
+            with open(self.repair_cost_path, 'rb') as f:
                 self.repair_cost_dist = pickle.load(f)
         if self.emission_data_path:
             self.emission_size_maker, self.emission_params, self.emission_per_well, emission_per_comp \

@@ -33,6 +33,7 @@ class Repair:
         :param emissions: an Emission object
         :return: None
         """
+        # todo: Check Null scenario repair costs
         if len(self.to_repair) > 0:
             rep_cond = emissions.emissions.reparable & emissions.emissions.index.isin(self.to_repair) & \
                        (emissions.emissions.end_time > time.current_time + self.repair_delay)
