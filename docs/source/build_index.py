@@ -27,7 +27,8 @@ def read_module(name, level=1, path='feast.', path_in='../../feast'):
                 # This if condition prevents imported classes from being printed twice
                 if obj.__module__ == mod.__name__:
                     lines.append(obj.__name__ + '\n' + section_symbols[level + 1] * sec_symbol_length + '\n')
-                    lines.append('.. autoclass:: ' + path + name[:-3] + '.' + obj.__name__ + '\n\n')
+                    lines.append('.. autoclass:: ' + path + name[:-3] + '.' + obj.__name__ + '\n')
+                    lines.append('    :members:\n\n')
             elif inspect.isfunction(obj):
                 # This if condition prevents imported classes from being printed twice
                 if obj.__module__ == mod.__name__:

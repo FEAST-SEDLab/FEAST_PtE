@@ -17,6 +17,7 @@ abstract_detection_method
 DetectionMethod
 ++++++++++++++++++++++++++++++++++++++++
 .. autoclass:: feast.DetectionModules.abstract_detection_method.DetectionMethod
+    :members:
 
 comp_survey
 ****************************************
@@ -25,6 +26,7 @@ comp_survey
 CompSurvey
 ++++++++++++++++++++++++++++++++++++++++
 .. autoclass:: feast.DetectionModules.comp_survey.CompSurvey
+    :members:
 
 ldar_program
 ****************************************
@@ -33,6 +35,7 @@ ldar_program
 LDARProgram
 ++++++++++++++++++++++++++++++++++++++++
 .. autoclass:: feast.DetectionModules.ldar_program.LDARProgram
+    :members:
 
 repair
 ****************************************
@@ -41,6 +44,7 @@ repair
 Repair
 ++++++++++++++++++++++++++++++++++++++++
 .. autoclass:: feast.DetectionModules.repair.Repair
+    :members:
 
 site_monitor
 ****************************************
@@ -49,6 +53,7 @@ site_monitor
 SiteMonitor
 ++++++++++++++++++++++++++++++++++++++++
 .. autoclass:: feast.DetectionModules.site_monitor.SiteMonitor
+    :members:
 
 site_survey
 ****************************************
@@ -57,6 +62,7 @@ site_survey
 SiteSurvey
 ++++++++++++++++++++++++++++++++++++++++
 .. autoclass:: feast.DetectionModules.site_survey.SiteSurvey
+    :members:
 
 EmissionSimModules
 ----------------------------------------
@@ -67,6 +73,7 @@ emission_class_functions
 Emission
 ++++++++++++++++++++++++++++++++++++++++
 .. autoclass:: feast.EmissionSimModules.emission_class_functions.Emission
+    :members:
 
 bootstrap_emission_maker
 ++++++++++++++++++++++++++++++++++++++++
@@ -91,14 +98,17 @@ infrastructure_classes
 Component
 ++++++++++++++++++++++++++++++++++++++++
 .. autoclass:: feast.EmissionSimModules.infrastructure_classes.Component
+    :members:
 
 GasField
 ++++++++++++++++++++++++++++++++++++++++
 .. autoclass:: feast.EmissionSimModules.infrastructure_classes.GasField
+    :members:
 
 Site
 ++++++++++++++++++++++++++++++++++++++++
 .. autoclass:: feast.EmissionSimModules.infrastructure_classes.Site
+    :members:
 
 result_classes
 ****************************************
@@ -107,14 +117,17 @@ result_classes
 ResultAggregate
 ++++++++++++++++++++++++++++++++++++++++
 .. autoclass:: feast.EmissionSimModules.result_classes.ResultAggregate
+    :members:
 
 ResultContinuous
 ++++++++++++++++++++++++++++++++++++++++
 .. autoclass:: feast.EmissionSimModules.result_classes.ResultContinuous
+    :members:
 
 ResultDiscrete
 ++++++++++++++++++++++++++++++++++++++++
 .. autoclass:: feast.EmissionSimModules.result_classes.ResultDiscrete
+    :members:
 
 simulation_classes
 ****************************************
@@ -123,10 +136,12 @@ simulation_classes
 Scenario
 ++++++++++++++++++++++++++++++++++++++++
 .. autoclass:: feast.EmissionSimModules.simulation_classes.Scenario
+    :members:
 
 Time
 ++++++++++++++++++++++++++++++++++++++++
 .. autoclass:: feast.EmissionSimModules.simulation_classes.Time
+    :members:
 
 input_data_classes
 ----------------------------------------
@@ -135,18 +150,22 @@ input_data_classes
 DataFile
 ****************************************
 .. autoclass:: feast.input_data_classes.DataFile
+    :members:
 
 LeakData
 ****************************************
 .. autoclass:: feast.input_data_classes.LeakData
+    :members:
 
 ProductionData
 ****************************************
 .. autoclass:: feast.input_data_classes.ProductionData
+    :members:
 
 RepairData
 ****************************************
 .. autoclass:: feast.input_data_classes.RepairData
+    :members:
 
 MEET_1_importer
 ----------------------------------------
