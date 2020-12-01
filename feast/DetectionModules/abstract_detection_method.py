@@ -1,3 +1,7 @@
+"""
+This module contains an abstract class that all DetectionMethods should inherit.
+"""
+
 import numpy as np
 from scipy import interpolate as interp
 from feast.EmissionSimModules import result_classes as rc
@@ -10,6 +14,9 @@ class DetectionMethod:
     def __init__(self, time, detection_variables=None, op_envelope=None, ophrs=None):
         """
         :param time: a Time object
+        :param detection_variables: list of variable names to be used in the detection calculations (eg. ['wind speed'])
+        :param op_envelope: operating envelope specifications for the detection method
+        :param ophrs: a dict specifying operating hours for the DetectionMethod
         """
         self.op_envelope = op_envelope or {}
         self.ophrs = ophrs or {}

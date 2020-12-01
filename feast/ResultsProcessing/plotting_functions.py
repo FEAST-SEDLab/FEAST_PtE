@@ -59,11 +59,9 @@ def plot_fixer(fig=None, ax=None, fsize=18, color=(0, 0, 0), tight_layout=True, 
 def time_series(results_file, line_width=6):
     """
     Display a time series of emissions from each detection method in a results file
-    Inputs:
-        results_file    path to a results file
-        display         choose whether to display the plot or not
-        save            choose whether to save the plot or not
-        file_out        define a path at which to save the file
+
+    :param results_file:    path to a results file
+    :param line_width:      width at which to plot lines
     """
     results = load(open(results_file, 'rb'))
     tech_dict = results.tech_dict
@@ -92,6 +90,7 @@ def abatement_cost_plotter(directory, gwp=34):
     Generates a box plot of the cost of abatement
     gwp defaults to 34, which is the value provided in the IPCC 5th assessment report including climate-carbon feedbacks
     (see Table 8.7, page 714 in Chapter 8 of Climate Change 2013: The Physical Science Basis.)
+
     :param directory: A directory containing one or more realizations of a scenario
     :param gwp: global warming potential of methane
     :return:
@@ -124,11 +123,10 @@ def summary_plotter(directory, n_wells=None, ylabel=None):
     """
     The NPV for each realization stored in 'directory is calculated and displayed in a stacked bar chart. Each component
     of the NPV is displayed separately in the chart.
-    Inputs:
-        directory    path to a directory containing results files
-        display      boolean value that determines whether or not the plot is displayed
-        save         boolean value that determines whether the plot is saved
-        file_out     file_out path to a file in which to save the figure if save is True
+
+    :param directory:    path to a directory containing results files
+    :param n_wells:      if set to a number, then the NPV will be reported on a per well basis
+    :param ylabel:       yaxis label
     """
     # load data
     files = [f for f in listdir(directory) if isfile(join(directory, f))]

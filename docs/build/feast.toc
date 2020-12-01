@@ -1,17 +1,53 @@
 \babel@toc {english}{}
-\contentsline {chapter}{\numberline {1}FEAST modules}{1}{chapter.1}%
-\contentsline {section}{\numberline {1.1}MEET\_1\_importer}{1}{section.1.1}%
-\contentsline {section}{\numberline {1.2}input\_data\_classes}{2}{section.1.2}%
-\contentsline {section}{\numberline {1.3}Detection Modules}{4}{section.1.3}%
-\contentsline {subsection}{\numberline {1.3.1}ldar\_program}{4}{subsection.1.3.1}%
-\contentsline {subsection}{\numberline {1.3.2}abstract\_detection\_method}{4}{subsection.1.3.2}%
-\contentsline {subsection}{\numberline {1.3.3}comp\_survey}{6}{subsection.1.3.3}%
-\contentsline {subsection}{\numberline {1.3.4}site\_survey}{8}{subsection.1.3.4}%
-\contentsline {subsection}{\numberline {1.3.5}site\_monitor}{10}{subsection.1.3.5}%
-\contentsline {subsection}{\numberline {1.3.6}repair}{11}{subsection.1.3.6}%
-\contentsline {section}{\numberline {1.4}EmissionSimModules}{12}{section.1.4}%
-\contentsline {subsection}{\numberline {1.4.1}emission}{12}{subsection.1.4.1}%
-\contentsline {subsection}{\numberline {1.4.2}infrastructure\_classes}{13}{subsection.1.4.2}%
-\contentsline {subsection}{\numberline {1.4.3}result\_classes}{16}{subsection.1.4.3}%
-\contentsline {subsection}{\numberline {1.4.4}simulation\_classes}{17}{subsection.1.4.4}%
-\contentsline {chapter}{Python Module Index}{19}{section*.75}%
+\contentsline {chapter}{\numberline {1}FEAST modules}{3}{chapter.1}%
+\contentsline {section}{\numberline {1.1}DetectionModules}{3}{section.1.1}%
+\contentsline {subsection}{\numberline {1.1.1}abstract\_detection\_method}{3}{subsection.1.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.1.1}DetectionMethod}{3}{subsubsection.1.1.1.1}%
+\contentsline {subsection}{\numberline {1.1.2}comp\_survey}{3}{subsection.1.1.2}%
+\contentsline {subsubsection}{\numberline {1.1.2.1}CompSurvey}{3}{subsubsection.1.1.2.1}%
+\contentsline {subsection}{\numberline {1.1.3}ldar\_program}{4}{subsection.1.1.3}%
+\contentsline {subsubsection}{\numberline {1.1.3.1}LDARProgram}{4}{subsubsection.1.1.3.1}%
+\contentsline {subsection}{\numberline {1.1.4}repair}{5}{subsection.1.1.4}%
+\contentsline {subsubsection}{\numberline {1.1.4.1}Repair}{5}{subsubsection.1.1.4.1}%
+\contentsline {subsection}{\numberline {1.1.5}site\_monitor}{5}{subsection.1.1.5}%
+\contentsline {subsubsection}{\numberline {1.1.5.1}SiteMonitor}{5}{subsubsection.1.1.5.1}%
+\contentsline {subsection}{\numberline {1.1.6}site\_survey}{6}{subsection.1.1.6}%
+\contentsline {subsubsection}{\numberline {1.1.6.1}SiteSurvey}{6}{subsubsection.1.1.6.1}%
+\contentsline {section}{\numberline {1.2}EmissionSimModules}{7}{section.1.2}%
+\contentsline {subsection}{\numberline {1.2.1}emission\_class\_functions}{7}{subsection.1.2.1}%
+\contentsline {subsubsection}{\numberline {1.2.1.1}Emission}{7}{subsubsection.1.2.1.1}%
+\contentsline {subsubsection}{\numberline {1.2.1.2}bootstrap\_emission\_maker}{7}{subsubsection.1.2.1.2}%
+\contentsline {subsubsection}{\numberline {1.2.1.3}comp\_indexes\_fcn}{8}{subsubsection.1.2.1.3}%
+\contentsline {subsubsection}{\numberline {1.2.1.4}emission\_objects\_generator}{8}{subsubsection.1.2.1.4}%
+\contentsline {subsubsection}{\numberline {1.2.1.5}permitted\_emission}{8}{subsubsection.1.2.1.5}%
+\contentsline {subsection}{\numberline {1.2.2}infrastructure\_classes}{8}{subsection.1.2.2}%
+\contentsline {subsubsection}{\numberline {1.2.2.1}Component}{9}{subsubsection.1.2.2.1}%
+\contentsline {subsubsection}{\numberline {1.2.2.2}GasField}{10}{subsubsection.1.2.2.2}%
+\contentsline {subsubsection}{\numberline {1.2.2.3}Site}{10}{subsubsection.1.2.2.3}%
+\contentsline {subsection}{\numberline {1.2.3}result\_classes}{10}{subsection.1.2.3}%
+\contentsline {subsubsection}{\numberline {1.2.3.1}ResultAggregate}{10}{subsubsection.1.2.3.1}%
+\contentsline {subsubsection}{\numberline {1.2.3.2}ResultContinuous}{10}{subsubsection.1.2.3.2}%
+\contentsline {subsubsection}{\numberline {1.2.3.3}ResultDiscrete}{10}{subsubsection.1.2.3.3}%
+\contentsline {subsection}{\numberline {1.2.4}simulation\_classes}{11}{subsection.1.2.4}%
+\contentsline {subsubsection}{\numberline {1.2.4.1}Scenario}{11}{subsubsection.1.2.4.1}%
+\contentsline {subsubsection}{\numberline {1.2.4.2}Time}{11}{subsubsection.1.2.4.2}%
+\contentsline {section}{\numberline {1.3}input\_data\_classes}{11}{section.1.3}%
+\contentsline {subsection}{\numberline {1.3.1}DataFile}{11}{subsection.1.3.1}%
+\contentsline {subsection}{\numberline {1.3.2}LeakData}{12}{subsection.1.3.2}%
+\contentsline {subsection}{\numberline {1.3.3}ProductionData}{12}{subsection.1.3.3}%
+\contentsline {subsection}{\numberline {1.3.4}RepairData}{12}{subsection.1.3.4}%
+\contentsline {section}{\numberline {1.4}MEET\_1\_importer}{12}{section.1.4}%
+\contentsline {subsection}{\numberline {1.4.1}gas\_comp\_to\_dict}{12}{subsection.1.4.1}%
+\contentsline {subsection}{\numberline {1.4.2}gascomp\_reader}{13}{subsection.1.4.2}%
+\contentsline {subsection}{\numberline {1.4.3}gc\_dat\_to\_gas\_field}{13}{subsection.1.4.3}%
+\contentsline {subsection}{\numberline {1.4.4}load\_gas\_comp\_file}{14}{subsection.1.4.4}%
+\contentsline {section}{\numberline {1.5}ResultsProcessing}{14}{section.1.5}%
+\contentsline {subsection}{\numberline {1.5.1}plotting\_functions}{14}{subsection.1.5.1}%
+\contentsline {subsubsection}{\numberline {1.5.1.1}abatement\_cost\_plotter}{14}{subsubsection.1.5.1.1}%
+\contentsline {subsubsection}{\numberline {1.5.1.2}plot\_fixer}{14}{subsubsection.1.5.1.2}%
+\contentsline {subsubsection}{\numberline {1.5.1.3}summary\_plotter}{15}{subsubsection.1.5.1.3}%
+\contentsline {subsubsection}{\numberline {1.5.1.4}time\_series}{15}{subsubsection.1.5.1.4}%
+\contentsline {subsection}{\numberline {1.5.2}results\_analysis\_functions}{15}{subsection.1.5.2}%
+\contentsline {subsubsection}{\numberline {1.5.2.1}npv\_calculator}{15}{subsubsection.1.5.2.1}%
+\contentsline {subsubsection}{\numberline {1.5.2.2}results\_analysis}{15}{subsubsection.1.5.2.2}%
+\contentsline {chapter}{Python Module Index}{17}{section*.36}%

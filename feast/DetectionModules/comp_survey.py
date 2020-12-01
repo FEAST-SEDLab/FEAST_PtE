@@ -3,7 +3,6 @@ This module defines the component level survey based detection class, CompSurvey
 """
 import numpy as np
 from .abstract_detection_method import DetectionMethod
-from ..EmissionSimModules.result_classes import ResultDiscrete
 
 
 class CompSurvey(DetectionMethod):
