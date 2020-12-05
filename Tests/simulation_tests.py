@@ -31,7 +31,7 @@ def test_results_analysis():
             site_queue=[]
         )
         ogi_survey = Dm.ldar_program.LDARProgram(
-            timeobj, copy.deepcopy(gf), {'ogi': ogi}
+            copy.deepcopy(gf), {'ogi': ogi}
         )
         sc = Esm.simulation_classes.Scenario(time=timeobj, gas_field=gf, ldar_program_dict={'ogi': ogi_survey})
         # todo: test 'json' save method
@@ -116,7 +116,7 @@ def test_npv_calculator():
         site_queue=[]
     )
     ogi_survey = Dm.ldar_program.LDARProgram(
-        timeobj, copy.deepcopy(gas_field), {'ogi': ogi}
+        copy.deepcopy(gas_field), {'ogi': ogi}
     )
     sc = Esm.simulation_classes.Scenario(time=timeobj, gas_field=gas_field, ldar_program_dict={'ogi': ogi_survey})
     sc.run(dir_out='ResultsTemp', display_status=False, save_method='pickle')

@@ -304,7 +304,7 @@ def test_ldar_program():
     )
     # test __init__
     ogi_survey = Dm.ldar_program.LDARProgram(
-        time, copy.deepcopy(gas_field), {'ogi': ogi}
+        copy.deepcopy(gas_field), {'ogi': ogi}
     )
     em = ogi_survey.emissions.get_current_emissions(time)
     if np.sum(em.flux) != 100:
@@ -323,7 +323,7 @@ def test_ldar_program():
         'ogi': ogi_no_survey
     }
     tiered_survey = Dm.ldar_program.LDARProgram(
-        time, gas_field, tech_dict
+        gas_field, tech_dict
     )
     # test action
     np.random.seed(0)
@@ -378,14 +378,14 @@ def test_scenario_run():
         detection_probabilities=probs
     )
     ogi_survey = Dm.ldar_program.LDARProgram(
-        timeobj, copy.deepcopy(gas_field), {'ogi': ogi}
+        copy.deepcopy(gas_field), {'ogi': ogi}
     )
     tech_dict = {
         'plane': plane_survey,
         'ogi': ogi_no_survey
     }
     tiered_survey = Dm.ldar_program.LDARProgram(
-        timeobj, gas_field, tech_dict
+        gas_field, tech_dict
     )
     scenario = sc.Scenario(time=timeobj, gas_field=gas_field, ldar_program_dict={'tiered': tiered_survey,
                                                                                  'ogi': ogi_survey})

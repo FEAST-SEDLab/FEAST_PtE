@@ -49,7 +49,7 @@ class Scenario:
         # -------------- Define settings --------------
         # time defines parameters related to time in the model. Time units are days.
         if 'Null' not in self.ldar_program_dict:
-            self.ldar_program_dict['Null'] = LDARProgram(self.time, self.gas_field, tech_dict={})
+            self.ldar_program_dict['Null'] = LDARProgram(self.gas_field, tech_dict={})
         # -------------- Run the simulation --------------
         # check_timestep(gas_field, time)
         for self.time.time_index in range(0, self.time.n_timesteps):

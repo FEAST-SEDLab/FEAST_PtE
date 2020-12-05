@@ -14,9 +14,8 @@ class LDARProgram:
     deploys runs the action methods of each detection and repair method contained in the program. The detection and
     repair methods determine their own behavior at each time step.
     """
-    def __init__(self, time, gas_field, tech_dict):
+    def __init__(self, gas_field, tech_dict):
         """
-        :param time: a Time object
         :param gas_field: a GasField object
         :param tech_dict: a dict containing all of the detection methods to be employed by the LDAR program. The dict
             must have the form {"name": DetectionMethod}. All of the relationships between detection methods and between

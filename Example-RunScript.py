@@ -249,7 +249,7 @@ def define_ldar_programs(timeobj, gas_field, ogi, ogi_no_survey, plane_survey, c
     }
     # Define LDAR programs
     ogi_survey = Dm.ldar_program.LDARProgram(
-        timeobj, copy.deepcopy(gas_field), {'ogi': ogi},
+        copy.deepcopy(gas_field), {'ogi': ogi},
     )
     # tiered survey
     tech_dict = {
@@ -257,7 +257,7 @@ def define_ldar_programs(timeobj, gas_field, ogi, ogi_no_survey, plane_survey, c
         'ogi': plane_ogi
     }
     plane_ogi_survey = Dm.ldar_program.LDARProgram(
-        timeobj, copy.deepcopy(gas_field), tech_dict,
+        copy.deepcopy(gas_field), tech_dict,
     )
 
     # continuous monitor
@@ -266,7 +266,7 @@ def define_ldar_programs(timeobj, gas_field, ogi, ogi_no_survey, plane_survey, c
         'ogi': cm_ogi
     }
     cm_ogi = Dm.ldar_program.LDARProgram(
-        timeobj, copy.deepcopy(gas_field), tech_dict,
+        copy.deepcopy(gas_field), tech_dict,
     )
 
     # All programs
