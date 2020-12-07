@@ -106,15 +106,6 @@ class GasField:
             self.emissions.extend(self.emerging_emissions(time))
         else:
             self.emissions = emissions
-        # self.input_emissions = []
-        # for ind in range(time.n_timesteps):
-        #     cond = np.where(self.start_times == ind)[0]
-        #     self.input_emissions.extend(ecf.Emission(flux=self.new_emissions.flux[cond],
-        #                                              reparable=self.new_emissions.reparable[cond],
-        #                                              site_index=self.new_emissions.site_index[cond],
-        #                                              comp_index=self.new_emissions.comp_index[cond],
-        #                                              end_time=self.new_emissions.endtime[cond],
-        #                                              repair_cost=self.new_emissions.repair_cost[cond]))
 
     def initialize_emissions(self, time):
         """
