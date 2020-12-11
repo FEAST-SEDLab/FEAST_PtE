@@ -2,4 +2,3 @@
 from . import EmissionSimModules
 from . import DetectionModules
 from . import input_data_classes
-from . import MEET_1_importer
