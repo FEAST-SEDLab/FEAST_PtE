@@ -5,6 +5,7 @@ This module defines the LDARProgram class.
 import numpy as np
 import copy
 from .repair import Repair
+from ..EmissionSimModules.result_classes import ResultDiscrete
 
 
 class LDARProgram:
@@ -26,6 +27,7 @@ class LDARProgram:
         self.vents_timeseries = []
         self.tech_dict = tech_dict
         self.repair = {}
+        self.repair_cost = ResultDiscrete(units='USD')
         for tech_name, tech in tech_dict.items():
             if type(tech.dispatch_object) is Repair:
                 self.repair[tech_name + ' ' + tech.dispatch_object.name] = tech.dispatch_object
@@ -44,3 +46,17 @@ class LDARProgram:
             tech.detect(time, gas_field, self.emissions.get_current_emissions(time))
         for rep in self.repair.values():
             rep.repair(time, self.emissions)
+
+    def calc_rep_costs(self, time):
+        """
+        Calculates the total repair costs up to time.current_time, assuming that all reparable emissions that have a
+        max end_time less than time.current_time have been repaired.
+
+        :param time: a FEAST time object
+        :return: None
+        """
+        for em in self.emissions.emissions.index.unique():
+            empdf_temp = self.emissions.emissions.loc[[em]]
+            max_row = empdf_temp[empdf_temp.end_time == empdf_temp.end_time.max()].iloc[0]
+            if max_row.reparable & (max_row.end_time < time.current_time):
+                self.repair_cost.append_entry([max_row.end_time, max_row.repair_cost])

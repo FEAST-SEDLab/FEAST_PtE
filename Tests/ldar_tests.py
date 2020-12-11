@@ -331,6 +331,11 @@ def test_ldar_program():
     em = tiered_survey.emissions.get_current_emissions(time)
     if np.sum(em.flux) != 86:
         raise ValueError("Unexpected emission rate after LDAR program action with tiered survey")
+    time.current_time = 1
+    tiered_survey.calc_rep_costs(time)
+    if tiered_survey.repair_cost.time_value[0][0] != 0 or len(tiered_survey.repair_cost.time_value) != 14 or \
+            tiered_survey.repair_cost.time_value[-1][-1] != 2:
+        raise ValueError("tiered_survey.calc_rep_costs is not calculating the correct repair costs")
 
 
 def test_scenario_run():

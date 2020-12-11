@@ -62,6 +62,7 @@ class Scenario:
                 lp.emissions_timeseries.append(lp.emissions.em_rate_in_range(t0, t0 + self.time.delta_t))
                 lp.vents_timeseries.append(lp.emissions.em_rate_in_range(t0, t0 + self.time.delta_t, reparable=False))
             self.time.current_time += self.time.delta_t
+        [lp.calc_rep_costs(self.time) for lp in self.ldar_program_dict.values()]
 
         # -------------- Save results --------------
         self.save(dir_out, method=save_method)
@@ -79,6 +80,7 @@ class Scenario:
             res_dict[prog_name] = {
                 'emission timeseries': prog.emissions_timeseries,
                 'vent timeseries': prog.vents_timeseries,
+                'repair cost': prog.repair_cost.__dict__
             }
             for tech_name, tech in prog.tech_dict.items():
                 res_dict[prog_name][tech_name] = {}
