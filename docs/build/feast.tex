@@ -73,7 +73,7 @@
 
 
 \title{FEAST}
-\date{Nov 30, 2020}
+\date{Dec 11, 2020}
 \release{3.1}
 \author{Chandler Kemp and Clay Bell}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -561,16 +561,13 @@ This module defines the LDARProgram class.
 \label{\detokenize{index:ldarprogram}}\index{LDARProgram (class in feast.DetectionModules.ldar\_program)@\spxentry{LDARProgram}\spxextra{class in feast.DetectionModules.ldar\_program}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.DetectionModules.ldar_program.LDARProgram}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{LDARProgram}}}{\emph{time}, \emph{gas\_field}, \emph{tech\_dict}}{}
+\phantomsection\label{\detokenize{index:feast.DetectionModules.ldar_program.LDARProgram}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxbfcode{\sphinxupquote{LDARProgram}}}{\emph{gas\_field}, \emph{tech\_dict}}{}
 An LDAR program contains one or more detection methods and one or more repair methods. Each LDAR program records
 the find and repair costs associated with all detection and repair methods in the program. The LDAR program
 deploys runs the action methods of each detection and repair method contained in the program. The detection and
 repair methods determine their own behavior at each time step.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{time}} \textendash{} a Time object
-
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{gas\_field}} \textendash{} a GasField object
 
@@ -590,6 +587,23 @@ Runs the detect method for every tech in tech\_dict and runs the repair method
 :param time: the simulation time object
 :param gas\_field: the simulation gas\_field object
 :return:
+
+\end{fulllineitems}
+
+\index{calc\_rep\_costs() (LDARProgram method)@\spxentry{calc\_rep\_costs()}\spxextra{LDARProgram method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{index:feast.DetectionModules.ldar_program.LDARProgram.calc_rep_costs}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calc\_rep\_costs}}}{\emph{time}}{}
+Calculates the total repair costs up to time.current\_time, assuming that all reparable emissions that have a
+max end\_time less than time.current\_time have been repaired.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\sphinxstyleliteralstrong{\sphinxupquote{time}} \textendash{} a FEAST time object
+
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -1908,161 +1922,6 @@ RepairData is designed to store the costs of repairing leaks from a particular r
 
 
 
-\section{MEET\_1\_importer}
-\label{\detokenize{index:module-feast.MEET_1_importer}}\label{\detokenize{index:meet-1-importer}}\index{feast.MEET\_1\_importer (module)@\spxentry{feast.MEET\_1\_importer}\spxextra{module}}
-
-\subsection{gas\_comp\_to\_dict}
-\label{\detokenize{index:gas-comp-to-dict}}\index{gas\_comp\_to\_dict() (in module feast.MEET\_1\_importer)@\spxentry{gas\_comp\_to\_dict()}\spxextra{in module feast.MEET\_1\_importer}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.MEET_1_importer.gas_comp_to_dict}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{gas\_comp\_to\_dict}}}{\emph{gc}, \emph{delta\_t}}{}
-converts a gas\_comp DataFrame to a dict specifying the start time, top time, emission rate, location,
-emission type and emission ID for every emitter in gas\_comp. If an emission changes its emission rate,
-it is recorded as stopping and restarting at the time of the change. LDAR programs will treat the emission
-correctly due to the emission ID that persists after the change in emission rate.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{gc}} \textendash{} a gas\_comp DataFrame as created by the function load\_gas\_comp\_file
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{delta\_t}} \textendash{} The time resolution of the gas\_comp file (seconds)
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-the dict containing emitter data from the gas\_comp file
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-
-
-\subsection{gascomp\_reader}
-\label{\detokenize{index:gascomp-reader}}\index{gascomp\_reader() (in module feast.MEET\_1\_importer)@\spxentry{gascomp\_reader()}\spxextra{in module feast.MEET\_1\_importer}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.MEET_1_importer.gascomp_reader}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{gascomp\_reader}}}{\emph{path\_to\_gas\_comp}, \emph{feast\_delta\_t}, \emph{duration}, \emph{comps\_per\_site}, \emph{rep\_cost\_path}, \emph{met\_data\_path=None}, \emph{met\_start\_hr=None}}{}
-Read a MEET 1.0 GasComp result file and return a feast Time object and GasField object specifying all of the
-emissions to occur in a FEAST simulation
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{path\_to\_gas\_comp}} \textendash{} path to a gas\_comp file
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{feast\_delta\_t}} \textendash{} time resolution of the FEAST simulation (days). FEAST will represent emissions with the     precision of the original MEET simulation, but will invoke LDAR events as though they occur instantaneously with     the time resolution specified here.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{duration}} \textendash{} duration of the simulation to run in FEAST (days)
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{comps\_per\_site}} \textendash{} A dict of form \{loc: number of components\}. This will specify the number of components to     be inspected for leaks at every site. Must have a key for every location ID in the gas\_comp file.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{rep\_cost\_path}} \textendash{} Path to a repair cost data file. The FEAST will randomly assign these repair costs to leaks     simulated in MEET.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{met\_data\_path}} \textendash{} Path to a meteorological data file (if left as None, FEAST will run without met data)
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{met\_start\_hr}} \textendash{} FEAST will rotate the meteorological data to begin at the hour specified by an integer here.
-
-\end{itemize}
-
-\item[{Return time\_obj}] \leavevmode
-a FEAST Time object to specify a simulation
-
-\item[{Return gas\_field}] \leavevmode
-a FEAST GasField object
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-
-
-\subsection{gc\_dat\_to\_gas\_field}
-\label{\detokenize{index:gc-dat-to-gas-field}}\index{gc\_dat\_to\_gas\_field() (in module feast.MEET\_1\_importer)@\spxentry{gc\_dat\_to\_gas\_field()}\spxextra{in module feast.MEET\_1\_importer}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.MEET_1_importer.gc_dat_to_gas_field}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{gc\_dat\_to\_gas\_field}}}{\emph{feast\_delta\_t}, \emph{duration}, \emph{comps\_per\_site}, \emph{rep\_cost\_path}, \emph{met\_data\_path=None}, \emph{met\_start\_hr=None}, \emph{size=0}, \emph{loc=0}, \emph{start=0}, \emph{stop=0}, \emph{emtype=0}, \emph{em\_id=None}}{}
-Ports data from a data\_dict returned by the funcation gas\_comp\_to\_dict into a FEAST GasField
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{feast\_delta\_t}} \textendash{} FEAST time resolution (days)
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{duration}} \textendash{} FEAST simulation duration (days)
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{comps\_per\_site}} \textendash{} A dict of form \{loc: number of components\}. This will specify the number of components to     be inspected for leaks at every site
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{rep\_cost\_path}} \textendash{} Path to a repair cost data file. The FEAST will randomly assign these repair costs to leaks     simulated in MEET
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{met\_data\_path}} \textendash{} Path to a meteorological data file (if left as None, FEAST will run without met data)
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{met\_start\_hr}} \textendash{} FEAST will rotate the meteorological data to begin at the hour specified by an integer here.
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{size}} \textendash{} an array of emission sizes (g/s)
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{loc}} \textendash{} an array of site ids
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{start}} \textendash{} an array of emission start times (days)
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{stop}} \textendash{} an array of emission stop times (days)
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{emtype}} \textendash{} an array of emission types (reparable or no)
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{em\_id}} \textendash{} an array of emission IDs
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-a FEAST Time object
-
-\item[{Returns}] \leavevmode
-a FEAST GasField object
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-
-
-\subsection{load\_gas\_comp\_file}
-\label{\detokenize{index:load-gas-comp-file}}\index{load\_gas\_comp\_file() (in module feast.MEET\_1\_importer)@\spxentry{load\_gas\_comp\_file()}\spxextra{in module feast.MEET\_1\_importer}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.MEET_1_importer.load_gas_comp_file}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{load\_gas\_comp\_file}}}{\emph{path\_to\_gas\_comp}}{}
-Loads a gas\_comp.csv file generated by MEET 1.0
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
-\sphinxstyleliteralstrong{\sphinxupquote{path\_to\_gas\_comp}} \textendash{} a path (str) to a gas\_comp file
-
-\item[{Returns}] \leavevmode
-a DataFrame of the gas\_comp file
-
-\item[{Returns}] \leavevmode
-the time resolution of meet simulation (seconds)
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-
-
 \section{ResultsProcessing}
 \label{\detokenize{index:resultsprocessing}}
 
@@ -2221,7 +2080,6 @@ techs           list of detection program names
 \item\relax\sphinxstyleindexentry{feast.EmissionSimModules.result\_classes}\sphinxstyleindexpageref{index:\detokenize{module-feast.EmissionSimModules.result_classes}}
 \item\relax\sphinxstyleindexentry{feast.EmissionSimModules.simulation\_classes}\sphinxstyleindexpageref{index:\detokenize{module-feast.EmissionSimModules.simulation_classes}}
 \item\relax\sphinxstyleindexentry{feast.input\_data\_classes}\sphinxstyleindexpageref{index:\detokenize{module-feast.input_data_classes}}
-\item\relax\sphinxstyleindexentry{feast.MEET\_1\_importer}\sphinxstyleindexpageref{index:\detokenize{module-feast.MEET_1_importer}}
 \item\relax\sphinxstyleindexentry{feast.ResultsProcessing.plotting\_functions}\sphinxstyleindexpageref{index:\detokenize{module-feast.ResultsProcessing.plotting_functions}}
 \item\relax\sphinxstyleindexentry{feast.ResultsProcessing.results\_analysis\_functions}\sphinxstyleindexpageref{index:\detokenize{module-feast.ResultsProcessing.results_analysis_functions}}
 \end{sphinxtheindex}
