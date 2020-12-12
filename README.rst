@@ -1,4 +1,4 @@
-Fugitive Emissions Abatement Simulation Tool (FEAST) v3.0
+Fugitive Emissions Abatement Simulation Tool (FEAST) v3.1
 ==========================================================
 
 Creators: Chandler Kemp, Arvind Ravikumar
