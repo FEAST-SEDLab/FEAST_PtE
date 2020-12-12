@@ -167,26 +167,6 @@ RepairData
 .. autoclass:: feast.input_data_classes.RepairData
     :members:
 
-MEET_1_importer
-----------------------------------------
-.. automodule:: feast.MEET_1_importer
-
-gas_comp_to_dict
-****************************************
-.. autofunction:: feast.MEET_1_importer.gas_comp_to_dict
-
-gascomp_reader
-****************************************
-.. autofunction:: feast.MEET_1_importer.gascomp_reader
-
-gc_dat_to_gas_field
-****************************************
-.. autofunction:: feast.MEET_1_importer.gc_dat_to_gas_field
-
-load_gas_comp_file
-****************************************
-.. autofunction:: feast.MEET_1_importer.load_gas_comp_file
-
 ResultsProcessing
 ----------------------------------------
 plotting_functions

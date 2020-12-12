@@ -33,8 +33,7 @@ release = '3.1'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'autodocsumm'
+    'sphinx.ext.autosummary'
 ]
 # autodoc_default_flags = ['members']
 # autodoc_default_options = {

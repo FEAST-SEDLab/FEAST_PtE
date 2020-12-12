@@ -18,7 +18,8 @@
 \indexentry{feast.DetectionModules.ldar\_program (module)@\spxentry{feast.DetectionModules.ldar\_program}\spxextra{module}|hyperpage}{7}
 \indexentry{LDARProgram (class in feast.DetectionModules.ldar\_program)@\spxentry{LDARProgram}\spxextra{class in feast.DetectionModules.ldar\_program}|hyperpage}{7}
 \indexentry{action() (LDARProgram method)@\spxentry{action()}\spxextra{LDARProgram method}|hyperpage}{7}
-\indexentry{feast.DetectionModules.repair (module)@\spxentry{feast.DetectionModules.repair}\spxextra{module}|hyperpage}{7}
+\indexentry{calc\_rep\_costs() (LDARProgram method)@\spxentry{calc\_rep\_costs()}\spxextra{LDARProgram method}|hyperpage}{7}
+\indexentry{feast.DetectionModules.repair (module)@\spxentry{feast.DetectionModules.repair}\spxextra{module}|hyperpage}{8}
 \indexentry{Repair (class in feast.DetectionModules.repair)@\spxentry{Repair}\spxextra{class in feast.DetectionModules.repair}|hyperpage}{8}
 \indexentry{action() (Repair method)@\spxentry{action()}\spxextra{Repair method}|hyperpage}{8}
 \indexentry{repair() (Repair method)@\spxentry{repair()}\spxextra{Repair method}|hyperpage}{8}
@@ -78,16 +79,11 @@
 \indexentry{ProductionData (class in feast.input\_data\_classes)@\spxentry{ProductionData}\spxextra{class in feast.input\_data\_classes}|hyperpage}{20}
 \indexentry{RepairData (class in feast.input\_data\_classes)@\spxentry{RepairData}\spxextra{class in feast.input\_data\_classes}|hyperpage}{20}
 \indexentry{define\_data() (RepairData method)@\spxentry{define\_data()}\spxextra{RepairData method}|hyperpage}{20}
-\indexentry{feast.MEET\_1\_importer (module)@\spxentry{feast.MEET\_1\_importer}\spxextra{module}|hyperpage}{20}
-\indexentry{gas\_comp\_to\_dict() (in module feast.MEET\_1\_importer)@\spxentry{gas\_comp\_to\_dict()}\spxextra{in module feast.MEET\_1\_importer}|hyperpage}{20}
-\indexentry{gascomp\_reader() (in module feast.MEET\_1\_importer)@\spxentry{gascomp\_reader()}\spxextra{in module feast.MEET\_1\_importer}|hyperpage}{21}
-\indexentry{gc\_dat\_to\_gas\_field() (in module feast.MEET\_1\_importer)@\spxentry{gc\_dat\_to\_gas\_field()}\spxextra{in module feast.MEET\_1\_importer}|hyperpage}{21}
-\indexentry{load\_gas\_comp\_file() (in module feast.MEET\_1\_importer)@\spxentry{load\_gas\_comp\_file()}\spxextra{in module feast.MEET\_1\_importer}|hyperpage}{22}
-\indexentry{feast.ResultsProcessing.plotting\_functions (module)@\spxentry{feast.ResultsProcessing.plotting\_functions}\spxextra{module}|hyperpage}{22}
-\indexentry{abatement\_cost\_plotter() (in module feast.ResultsProcessing.plotting\_functions)@\spxentry{abatement\_cost\_plotter()}\spxextra{in module feast.ResultsProcessing.plotting\_functions}|hyperpage}{22}
-\indexentry{plot\_fixer() (in module feast.ResultsProcessing.plotting\_functions)@\spxentry{plot\_fixer()}\spxextra{in module feast.ResultsProcessing.plotting\_functions}|hyperpage}{22}
-\indexentry{summary\_plotter() (in module feast.ResultsProcessing.plotting\_functions)@\spxentry{summary\_plotter()}\spxextra{in module feast.ResultsProcessing.plotting\_functions}|hyperpage}{22}
-\indexentry{time\_series() (in module feast.ResultsProcessing.plotting\_functions)@\spxentry{time\_series()}\spxextra{in module feast.ResultsProcessing.plotting\_functions}|hyperpage}{23}
-\indexentry{feast.ResultsProcessing.results\_analysis\_functions (module)@\spxentry{feast.ResultsProcessing.results\_analysis\_functions}\spxextra{module}|hyperpage}{23}
-\indexentry{npv\_calculator() (in module feast.ResultsProcessing.results\_analysis\_functions)@\spxentry{npv\_calculator()}\spxextra{in module feast.ResultsProcessing.results\_analysis\_functions}|hyperpage}{23}
-\indexentry{results\_analysis() (in module feast.ResultsProcessing.results\_analysis\_functions)@\spxentry{results\_analysis()}\spxextra{in module feast.ResultsProcessing.results\_analysis\_functions}|hyperpage}{23}
+\indexentry{feast.ResultsProcessing.plotting\_functions (module)@\spxentry{feast.ResultsProcessing.plotting\_functions}\spxextra{module}|hyperpage}{20}
+\indexentry{abatement\_cost\_plotter() (in module feast.ResultsProcessing.plotting\_functions)@\spxentry{abatement\_cost\_plotter()}\spxextra{in module feast.ResultsProcessing.plotting\_functions}|hyperpage}{20}
+\indexentry{plot\_fixer() (in module feast.ResultsProcessing.plotting\_functions)@\spxentry{plot\_fixer()}\spxextra{in module feast.ResultsProcessing.plotting\_functions}|hyperpage}{21}
+\indexentry{summary\_plotter() (in module feast.ResultsProcessing.plotting\_functions)@\spxentry{summary\_plotter()}\spxextra{in module feast.ResultsProcessing.plotting\_functions}|hyperpage}{21}
+\indexentry{time\_series() (in module feast.ResultsProcessing.plotting\_functions)@\spxentry{time\_series()}\spxextra{in module feast.ResultsProcessing.plotting\_functions}|hyperpage}{21}
+\indexentry{feast.ResultsProcessing.results\_analysis\_functions (module)@\spxentry{feast.ResultsProcessing.results\_analysis\_functions}\spxextra{module}|hyperpage}{21}
+\indexentry{npv\_calculator() (in module feast.ResultsProcessing.results\_analysis\_functions)@\spxentry{npv\_calculator()}\spxextra{in module feast.ResultsProcessing.results\_analysis\_functions}|hyperpage}{21}
+\indexentry{results\_analysis() (in module feast.ResultsProcessing.results\_analysis\_functions)@\spxentry{results\_analysis()}\spxextra{in module feast.ResultsProcessing.results\_analysis\_functions}|hyperpage}{22}

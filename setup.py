@@ -68,7 +68,7 @@ setup(
 
     # https://packaging.python.org/en/latest/single_source_version.html
 
-    version='3.0',  # Required
+    version='3.1',  # Required
 
 
 
