@@ -1,0 +1,93 @@
+\indexentry{feast.DetectionModules.abstract\_detection\_method (module)@\spxentry{feast.DetectionModules.abstract\_detection\_method}\spxextra{module}|hyperpage}{3}
+\indexentry{DetectionMethod (class in feast.DetectionModules.abstract\_detection\_method)@\spxentry{DetectionMethod}\spxextra{class in feast.DetectionModules.abstract\_detection\_method}|hyperpage}{3}
+\indexentry{check\_min\_max\_condition() (DetectionMethod static method)@\spxentry{check\_min\_max\_condition()}\spxextra{DetectionMethod static method}|hyperpage}{3}
+\indexentry{check\_op\_envelope() (DetectionMethod method)@\spxentry{check\_op\_envelope()}\spxextra{DetectionMethod method}|hyperpage}{3}
+\indexentry{check\_time() (DetectionMethod method)@\spxentry{check\_time()}\spxextra{DetectionMethod method}|hyperpage}{4}
+\indexentry{choose\_sites() (DetectionMethod method)@\spxentry{choose\_sites()}\spxextra{DetectionMethod method}|hyperpage}{4}
+\indexentry{empirical\_interpolator() (DetectionMethod static method)@\spxentry{empirical\_interpolator()}\spxextra{DetectionMethod static method}|hyperpage}{4}
+\indexentry{extend\_site\_queue() (DetectionMethod method)@\spxentry{extend\_site\_queue()}\spxextra{DetectionMethod method}|hyperpage}{4}
+\indexentry{find\_comp\_name() (DetectionMethod static method)@\spxentry{find\_comp\_name()}\spxextra{DetectionMethod static method}|hyperpage}{5}
+\indexentry{find\_site\_name() (DetectionMethod static method)@\spxentry{find\_site\_name()}\spxextra{DetectionMethod static method}|hyperpage}{5}
+\indexentry{get\_current\_conditions() (DetectionMethod method)@\spxentry{get\_current\_conditions()}\spxextra{DetectionMethod method}|hyperpage}{5}
+\indexentry{feast.DetectionModules.comp\_survey (module)@\spxentry{feast.DetectionModules.comp\_survey}\spxextra{module}|hyperpage}{5}
+\indexentry{CompSurvey (class in feast.DetectionModules.comp\_survey)@\spxentry{CompSurvey}\spxextra{class in feast.DetectionModules.comp\_survey}|hyperpage}{5}
+\indexentry{action() (CompSurvey method)@\spxentry{action()}\spxextra{CompSurvey method}|hyperpage}{6}
+\indexentry{detect() (CompSurvey method)@\spxentry{detect()}\spxextra{CompSurvey method}|hyperpage}{6}
+\indexentry{detect\_prob\_curve() (CompSurvey method)@\spxentry{detect\_prob\_curve()}\spxextra{CompSurvey method}|hyperpage}{6}
+\indexentry{emitters\_surveyed() (CompSurvey method)@\spxentry{emitters\_surveyed()}\spxextra{CompSurvey method}|hyperpage}{7}
+\indexentry{feast.DetectionModules.ldar\_program (module)@\spxentry{feast.DetectionModules.ldar\_program}\spxextra{module}|hyperpage}{7}
+\indexentry{LDARProgram (class in feast.DetectionModules.ldar\_program)@\spxentry{LDARProgram}\spxextra{class in feast.DetectionModules.ldar\_program}|hyperpage}{7}
+\indexentry{action() (LDARProgram method)@\spxentry{action()}\spxextra{LDARProgram method}|hyperpage}{7}
+\indexentry{feast.DetectionModules.repair (module)@\spxentry{feast.DetectionModules.repair}\spxextra{module}|hyperpage}{7}
+\indexentry{Repair (class in feast.DetectionModules.repair)@\spxentry{Repair}\spxextra{class in feast.DetectionModules.repair}|hyperpage}{8}
+\indexentry{action() (Repair method)@\spxentry{action()}\spxextra{Repair method}|hyperpage}{8}
+\indexentry{repair() (Repair method)@\spxentry{repair()}\spxextra{Repair method}|hyperpage}{8}
+\indexentry{feast.DetectionModules.site\_monitor (module)@\spxentry{feast.DetectionModules.site\_monitor}\spxextra{module}|hyperpage}{8}
+\indexentry{SiteMonitor (class in feast.DetectionModules.site\_monitor)@\spxentry{SiteMonitor}\spxextra{class in feast.DetectionModules.site\_monitor}|hyperpage}{8}
+\indexentry{action() (SiteMonitor method)@\spxentry{action()}\spxextra{SiteMonitor method}|hyperpage}{9}
+\indexentry{detect() (SiteMonitor method)@\spxentry{detect()}\spxextra{SiteMonitor method}|hyperpage}{9}
+\indexentry{detect\_prob\_curve() (SiteMonitor method)@\spxentry{detect\_prob\_curve()}\spxextra{SiteMonitor method}|hyperpage}{9}
+\indexentry{prob\_detection() (SiteMonitor static method)@\spxentry{prob\_detection()}\spxextra{SiteMonitor static method}|hyperpage}{9}
+\indexentry{feast.DetectionModules.site\_survey (module)@\spxentry{feast.DetectionModules.site\_survey}\spxextra{module}|hyperpage}{10}
+\indexentry{SiteSurvey (class in feast.DetectionModules.site\_survey)@\spxentry{SiteSurvey}\spxextra{class in feast.DetectionModules.site\_survey}|hyperpage}{10}
+\indexentry{action() (SiteSurvey method)@\spxentry{action()}\spxextra{SiteSurvey method}|hyperpage}{10}
+\indexentry{detect() (SiteSurvey method)@\spxentry{detect()}\spxextra{SiteSurvey method}|hyperpage}{11}
+\indexentry{detect\_prob\_curve() (SiteSurvey method)@\spxentry{detect\_prob\_curve()}\spxextra{SiteSurvey method}|hyperpage}{11}
+\indexentry{sites\_surveyed() (SiteSurvey method)@\spxentry{sites\_surveyed()}\spxextra{SiteSurvey method}|hyperpage}{11}
+\indexentry{feast.EmissionSimModules.emission\_class\_functions (module)@\spxentry{feast.EmissionSimModules.emission\_class\_functions}\spxextra{module}|hyperpage}{11}
+\indexentry{Emission (class in feast.EmissionSimModules.emission\_class\_functions)@\spxentry{Emission}\spxextra{class in feast.EmissionSimModules.emission\_class\_functions}|hyperpage}{12}
+\indexentry{em\_rate\_in\_range() (Emission method)@\spxentry{em\_rate\_in\_range()}\spxextra{Emission method}|hyperpage}{12}
+\indexentry{extend() (Emission method)@\spxentry{extend()}\spxextra{Emission method}|hyperpage}{12}
+\indexentry{get\_current\_emissions() (Emission method)@\spxentry{get\_current\_emissions()}\spxextra{Emission method}|hyperpage}{12}
+\indexentry{get\_emissions\_in\_range() (Emission method)@\spxentry{get\_emissions\_in\_range()}\spxextra{Emission method}|hyperpage}{12}
+\indexentry{bootstrap\_emission\_maker() (in module feast.EmissionSimModules.emission\_class\_functions)@\spxentry{bootstrap\_emission\_maker()}\spxextra{in module feast.EmissionSimModules.emission\_class\_functions}|hyperpage}{12}
+\indexentry{comp\_indexes\_fcn() (in module feast.EmissionSimModules.emission\_class\_functions)@\spxentry{comp\_indexes\_fcn()}\spxextra{in module feast.EmissionSimModules.emission\_class\_functions}|hyperpage}{13}
+\indexentry{emission\_objects\_generator() (in module feast.EmissionSimModules.emission\_class\_functions)@\spxentry{emission\_objects\_generator()}\spxextra{in module feast.EmissionSimModules.emission\_class\_functions}|hyperpage}{13}
+\indexentry{permitted\_emission() (in module feast.EmissionSimModules.emission\_class\_functions)@\spxentry{permitted\_emission()}\spxextra{in module feast.EmissionSimModules.emission\_class\_functions}|hyperpage}{13}
+\indexentry{feast.EmissionSimModules.infrastructure\_classes (module)@\spxentry{feast.EmissionSimModules.infrastructure\_classes}\spxextra{module}|hyperpage}{13}
+\indexentry{Component (class in feast.EmissionSimModules.infrastructure\_classes)@\spxentry{Component}\spxextra{class in feast.EmissionSimModules.infrastructure\_classes}|hyperpage}{14}
+\indexentry{GasField (class in feast.EmissionSimModules.infrastructure\_classes)@\spxentry{GasField}\spxextra{class in feast.EmissionSimModules.infrastructure\_classes}|hyperpage}{15}
+\indexentry{emerging\_emissions() (GasField method)@\spxentry{emerging\_emissions()}\spxextra{GasField method}|hyperpage}{15}
+\indexentry{emission\_maker() (GasField static method)@\spxentry{emission\_maker()}\spxextra{GasField static method}|hyperpage}{15}
+\indexentry{emission\_size\_maker() (GasField method)@\spxentry{emission\_size\_maker()}\spxextra{GasField method}|hyperpage}{15}
+\indexentry{get\_met() (GasField method)@\spxentry{get\_met()}\spxextra{GasField method}|hyperpage}{15}
+\indexentry{initialize\_emissions() (GasField method)@\spxentry{initialize\_emissions()}\spxextra{GasField method}|hyperpage}{15}
+\indexentry{met\_data\_maker() (GasField method)@\spxentry{met\_data\_maker()}\spxextra{GasField method}|hyperpage}{16}
+\indexentry{set\_indexes() (GasField method)@\spxentry{set\_indexes()}\spxextra{GasField method}|hyperpage}{16}
+\indexentry{Site (class in feast.EmissionSimModules.infrastructure\_classes)@\spxentry{Site}\spxextra{class in feast.EmissionSimModules.infrastructure\_classes}|hyperpage}{16}
+\indexentry{feast.EmissionSimModules.result\_classes (module)@\spxentry{feast.EmissionSimModules.result\_classes}\spxextra{module}|hyperpage}{16}
+\indexentry{ResultAggregate (class in feast.EmissionSimModules.result\_classes)@\spxentry{ResultAggregate}\spxextra{class in feast.EmissionSimModules.result\_classes}|hyperpage}{16}
+\indexentry{append\_entry() (ResultAggregate method)@\spxentry{append\_entry()}\spxextra{ResultAggregate method}|hyperpage}{16}
+\indexentry{get\_vals() (ResultAggregate method)@\spxentry{get\_vals()}\spxextra{ResultAggregate method}|hyperpage}{16}
+\indexentry{ResultContinuous (class in feast.EmissionSimModules.result\_classes)@\spxentry{ResultContinuous}\spxextra{class in feast.EmissionSimModules.result\_classes}|hyperpage}{17}
+\indexentry{get\_time\_integrated() (ResultContinuous method)@\spxentry{get\_time\_integrated()}\spxextra{ResultContinuous method}|hyperpage}{17}
+\indexentry{ResultDiscrete (class in feast.EmissionSimModules.result\_classes)@\spxentry{ResultDiscrete}\spxextra{class in feast.EmissionSimModules.result\_classes}|hyperpage}{17}
+\indexentry{get\_cumulative\_vals() (ResultDiscrete method)@\spxentry{get\_cumulative\_vals()}\spxextra{ResultDiscrete method}|hyperpage}{17}
+\indexentry{get\_sum\_val() (ResultDiscrete method)@\spxentry{get\_sum\_val()}\spxextra{ResultDiscrete method}|hyperpage}{17}
+\indexentry{feast.EmissionSimModules.simulation\_classes (module)@\spxentry{feast.EmissionSimModules.simulation\_classes}\spxextra{module}|hyperpage}{18}
+\indexentry{Scenario (class in feast.EmissionSimModules.simulation\_classes)@\spxentry{Scenario}\spxextra{class in feast.EmissionSimModules.simulation\_classes}|hyperpage}{18}
+\indexentry{check\_timestep() (Scenario method)@\spxentry{check\_timestep()}\spxextra{Scenario method}|hyperpage}{18}
+\indexentry{real\_filename() (Scenario static method)@\spxentry{real\_filename()}\spxextra{Scenario static method}|hyperpage}{18}
+\indexentry{run() (Scenario method)@\spxentry{run()}\spxextra{Scenario method}|hyperpage}{18}
+\indexentry{save() (Scenario method)@\spxentry{save()}\spxextra{Scenario method}|hyperpage}{18}
+\indexentry{Time (class in feast.EmissionSimModules.simulation\_classes)@\spxentry{Time}\spxextra{class in feast.EmissionSimModules.simulation\_classes}|hyperpage}{19}
+\indexentry{feast.input\_data\_classes (module)@\spxentry{feast.input\_data\_classes}\spxextra{module}|hyperpage}{19}
+\indexentry{DataFile (class in feast.input\_data\_classes)@\spxentry{DataFile}\spxextra{class in feast.input\_data\_classes}|hyperpage}{19}
+\indexentry{LeakData (class in feast.input\_data\_classes)@\spxentry{LeakData}\spxextra{class in feast.input\_data\_classes}|hyperpage}{19}
+\indexentry{define\_data() (LeakData method)@\spxentry{define\_data()}\spxextra{LeakData method}|hyperpage}{19}
+\indexentry{ProductionData (class in feast.input\_data\_classes)@\spxentry{ProductionData}\spxextra{class in feast.input\_data\_classes}|hyperpage}{20}
+\indexentry{RepairData (class in feast.input\_data\_classes)@\spxentry{RepairData}\spxextra{class in feast.input\_data\_classes}|hyperpage}{20}
+\indexentry{define\_data() (RepairData method)@\spxentry{define\_data()}\spxextra{RepairData method}|hyperpage}{20}
+\indexentry{feast.MEET\_1\_importer (module)@\spxentry{feast.MEET\_1\_importer}\spxextra{module}|hyperpage}{20}
+\indexentry{gas\_comp\_to\_dict() (in module feast.MEET\_1\_importer)@\spxentry{gas\_comp\_to\_dict()}\spxextra{in module feast.MEET\_1\_importer}|hyperpage}{20}
+\indexentry{gascomp\_reader() (in module feast.MEET\_1\_importer)@\spxentry{gascomp\_reader()}\spxextra{in module feast.MEET\_1\_importer}|hyperpage}{21}
+\indexentry{gc\_dat\_to\_gas\_field() (in module feast.MEET\_1\_importer)@\spxentry{gc\_dat\_to\_gas\_field()}\spxextra{in module feast.MEET\_1\_importer}|hyperpage}{21}
+\indexentry{load\_gas\_comp\_file() (in module feast.MEET\_1\_importer)@\spxentry{load\_gas\_comp\_file()}\spxextra{in module feast.MEET\_1\_importer}|hyperpage}{22}
+\indexentry{feast.ResultsProcessing.plotting\_functions (module)@\spxentry{feast.ResultsProcessing.plotting\_functions}\spxextra{module}|hyperpage}{22}
+\indexentry{abatement\_cost\_plotter() (in module feast.ResultsProcessing.plotting\_functions)@\spxentry{abatement\_cost\_plotter()}\spxextra{in module feast.ResultsProcessing.plotting\_functions}|hyperpage}{22}
+\indexentry{plot\_fixer() (in module feast.ResultsProcessing.plotting\_functions)@\spxentry{plot\_fixer()}\spxextra{in module feast.ResultsProcessing.plotting\_functions}|hyperpage}{22}
+\indexentry{summary\_plotter() (in module feast.ResultsProcessing.plotting\_functions)@\spxentry{summary\_plotter()}\spxextra{in module feast.ResultsProcessing.plotting\_functions}|hyperpage}{22}
+\indexentry{time\_series() (in module feast.ResultsProcessing.plotting\_functions)@\spxentry{time\_series()}\spxextra{in module feast.ResultsProcessing.plotting\_functions}|hyperpage}{23}
+\indexentry{feast.ResultsProcessing.results\_analysis\_functions (module)@\spxentry{feast.ResultsProcessing.results\_analysis\_functions}\spxextra{module}|hyperpage}{23}
+\indexentry{npv\_calculator() (in module feast.ResultsProcessing.results\_analysis\_functions)@\spxentry{npv\_calculator()}\spxextra{in module feast.ResultsProcessing.results\_analysis\_functions}|hyperpage}{23}
+\indexentry{results\_analysis() (in module feast.ResultsProcessing.results\_analysis\_functions)@\spxentry{results\_analysis()}\spxextra{in module feast.ResultsProcessing.results\_analysis\_functions}|hyperpage}{23}

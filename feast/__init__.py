@@ -1,5 +1,4 @@
 # indicating that FEAST is a package
-from . import GeneralClassesFunctions
+from . import EmissionSimModules
 from . import DetectionModules
-from . import field_simulation
-from . import InputData
+from . import input_data_classes

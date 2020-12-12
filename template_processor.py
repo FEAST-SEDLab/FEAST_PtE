@@ -4,7 +4,7 @@
 
 # -------------- reading the spreadsheet --------------
 import pandas as pd
-from feast.InputData.input_data_classes import LeakData
+from feast.input_data_classes import LeakData
 import pickle
 import os
 import sys

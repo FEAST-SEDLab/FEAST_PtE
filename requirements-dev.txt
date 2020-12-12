@@ -11,8 +11,11 @@ matplotlib == 3.1.3
 pandas
 # pysal errored out when installed naively. The appropriate rtree, GDAL and Fiona wheels needed to be installed first:
 # (Rtree‑0.9.3‑cp38‑cp38‑win_amd64.whl, GDAL-3.0.4-cp38-cp38-win_amd64.whl, Fiona-1.8.13-cp38-cp38-win_amd64.whl)
-#
+# Can be downloaded from lfd.uci.edu/~gohlke/pythonlibs
 pysal
 geopy
+xlrd
 
-#
+########## Packages required for advanced simulations (parallel processing)
+multiprocess == 0.70.9
+psutil == 5.7.0
