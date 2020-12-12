@@ -77,16 +77,13 @@ def define_sites(comp_fug, misc_vent, plunger, noplunger):
     :return site_dict: dict of all sites to be simulated
     """
     # Define the number of wells at each site
-    # Assign the number of wells per site
     # The well per site distribution was built using data from the Colorado Oil and Gas Conservation Commission
     counts = [78, 8, 4, 3, 2, 1, 1, 1, 1, 1]
     n_wells = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
     # ------Each iteration of this for loop generates one realization of the simulation
     site_dict = {}
-    with open('ExampleData/DataObjectInstances/COGCC_site_prod_2019.p', 'rb') as f:
-        prod_dat = pickle.load(f).site_prod[:, 2]
-        prod_dat = prod_dat[prod_dat > 0]
+
     # Assign components to sites
     for n_wells_in_site in n_wells:
         basicpad = feast.EmissionSimModules.infrastructure_classes.Site(
@@ -98,7 +95,6 @@ def define_sites(comp_fug, misc_vent, plunger, noplunger):
                 'misc vent ' + str(n_wells_in_site): {'number': 350 * n_wells_in_site,
                                                       'parameters': copy.copy(misc_vent)}
             },
-            prod_dat=prod_dat
         )
         site_dict['basic pad ' + str(n_wells_in_site)] = {'number': counts[n_wells_in_site - 1],
                                                           'parameters': basicpad}
@@ -109,7 +105,6 @@ def define_sites(comp_fug, misc_vent, plunger, noplunger):
             'plunger': {'number': 2, 'parameters': copy.copy(plunger)},
             'misc vent plunger': {'number': 600, 'parameters': copy.copy(misc_vent)}
         },
-        prod_dat=prod_dat
     )
     unloadnp = feast.EmissionSimModules.infrastructure_classes.Site(
         name='unload no plunger',
@@ -118,7 +113,6 @@ def define_sites(comp_fug, misc_vent, plunger, noplunger):
             'no plunger': {'number': 2, 'parameters': copy.copy(noplunger)},
             'misc vent np': {'number': 600, 'parameters': copy.copy(misc_vent)}
         },
-        prod_dat=prod_dat
     )
     site_dict['plunger'] = {'number': 6, 'parameters': plungersite}
     site_dict['unload no plunger'] = {'number': 1, 'parameters': unloadnp}
@@ -220,10 +214,9 @@ def define_detection_methods(timeobj):
     return ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7
 
 
-def define_ldar_programs(timeobj, gas_field, ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7):
+def define_ldar_programs(gas_field, ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7):
     """
     Define LDAR programs using the detection and repair methods defined previously
-    :param timeobj: Time settings for the simulation
     :param gas_field: Emission simulation settings
     :param ogi:  component survey method representing OGI with periodic surveys
     :param ogi_no_survey: A component survey method representing OGI deployed by a site-level detection method
@@ -286,7 +279,7 @@ for ind in range(n_montecarlo):
     print('Iteration number: {:0.0f}'.format(ind))
     gas_field = define_gas_field(timeobj, site_dict)
     ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7 = define_detection_methods(timeobj)
-    ldar_dict = define_ldar_programs(timeobj, gas_field, ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7)
+    ldar_dict = define_ldar_programs(gas_field, ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7)
     scenario = sc.Scenario(time=timeobj, gas_field=gas_field, ldar_program_dict=ldar_dict)
     scenario.run(dir_out='ExampleRunScriptResults', display_status=True, save_method='pickle')
 
