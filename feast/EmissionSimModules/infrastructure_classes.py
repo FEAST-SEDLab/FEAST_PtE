@@ -114,9 +114,6 @@ class GasField:
         :param time:
         :return initial_emissions:
         """
-        cap_est = 0
-        for site_dict in self.sites.values():
-            cap_est += site_dict['number'] * 10
         initial_emissions = ecf.Emission()
         # This generates new leaks for each component type in each site type
         for sitedict in self.sites.values():
