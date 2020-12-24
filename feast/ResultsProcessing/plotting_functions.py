@@ -64,7 +64,7 @@ def time_series(results_file, line_width=6):
     :param line_width:      width at which to plot lines
     """
     results = load(open(results_file, 'rb'))
-    tech_dict = results.tech_dict
+    tech_dict = results.ldar_program_dict
     fig = plt.figure()
     ax = fig.add_subplot(111)
     counter = -1
@@ -74,9 +74,10 @@ def time_series(results_file, line_width=6):
             lab = 'No LDAR'
         counter += 1
         tech_dict[tech].line = ax.plot(np.array(range(0, results.time.n_timesteps)) * results.time.delta_t / 365,
-                                       np.array(tech_dict[tech].emissions)/tech_dict[tech].emissions[0], label=lab,
+                                       np.array(tech_dict[tech].emissions_timeseries)/tech_dict[
+                                           tech].emissions_timeseries[0], label=lab,
                                        color=color_set[counter], linewidth=line_width)
-        avg_emissions = np.mean(np.array(tech_dict[tech].emissions)/tech_dict[tech].emissions[0])
+        avg_emissions = np.mean(np.array(tech_dict[tech].emissions_timeseries)/tech_dict[tech].emissions_timeseries[0])
         ax.plot([0, results.time.end_time / 365],
                 [avg_emissions, avg_emissions],
                 '--', label=lab + ' Average', color=color_set[counter], linewidth=line_width)
@@ -85,7 +86,7 @@ def time_series(results_file, line_width=6):
     plt.legend(bbox_to_anchor=(1, 0.72))
 
 
-def abatement_cost_plotter(directory, gwp=34):
+def abatement_cost_plotter(directory, gwp=34, discount_rate=0, gas_price=0):
     """
     Generates a box plot of the cost of abatement
     gwp defaults to 34, which is the value provided in the IPCC 5th assessment report including climate-carbon feedbacks
@@ -93,9 +94,11 @@ def abatement_cost_plotter(directory, gwp=34):
 
     :param directory: A directory containing one or more realizations of a scenario
     :param gwp: global warming potential of methane
+    :param discount_rate: discount rate to use in NPV calculations
+    :param gas_price: value of saved gas ($/g)
     :return:
     """
-    _, emissions, costs, techs = results_analysis_functions.results_analysis(directory)
+    npv, emissions, techs = results_analysis_functions.results_analysis(directory, discount_rate, gas_price)
     files = [f for f in listdir(directory) if isfile(join(directory, f))]
     with open(directory + '/' + files[0], 'rb') as f:
         sample = load(f)
@@ -104,7 +107,7 @@ def abatement_cost_plotter(directory, gwp=34):
     cost_abate = np.zeros([emissions.shape[0] - 1, emissions.shape[1]])
     for ind in range(em_abate.shape[0]):
         em_abate[ind, :] = emissions[-1, :] - emissions[ind, :]
-        cost_abate[ind, :] = costs[ind, :] - costs[-1, :]
+        cost_abate[ind, :] = -npv['Total'][ind, :]
     abatement_cost = cost_abate / em_abate / gwp
     medianprops = dict(color='k')
     boxplot = plt.boxplot(np.transpose(abatement_cost), medianprops=medianprops, patch_artist=True)
@@ -116,75 +119,4 @@ def abatement_cost_plotter(directory, gwp=34):
     ax.set_xticklabels(techs[:2])
     ax.set_ylabel('Mitigation cost\n(USD/metric ton CO$_2$ eq.)')
     ax.set_xlabel('LDAR program')
-    plot_fixer()
-
-
-def summary_plotter(directory, n_wells=None, ylabel=None):
-    """
-    The NPV for each realization stored in 'directory is calculated and displayed in a stacked bar chart. Each component
-    of the NPV is displayed separately in the chart.
-
-    :param directory:    path to a directory containing results files
-    :param n_wells:      if set to a number, then the NPV will be reported on a per well basis
-    :param ylabel:       yaxis label
-    """
-    # load data
-    files = [f for f in listdir(directory) if isfile(join(directory, f))]
-    sample = load(open(directory + '/' + files[0], 'rb'))
-    npv_in, emissions, costs, techs = results_analysis_functions.results_analysis(directory)
-    # Normalize to the number of wells
-    if n_wells is not None:
-        for cost_type in npv_in:
-            npv_in[cost_type] = npv_in[cost_type] / (1000 * n_wells)
-        ylabel = "NPV (k$/well)"
-    n_realizations = len(npv_in['Total'][0, :])
-    tech_keys = []
-    # Get a list of indexes that do not have data related to the null detection method
-    for key in sample.tech_dict.keys():
-        if key != 'Null':
-            tech_keys.append(key)
-    n_tech = len(sample.tech_dict)
-    npv_std = np.std(npv_in['Total'], 1)
-    totals = np.average(npv_in['Total'], 1)
-    npv = dict()
-    for key in npv_in.keys():
-        npv[key] = np.sum(npv_in[key], 1)/n_realizations
-
-    # create figure
-    plt.figure(figsize=(10, 5))
-    width = 0.35
-    ind = np.linspace(0, n_tech-2, n_tech-1)
-    counter = 0
-    neg_bottoms = [0]*(n_tech-1)
-    pos_bottoms = [0]*(n_tech-1)
-    key_list = list(npv.keys())
-    key_list.sort()
-    for key in key_list:
-        if key == 'Total' or key == 'Gas':
-            continue
-        else:
-            for k in ind:
-                m = int(k)
-                if npv[key][m] >= 0:
-                    if m == 0:
-                        plt.bar(m, -npv[key][m], width, bottom=neg_bottoms[m], color=color_set[counter], label=key)
-                    else:
-                        plt.bar(m, -npv[key][m], width, bottom=neg_bottoms[m], color=color_set[counter])
-                    neg_bottoms[m] -= npv[key][m]
-                else:
-                    if m == 0:
-                        plt.bar(m, -npv[key][m], width, bottom=pos_bottoms[m], color=color_set[counter], label=key)
-                    else:
-                        plt.bar(m, -npv[key][m], width, bottom=pos_bottoms[m], color=color_set[counter])
-                    pos_bottoms[m] -= npv[key][m]
-        counter += 1
-    plt.bar(ind, npv['Gas'], width, bottom=pos_bottoms, color=color_set[counter], label='Gas')
-    plt.errorbar(ind, totals, yerr=npv_std, linewidth=8, fmt='o', ms=1, label='Total NPV', ecolor='yellow', capsize=8)
-    if ylabel is None:
-        plt.ylabel("NPV ($)")
-    else:
-        plt.ylabel(ylabel, fontsize=18)
-    plt.xticks(np.linspace(0, len(tech_keys) - 1, len(tech_keys)), tech_keys, fontsize=18)
-    ax = plt.gca()
-    ax.legend(bbox_to_anchor=(1.4, 1), fontsize=18)
     plot_fixer()

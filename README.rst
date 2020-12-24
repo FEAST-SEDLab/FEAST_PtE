@@ -13,6 +13,12 @@ A Brief History of FEAST
 FEAST was initially developed at the Environmental Assessment and Optimization group at Stanford University and
 released in 2016 (C.Kemp et al. Environ. Sci. Tech. 50 4546 http://dx.doi.org/10.1021/acs.est.5b06068). The latest version of FEAST, version 3.1, incorporates additional emission data sets, improves parametric representations of new technologies and methods, and explicitly accounts for leaks (unintentional) and vents (intentional) within the simulated oil and gas facility.
 
+Jupyter notebook tutorial
+-------------------------
+Clicking the link below will direct you to a jupyter notebook server that demonstrates a few basic simulations in FEAST. The server will not support advanced simulations and your results will not be maintained indefinitely, so it should be used as an educational tool rather than an analysis platform. Enter any username and password to access the server. By recording your username and password you will be able to reaccess your work after the server times out.
+
+http://feast.harrisburgu.cloud
+
 FEAST-related Resources
 ------------------------
 More details on FEAST: [Will Be Available Soon]
