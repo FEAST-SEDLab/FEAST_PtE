@@ -9,6 +9,8 @@ def results_analysis(directory, discount_rate, gas_price):
     Process many realizations of a single scenario stored in a directory
 
     :param directory:       A directory of results files all generated under the same scenario
+    :param discount_rate:   Discount rate to apply in net present value (NPV) calculations
+    :param gas_price:       value of gas saved ($/g)
     :return:
         null_npv          array of null-NPV of each LDAR program in each realization [k$/well]
         emissions_timeseries  Array of emissions in each LDAR program in each realization at each time step
@@ -68,7 +70,7 @@ def npv_calculator(filepath, discount_rate, gas_price):
     null_repair_cost = np.sum(em_tc['repair_cost'][cond] / ((1 + discount_rate)**(em_tc['end_time'][cond] / 365)))
     # Calculate costs associated with each LDAR program
     time_array = np.linspace(0, time.end_time - time.delta_t, time.n_timesteps)
-    discount_array = (1 + discount_rate)**(time_array/ 365)
+    discount_array = (1 + discount_rate)**(time_array / 365)
     index = 0
     for pr_name, program in sample.ldar_program_dict.items():
         if pr_name != 'Null':
