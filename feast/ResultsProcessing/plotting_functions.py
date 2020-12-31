@@ -116,7 +116,7 @@ def abatement_cost_plotter(directory, gwp=34, discount_rate=0, gas_price=0):
         bx.set(facecolor=color_set[ind])
         ind += 1
     ax = plt.gca()
-    ax.set_xticklabels(techs[:2])
+    ax.set_xticklabels(techs[:len(techs) - 1])
     ax.set_ylabel('Mitigation cost\n(USD/metric ton CO$_2$ eq.)')
     ax.set_xlabel('LDAR program')
     plot_fixer()
