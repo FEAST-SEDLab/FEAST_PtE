@@ -110,7 +110,9 @@ def abatement_cost_plotter(directory, gwp=34, discount_rate=0, gas_price=0):
         cost_abate[ind, :] = -npv['Total'][ind, :]
     abatement_cost = cost_abate / em_abate / gwp
     medianprops = dict(color='k')
-    boxplot = plt.boxplot(np.transpose(abatement_cost), medianprops=medianprops, patch_artist=True)
+    boxprops = dict(linewidth=4)
+    boxplot = plt.boxplot(np.transpose(abatement_cost), medianprops=medianprops,
+                          boxprops=boxprops, patch_artist=True)
     ind = 1
     for bx in boxplot['boxes']:
         bx.set(facecolor=color_set[ind])

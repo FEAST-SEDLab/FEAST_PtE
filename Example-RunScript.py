@@ -14,7 +14,7 @@ import time
 
 # The random seed below can be un-commented to generate reproducible realizations.
 # np.random.seed(0)
-n_montecarlo = 1
+n_montecarlo = 5
 a = time.time()
 
 
@@ -271,12 +271,11 @@ def define_ldar_programs(gas_field, ogi, ogi_no_survey, plane_survey, cont_monit
     return ldar_dict
 
 
-comp_fug, misc_vent, plunger, noplunger = define_emitters()
-site_dict = define_sites(comp_fug, misc_vent, plunger, noplunger)
-timeobj = define_time_settings()
-
 for ind in range(n_montecarlo):
     print('Iteration number: {:0.0f}'.format(ind))
+    comp_fug, misc_vent, plunger, noplunger = define_emitters()
+    site_dict = define_sites(comp_fug, misc_vent, plunger, noplunger)
+    timeobj = define_time_settings()
     gas_field = define_gas_field(timeobj, site_dict)
     ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7 = define_detection_methods(timeobj)
     ldar_dict = define_ldar_programs(gas_field, ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7)
