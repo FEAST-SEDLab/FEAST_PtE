@@ -170,7 +170,7 @@ def bootstrap_leak_maker(n_leaks_in, comp_name, site, time, capacity=0, reparabl
         round_err.append(n_leaks_key % 1)
     # Add leaks omitted due to inability to add fractional leaks
     # The "round" function in the following line is intended to eliminate floating point errors.
-    chooser = np.random.uniform(0, sum(round_err), round(sum(round_err)))
+    chooser = np.random.uniform(0, sum(round_err), int(round(sum(round_err))))
     error_intervals = np.cumsum(round_err)
     for choose in chooser:
         ind = 0

@@ -85,6 +85,42 @@ def field_simulation(gas_field=None, dir_out='Results', time=None,
     if save_method=='all':
         results = simulation_classes.Results(time, gas_field, tech_dict, econ_set)
         save_results(dir_out, results)
+    elif save_method=='sensitivity':
+        em_dist = os.path.split(gas_field.comp_dict['Fugitive 1'].emission_data_path)[-1]
+        for site_name in gas_field.sites:
+            if 'basic' in site_name:
+                comp_dict = gas_field.sites[site_name]['parameters'].comp_dict
+                for comp_name in comp_dict:
+                    if "Fugitive" in comp_name:
+                        fug_comps = comp_dict[comp_name]['number']
+                        n = comp_name.split(' ')[-1]
+                        vent_comps = comp_dict['misc vent ' + n]['number']
+                        break
+                break
+        vent_frac = vent_comps / (fug_comps + vent_comps)
+        res_out = {
+            'em_dist': em_dist,
+            'nrr': gas_field.comp_dict['Fugitive 1'].null_repair_rate,
+            'lpr': gas_field.comp_dict['Fugitive 1'].emission_production_rate,
+            'vent_frac': vent_frac
+        }
+        for tech in tech_dict:
+            res_out[tech] = {
+                'emissions': np.sum(tech_dict[tech].emissions),
+                'vents': np.sum(tech_dict[tech].vents),
+                'find_cost': np.sum(tech_dict[tech].find_cost),
+                'repair_cost': np.sum(tech_dict[tech].repair_cost),
+            }
+            if 'secondary_comps_surveyed' in dir(tech_dict[tech]):
+                res_out[tech]['comps_surveyed'] = tech_dict[tech].secondary_comps_surveyed
+                res_out[tech]['sites_surveyed'] = tech_dict[tech].secondary_sites_surveyed
+
+        if not os.path.exists(dir_out):
+            os.makedirs(dir_out)
+        n_realization = len(os.listdir(dir_out))
+        file_out = os.path.join(dir_out, 'realization' + str(n_realization) + '.p')
+        with open(file_out, 'wb') as f:
+            pickle.dump(res_out, f)
     else:
         res_out = {}
         for tech in tech_dict:
