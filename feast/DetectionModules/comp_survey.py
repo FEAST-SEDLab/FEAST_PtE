@@ -2,7 +2,7 @@
 This module defines the component level survey based detection class, CompSurvey.
 """
 import numpy as np
-from .abstract_detection_method import DetectionMethod
+from feast.DetectionModules.abstract_detection_method import DetectionMethod
 
 
 class CompSurvey(DetectionMethod):
@@ -20,7 +20,7 @@ class CompSurvey(DetectionMethod):
     """
     def __init__(self, time, dispatch_object, survey_interval, survey_speed, labor, site_queue,
                  detection_probability_points, detection_probabilities, ophrs,
-                 comp_survey_index=0, site_survey_index=0,
+                 comp_survey_index=0, site_survey_index=0, dispatch_treshold=None, sensitivity=None,
                  op_env_wait_time=7, **kwargs):
         """
         :param time: a Time object
@@ -47,6 +47,7 @@ class CompSurvey(DetectionMethod):
         self.labor = labor  # $/hr
         # days (amount of time to wait for operating envelope conditions at a partly surveyed site)
         self.op_env_wait_time = op_env_wait_time
+        self.sensitivity = sensitivity # instrument measurement error
 
         # --------------- Detection Variables -----------------
         self.site_queue = site_queue  # queue of sites to survey
@@ -54,6 +55,7 @@ class CompSurvey(DetectionMethod):
         self.site_survey_index = site_survey_index
         self.detection_probability_points = np.array(detection_probability_points)
         self.detection_probabilities = np.array(detection_probabilities)
+        self.dispatch_threshold = dispatch_treshold # user defined threshold to decide whether to dispatch repair team
 
         # -------------- Internal variables -----------------
         self.mid_site_fail_time = np.infty
@@ -136,6 +138,33 @@ class CompSurvey(DetectionMethod):
                 remaining_comps = 0
         return emitter_inds
 
+    def detection_quantification(self, emissions, eIDs):
+        """
+        The detection_quantification method checks the detected emission and evaluates the magnitude of the emission
+        measured by the detection technology measurement sensitivity. If the measured emission is greater than the
+        user defined dispatch threshold, it is returned in an array.
+
+        :param emissions: DataFrame of emissions at current time-step
+        :param eIDs: array of detected emissions DataFrame indices
+        :return: array of emissions that meet dispatch criteria
+        """
+        
+        if (self.sensitivity == None) | (self.dispatch_threshold == None):
+            return eIDs, None
+        elif len(eIDs) == 0:
+            return eIDs, None
+        else:
+            thresh_eIDs = []
+            permiss_emiss = []
+            for i in eIDs:
+                detect_val = np.random.normal(emissions.loc[i]['flux'], self.sensitivity)
+                if detect_val < 0:
+                    detect_val == 0
+                if detect_val >= self.dispatch_threshold:
+                    thresh_eIDs.append(i)
+                    permiss_emiss.append(detect_val)
+        return thresh_eIDs, permiss_emiss
+
     def detect(self, time, gas_field, emissions):
         """
         The detect method checks that the current time is within operating hours, selects emitters to inspect,
@@ -145,11 +174,13 @@ class CompSurvey(DetectionMethod):
         :param gas_field: a GasField object
         :param emissions: a DataFrame of current emissions
         """
+
         # enforces the operating hours
         if self.check_time(time):
             emitter_inds = self.emitters_surveyed(time, gas_field, emissions)
-            if len(emitter_inds) > 0:
-                detect = self.detect_prob_curve(time, gas_field, np.array(emitter_inds), emissions)
+            thresh_emitter_inds, thresh_emission = self.detection_quantification(emissions, emitter_inds)
+            if len(thresh_emitter_inds) > 0:
+                detect = self.detect_prob_curve(time, gas_field, np.array(thresh_emitter_inds), emissions)
                 if len(detect) > 0:
                     self.detection_count.append_entry([time.current_time, len(detect)])
                 # Deploy follow up action

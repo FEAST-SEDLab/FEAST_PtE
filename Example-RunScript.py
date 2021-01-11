@@ -160,6 +160,8 @@ def define_detection_methods(timeobj):
     probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.02)) / (0.8 * np.sqrt(2))) for f
                                   in points])
     probs[0] = 0
+    sens = 0.01
+    dt = 0.05
     ogi = Dm.comp_survey.CompSurvey(
         timeobj,
         survey_interval=180,
@@ -171,6 +173,7 @@ def define_detection_methods(timeobj):
         detection_probabilities=probs,
         dispatch_object=rep0,
         site_queue=[],
+
     )
     ogi_no_survey = Dm.comp_survey.CompSurvey(
         timeobj,
@@ -183,6 +186,7 @@ def define_detection_methods(timeobj):
         detection_probabilities=probs,
         dispatch_object=copy.copy(rep0),
         site_queue=[],
+
     )
     points = np.logspace(-3, 1, 100)
     # 0.474
