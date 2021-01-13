@@ -138,33 +138,6 @@ class CompSurvey(DetectionMethod):
                 remaining_comps = 0
         return emitter_inds
 
-    def detection_quantification(self, emissions, eIDs):
-        """
-        The detection_quantification method checks the detected emission and evaluates the magnitude of the emission
-        measured by the detection technology measurement sensitivity. If the measured emission is greater than the
-        user defined dispatch threshold, it is returned in an array.
-
-        :param emissions: DataFrame of emissions at current time-step
-        :param eIDs: array of detected emissions DataFrame indices
-        :return: array of emissions that meet dispatch criteria
-        """
-        
-        if (self.sensitivity == None) | (self.dispatch_threshold == None):
-            return eIDs, None
-        elif len(eIDs) == 0:
-            return eIDs, None
-        else:
-            thresh_eIDs = []
-            permiss_emiss = []
-            for i in eIDs:
-                detect_val = np.random.normal(emissions.loc[i]['flux'], self.sensitivity)
-                if detect_val < 0:
-                    detect_val == 0
-                if detect_val >= self.dispatch_threshold:
-                    thresh_eIDs.append(i)
-                    permiss_emiss.append(detect_val)
-        return thresh_eIDs, permiss_emiss
-
     def detect(self, time, gas_field, emissions):
         """
         The detect method checks that the current time is within operating hours, selects emitters to inspect,
@@ -178,13 +151,13 @@ class CompSurvey(DetectionMethod):
         # enforces the operating hours
         if self.check_time(time):
             emitter_inds = self.emitters_surveyed(time, gas_field, emissions)
-            thresh_emitter_inds, thresh_emission = self.detection_quantification(emissions, emitter_inds)
-            if len(thresh_emitter_inds) > 0:
-                detect = self.detect_prob_curve(time, gas_field, np.array(thresh_emitter_inds), emissions)
-                if len(detect) > 0:
-                    self.detection_count.append_entry([time.current_time, len(detect)])
+            if len(emitter_inds) > 0:
+                detect = self.detect_prob_curve(time, gas_field, np.array(emitter_inds), emissions)
+                thresh_detect, thresh_emission =self.detection_quantification(emissions, emitter_inds)
+                if len(thresh_detect) > 0:
+                    self.detection_count.append_entry([time.current_time, len(thresh_detect)])
                 # Deploy follow up action
-                self.dispatch_object.action(None, detect)
+                self.dispatch_object.action(None, thresh_detect)
 
     def action(self, site_inds=None, emit_inds=None):
         """

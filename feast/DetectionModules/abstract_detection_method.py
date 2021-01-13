@@ -5,6 +5,7 @@ This module contains an abstract class that all DetectionMethods should inherit.
 import numpy as np
 from scipy import interpolate as interp
 from feast.EmissionSimModules import result_classes as rc
+import copy
 
 
 class DetectionMethod:
@@ -245,3 +246,69 @@ class DetectionMethod:
         for si in site_inds:
             if si not in self.site_queue:
                 self.site_queue.append(si)
+
+
+    def flux_val(self, flux):
+        dflux = np.random.normal(flux, self.sensitivity)
+        if dflux < 0:
+            return 0
+        else:
+            return dflux
+
+    def detection_quantification_comp(self, emissions, eIDs):
+        """
+        The detection_quantification method checks the detected emission and evaluates the magnitude of the emission
+        measured by the detection technology measurement sensitivity. If the measured emission is greater than the
+        user defined dispatch threshold, it is returned in an array.
+
+        :param emissions: DataFrame of emissions at current time-step
+        :param eIDs: array of detected emissions DataFrame indices
+        :return: array of emissions that meet dispatch criteria
+        """
+
+        if (self.sensitivity == None) | (self.dispatch_threshold == None):
+            return eIDs, None
+        elif len(eIDs) == 0:
+            return eIDs, None
+        else:
+            thresh_eIDs = []
+            permiss_emiss = []
+            for i in eIDs:
+                detect_val = np.random.normal(emissions.loc[i]['flux'], self.sensitivity)
+                if detect_val < 0:
+                    detect_val == 0
+                if detect_val >= self.dispatch_threshold:
+                    thresh_eIDs.append(i)
+                    permiss_emiss.append(detect_val)
+        return thresh_eIDs, permiss_emiss
+
+    def detection_quantification(self, emissions, eIDs):
+        """
+        The detection_quantification method checks the detected emission and evaluates the magnitude of the emission
+        measured by the detection technology measurement sensitivity. If the measured emission is greater than the
+        user defined dispatch threshold, it is returned in an array.
+
+        :param emissions: DataFrame of emissions at current time-step
+        :param eIDs: array of detected emissions DataFrame indices
+        :return: array of emissions that meet dispatch criteria
+        """
+
+        if (self.sensitivity == None) | (self.dispatch_threshold == None):
+            return eIDs, None
+        elif len(eIDs) == 0:
+            return eIDs, None
+        else:
+            if self.__module__ == 'feast.DetectionModules.site_survey':
+                em = emissions.loc[
+                    emissions['site_index'].isin(eIDs)].groupby('site_index')['flux'].sum().reset_index()
+                em['detect_val'] = None
+            elif self.__module__ == 'feast.DetectionModules.comp_survey':
+                em = emissions.loc[emissions.index.isin(eIDs)].copy()
+                em['detect_val'] = None
+            else:
+                raise Exception('this survey type not yet supported')
+
+            em['detect_val'] = em['flux'].apply(lambda x: self.flux_val(x))
+            thresh_eIDs = em.loc[em['detect_val'] >= self.dispatch_threshold,'site_index'].values
+            permiss_emiss = em.loc[em['detect_val'] >= self.dispatch_threshold, 'detect_val'].values
+            return thresh_eIDs, permiss_emiss

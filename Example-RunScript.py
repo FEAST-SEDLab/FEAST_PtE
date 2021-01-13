@@ -173,7 +173,8 @@ def define_detection_methods(timeobj):
         detection_probabilities=probs,
         dispatch_object=rep0,
         site_queue=[],
-
+        sensitivity=sens,
+        dispatch_treshold=dt
     )
     ogi_no_survey = Dm.comp_survey.CompSurvey(
         timeobj,
@@ -186,7 +187,8 @@ def define_detection_methods(timeobj):
         detection_probabilities=probs,
         dispatch_object=copy.copy(rep0),
         site_queue=[],
-
+        sensitivity=sens,
+        dispatch_treshold=dt
     )
     points = np.logspace(-3, 1, 100)
     # 0.474
@@ -203,7 +205,9 @@ def define_detection_methods(timeobj):
         detection_probabilities=probs,
         dispatch_object=ogi_no_survey,
         site_queue=[],
-        ophrs={'begin': 8, 'end': 17}
+        ophrs={'begin': 8, 'end': 17},
+        sensitivity=sens,
+        dispatch_threshold=dt
     )
     cont_monitor = Dm.site_monitor.SiteMonitor(
         timeobj,
