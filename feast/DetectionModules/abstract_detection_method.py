@@ -14,7 +14,8 @@ class DetectionMethod:
     def __init__(self, time, detection_variables=None, op_envelope=None, ophrs=None):
         """
         :param time: a Time object
-        :param detection_variables: list of variable names to be used in the detection calculations (eg. ['wind speed'])
+        :param detection_variables: dict of variables used in probability of detection calculations with the name of
+        the variable followed by interpolation method (eg. {'flux': 'mean', 'wind speed': max})
         :param op_envelope: operating envelope specifications for the detection method
         :param ophrs: a dict specifying operating hours for the DetectionMethod
         """
@@ -219,7 +220,7 @@ class DetectionMethod:
     @staticmethod
     def empirical_interpolator(test_conditions, test_results, sim_conditions):
         """
-        Calculates the probabiity of detection by interpolating the value of test_results between test_conditions.
+        Calculates the probability of detection by interpolating the value of test_results between test_conditions.
 
         :param test_conditions: conditions to be interpolated from
         :param test_results: results associated with each condition listed in test_conditions
