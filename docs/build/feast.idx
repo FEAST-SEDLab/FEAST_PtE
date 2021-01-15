@@ -75,15 +75,14 @@
 \indexentry{feast.input\_data\_classes (module)@\spxentry{feast.input\_data\_classes}\spxextra{module}|hyperpage}{19}
 \indexentry{DataFile (class in feast.input\_data\_classes)@\spxentry{DataFile}\spxextra{class in feast.input\_data\_classes}|hyperpage}{19}
 \indexentry{LeakData (class in feast.input\_data\_classes)@\spxentry{LeakData}\spxextra{class in feast.input\_data\_classes}|hyperpage}{19}
-\indexentry{define\_data() (LeakData method)@\spxentry{define\_data()}\spxextra{LeakData method}|hyperpage}{19}
+\indexentry{define\_data() (LeakData method)@\spxentry{define\_data()}\spxextra{LeakData method}|hyperpage}{20}
 \indexentry{ProductionData (class in feast.input\_data\_classes)@\spxentry{ProductionData}\spxextra{class in feast.input\_data\_classes}|hyperpage}{20}
 \indexentry{RepairData (class in feast.input\_data\_classes)@\spxentry{RepairData}\spxextra{class in feast.input\_data\_classes}|hyperpage}{20}
 \indexentry{define\_data() (RepairData method)@\spxentry{define\_data()}\spxextra{RepairData method}|hyperpage}{20}
 \indexentry{feast.ResultsProcessing.plotting\_functions (module)@\spxentry{feast.ResultsProcessing.plotting\_functions}\spxextra{module}|hyperpage}{20}
 \indexentry{abatement\_cost\_plotter() (in module feast.ResultsProcessing.plotting\_functions)@\spxentry{abatement\_cost\_plotter()}\spxextra{in module feast.ResultsProcessing.plotting\_functions}|hyperpage}{20}
 \indexentry{plot\_fixer() (in module feast.ResultsProcessing.plotting\_functions)@\spxentry{plot\_fixer()}\spxextra{in module feast.ResultsProcessing.plotting\_functions}|hyperpage}{21}
-\indexentry{summary\_plotter() (in module feast.ResultsProcessing.plotting\_functions)@\spxentry{summary\_plotter()}\spxextra{in module feast.ResultsProcessing.plotting\_functions}|hyperpage}{21}
 \indexentry{time\_series() (in module feast.ResultsProcessing.plotting\_functions)@\spxentry{time\_series()}\spxextra{in module feast.ResultsProcessing.plotting\_functions}|hyperpage}{21}
 \indexentry{feast.ResultsProcessing.results\_analysis\_functions (module)@\spxentry{feast.ResultsProcessing.results\_analysis\_functions}\spxextra{module}|hyperpage}{21}
 \indexentry{npv\_calculator() (in module feast.ResultsProcessing.results\_analysis\_functions)@\spxentry{npv\_calculator()}\spxextra{in module feast.ResultsProcessing.results\_analysis\_functions}|hyperpage}{21}
-\indexentry{results\_analysis() (in module feast.ResultsProcessing.results\_analysis\_functions)@\spxentry{results\_analysis()}\spxextra{in module feast.ResultsProcessing.results\_analysis\_functions}|hyperpage}{22}
+\indexentry{results\_analysis() (in module feast.ResultsProcessing.results\_analysis\_functions)@\spxentry{results\_analysis()}\spxextra{in module feast.ResultsProcessing.results\_analysis\_functions}|hyperpage}{21}

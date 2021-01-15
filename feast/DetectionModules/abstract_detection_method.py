@@ -15,7 +15,7 @@ class DetectionMethod:
         """
         :param time: a Time object
         :param detection_variables: dict of variables used in probability of detection calculations with the name of
-        the variable followed by interpolation method (eg. {'flux': 'mean', 'wind speed': max})
+            the variable followed by interpolation method (eg. {'flux': 'mean', 'wind speed': max})
         :param op_envelope: operating envelope specifications for the detection method
         :param ophrs: a dict specifying operating hours for the DetectionMethod
         """

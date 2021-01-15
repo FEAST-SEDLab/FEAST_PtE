@@ -143,6 +143,12 @@ Time
 .. autoclass:: feast.EmissionSimModules.simulation_classes.Time
     :members:
 
+GeneralClassesFunctions
+----------------------------------------
+InputData
+----------------------------------------
+RawDataProcessingScripts
+****************************************
 input_data_classes
 ----------------------------------------
 .. automodule:: feast.input_data_classes
@@ -180,10 +186,6 @@ abatement_cost_plotter
 plot_fixer
 ++++++++++++++++++++++++++++++++++++++++
 .. autofunction:: feast.ResultsProcessing.plotting_functions.plot_fixer
-
-summary_plotter
-++++++++++++++++++++++++++++++++++++++++
-.. autofunction:: feast.ResultsProcessing.plotting_functions.summary_plotter
 
 time_series
 ++++++++++++++++++++++++++++++++++++++++
