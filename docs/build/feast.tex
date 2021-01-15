@@ -73,7 +73,7 @@
 
 
 \title{FEAST}
-\date{Dec 11, 2020}
+\date{Jan 14, 2021}
 \release{3.1}
 \author{Chandler Kemp and Clay Bell}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -115,7 +115,8 @@ DetectionMethod is an abstract super class that defines the form required for al
 \sphinxstyleliteralstrong{\sphinxupquote{time}} \textendash{} a Time object
 
 \item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{detection\_variables}} \textendash{} list of variable names to be used in the detection calculations (eg. {[}‘wind speed’{]})
+\sphinxstyleliteralstrong{\sphinxupquote{detection\_variables}} \textendash{} dict of variables used in probability of detection calculations with the name of
+the variable followed by interpolation method (eg. \{‘flux’: ‘mean’, ‘wind speed’: max\})
 
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{op\_envelope}} \textendash{} operating envelope specifications for the detection method
@@ -268,7 +269,7 @@ None
 
 \begin{fulllineitems}
 \phantomsection\label{\detokenize{index:feast.DetectionModules.abstract_detection_method.DetectionMethod.empirical_interpolator}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{static }}\sphinxbfcode{\sphinxupquote{empirical\_interpolator}}}{\emph{test\_conditions}, \emph{test\_results}, \emph{sim\_conditions}}{}
-Calculates the probabiity of detection by interpolating the value of test\_results between test\_conditions.
+Calculates the probability of detection by interpolating the value of test\_results between test\_conditions.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
@@ -1776,6 +1777,15 @@ Instances of the time class store all time related information during a simulati
 
 
 
+\section{GeneralClassesFunctions}
+\label{\detokenize{index:generalclassesfunctions}}
+
+\section{InputData}
+\label{\detokenize{index:inputdata}}
+
+\subsection{RawDataProcessingScripts}
+\label{\detokenize{index:rawdataprocessingscripts}}
+
 \section{input\_data\_classes}
 \label{\detokenize{index:module-feast.input_data_classes}}\label{\detokenize{index:input-data-classes}}\index{feast.input\_data\_classes (module)@\spxentry{feast.input\_data\_classes}\spxextra{module}}
 This module defines all classes used to store input data.
@@ -1932,7 +1942,7 @@ RepairData is designed to store the costs of repairing leaks from a particular r
 \label{\detokenize{index:abatement-cost-plotter}}\index{abatement\_cost\_plotter() (in module feast.ResultsProcessing.plotting\_functions)@\spxentry{abatement\_cost\_plotter()}\spxextra{in module feast.ResultsProcessing.plotting\_functions}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.ResultsProcessing.plotting_functions.abatement_cost_plotter}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{abatement\_cost\_plotter}}}{\emph{directory}, \emph{gwp=34}}{}
+\phantomsection\label{\detokenize{index:feast.ResultsProcessing.plotting_functions.abatement_cost_plotter}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{abatement\_cost\_plotter}}}{\emph{directory}, \emph{gwp=34}, \emph{discount\_rate=0}, \emph{gas\_price=0}}{}
 Generates a box plot of the cost of abatement
 gwp defaults to 34, which is the value provided in the IPCC 5th assessment report including climate\sphinxhyphen{}carbon feedbacks
 (see Table 8.7, page 714 in Chapter 8 of Climate Change 2013: The Physical Science Basis.)
@@ -1943,6 +1953,12 @@ gwp defaults to 34, which is the value provided in the IPCC 5th assessment repor
 
 \item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{gwp}} \textendash{} global warming potential of methane
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{discount\_rate}} \textendash{} discount rate to use in NPV calculations
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{gas\_price}} \textendash{} value of saved gas (\$/g)
 
 \end{itemize}
 
@@ -1960,32 +1976,6 @@ gwp defaults to 34, which is the value provided in the IPCC 5th assessment repor
 
 \begin{fulllineitems}
 \phantomsection\label{\detokenize{index:feast.ResultsProcessing.plotting_functions.plot_fixer}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{plot\_fixer}}}{\emph{fig=None}, \emph{ax=None}, \emph{fsize=18}, \emph{color=(0}, \emph{0}, \emph{0)}, \emph{tight\_layout=True}, \emph{line\_width=4}, \emph{fontweight=\textquotesingle{}bold\textquotesingle{}}}{}
-\end{fulllineitems}
-
-
-
-\subsubsection{summary\_plotter}
-\label{\detokenize{index:summary-plotter}}\index{summary\_plotter() (in module feast.ResultsProcessing.plotting\_functions)@\spxentry{summary\_plotter()}\spxextra{in module feast.ResultsProcessing.plotting\_functions}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{index:feast.ResultsProcessing.plotting_functions.summary_plotter}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{summary\_plotter}}}{\emph{directory}, \emph{n\_wells=None}, \emph{ylabel=None}}{}
-The NPV for each realization stored in ‘directory is calculated and displayed in a stacked bar chart. Each component
-of the NPV is displayed separately in the chart.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{directory}} \textendash{} path to a directory containing results files
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{n\_wells}} \textendash{} if set to a number, then the NPV will be reported on a per well basis
-
-\item {} 
-\sphinxstyleliteralstrong{\sphinxupquote{ylabel}} \textendash{} yaxis label
-
-\end{itemize}
-
-\end{description}\end{quote}
-
 \end{fulllineitems}
 
 
@@ -2050,8 +2040,17 @@ null\_npv          NPV of each LDAR program compared to a scenario with only the
 \phantomsection\label{\detokenize{index:feast.ResultsProcessing.results_analysis_functions.results_analysis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{results\_analysis}}}{\emph{directory}, \emph{discount\_rate}, \emph{gas\_price}}{}
 Process many realizations of a single scenario stored in a directory
 \begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
 \sphinxstyleliteralstrong{\sphinxupquote{directory}} \textendash{} A directory of results files all generated under the same scenario
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{discount\_rate}} \textendash{} Discount rate to apply in net present value (NPV) calculations
+
+\item {} 
+\sphinxstyleliteralstrong{\sphinxupquote{gas\_price}} \textendash{} value of gas saved (\$/g)
+
+\end{itemize}
 
 \item[{Returns}] \leavevmode
 null\_npv          array of null\sphinxhyphen{}NPV of each LDAR program in each realization {[}k\$/well{]}

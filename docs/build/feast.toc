@@ -31,18 +31,20 @@
 \contentsline {subsection}{\numberline {1.2.4}simulation\_classes}{18}{subsection.1.2.4}%
 \contentsline {subsubsection}{\numberline {1.2.4.1}Scenario}{18}{subsubsection.1.2.4.1}%
 \contentsline {subsubsection}{\numberline {1.2.4.2}Time}{19}{subsubsection.1.2.4.2}%
-\contentsline {section}{\numberline {1.3}input\_data\_classes}{19}{section.1.3}%
-\contentsline {subsection}{\numberline {1.3.1}DataFile}{19}{subsection.1.3.1}%
-\contentsline {subsection}{\numberline {1.3.2}LeakData}{19}{subsection.1.3.2}%
-\contentsline {subsection}{\numberline {1.3.3}ProductionData}{20}{subsection.1.3.3}%
-\contentsline {subsection}{\numberline {1.3.4}RepairData}{20}{subsection.1.3.4}%
-\contentsline {section}{\numberline {1.4}ResultsProcessing}{20}{section.1.4}%
-\contentsline {subsection}{\numberline {1.4.1}plotting\_functions}{20}{subsection.1.4.1}%
-\contentsline {subsubsection}{\numberline {1.4.1.1}abatement\_cost\_plotter}{20}{subsubsection.1.4.1.1}%
-\contentsline {subsubsection}{\numberline {1.4.1.2}plot\_fixer}{21}{subsubsection.1.4.1.2}%
-\contentsline {subsubsection}{\numberline {1.4.1.3}summary\_plotter}{21}{subsubsection.1.4.1.3}%
-\contentsline {subsubsection}{\numberline {1.4.1.4}time\_series}{21}{subsubsection.1.4.1.4}%
-\contentsline {subsection}{\numberline {1.4.2}results\_analysis\_functions}{21}{subsection.1.4.2}%
-\contentsline {subsubsection}{\numberline {1.4.2.1}npv\_calculator}{21}{subsubsection.1.4.2.1}%
-\contentsline {subsubsection}{\numberline {1.4.2.2}results\_analysis}{22}{subsubsection.1.4.2.2}%
-\contentsline {chapter}{Python Module Index}{23}{section*.79}%
+\contentsline {section}{\numberline {1.3}GeneralClassesFunctions}{19}{section.1.3}%
+\contentsline {section}{\numberline {1.4}InputData}{19}{section.1.4}%
+\contentsline {subsection}{\numberline {1.4.1}RawDataProcessingScripts}{19}{subsection.1.4.1}%
+\contentsline {section}{\numberline {1.5}input\_data\_classes}{19}{section.1.5}%
+\contentsline {subsection}{\numberline {1.5.1}DataFile}{19}{subsection.1.5.1}%
+\contentsline {subsection}{\numberline {1.5.2}LeakData}{19}{subsection.1.5.2}%
+\contentsline {subsection}{\numberline {1.5.3}ProductionData}{20}{subsection.1.5.3}%
+\contentsline {subsection}{\numberline {1.5.4}RepairData}{20}{subsection.1.5.4}%
+\contentsline {section}{\numberline {1.6}ResultsProcessing}{20}{section.1.6}%
+\contentsline {subsection}{\numberline {1.6.1}plotting\_functions}{20}{subsection.1.6.1}%
+\contentsline {subsubsection}{\numberline {1.6.1.1}abatement\_cost\_plotter}{20}{subsubsection.1.6.1.1}%
+\contentsline {subsubsection}{\numberline {1.6.1.2}plot\_fixer}{21}{subsubsection.1.6.1.2}%
+\contentsline {subsubsection}{\numberline {1.6.1.3}time\_series}{21}{subsubsection.1.6.1.3}%
+\contentsline {subsection}{\numberline {1.6.2}results\_analysis\_functions}{21}{subsection.1.6.2}%
+\contentsline {subsubsection}{\numberline {1.6.2.1}npv\_calculator}{21}{subsubsection.1.6.2.1}%
+\contentsline {subsubsection}{\numberline {1.6.2.2}results\_analysis}{21}{subsubsection.1.6.2.2}%
+\contentsline {chapter}{Python Module Index}{23}{section*.78}%
