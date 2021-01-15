@@ -21,11 +21,15 @@ http://feast.harrisburgu.cloud
 
 FEAST-related Resources
 ------------------------
-More details on FEAST: [Will Be Available Soon]
 
-Webinar link: https://www.youtube.com/watch?v=RWi8CmmGOPA
+FEAST 3.0 Webinar link: https://www.youtube.com/watch?v=RWi8CmmGOPA
 
-FEAST publications:  [Will be Available Soon] 
+A sample of publications using FEAST:
+Ravikumar, A., J. Wang, M. McGuire, C. Bell, D. Zimmerle, A. Brandt. "Good versus Good Enough?" Empirical Tests of Methane Leak Detection Sensitivity of a Commercial Infrared Camera. Environ. Sci. Technol. 2018.
+
+Ravikumar, A., A. Brandt. Designing better methane mitigation policies: the challenge of distributed small sources in the natural gas sector. Environmental Researcher Letters. 2017. 10.1088/1748-9326/aa6791
+
+Kemp, C., A Ravikumar, A. Brandt. Comparing Natural Gas Leakage Detection Technologies Using an Open-Source Virtual Gas Field Simulator. Environ. Sci. Technol. 2016. 10.1021/acs.est.5b06068
 
 Contact Information
 -------------------
