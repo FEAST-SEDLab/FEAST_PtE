@@ -26,7 +26,7 @@ FEAST 3.0 Webinar link: https://www.youtube.com/watch?v=RWi8CmmGOPA
 
 A sample of publications using FEAST:
 
-Ravikumar, A., J. Wang, M. McGuire, C. Bell, D. Zimmerle, A. Brandt. "Good versus Good Enough?" Empirical Tests of Methane Leak Detection Sensitivity of a Commercial Infrared Camera. Environ. Sci. Technol. 2018.
+Ravikumar, A., J. Wang, M. McGuire, C. Bell, D. Zimmerle, A. Brandt. "Good versus Good Enough?" Empirical Tests of Methane Leak Detection Sensitivity of a Commercial Infrared Camera. Environ. Sci. Technol. 2018. 10.1021/acs.est.7b04945.
 
 Ravikumar, A., A. Brandt. Designing better methane mitigation policies: the challenge of distributed small sources in the natural gas sector. Environmental Researcher Letters. 2017. 10.1088/1748-9326/aa6791
 
