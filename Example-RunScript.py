@@ -174,7 +174,7 @@ def define_detection_methods(timeobj):
         dispatch_object=rep0,
         site_queue=[],
         sensitivity=sens,
-        dispatch_treshold=dt
+        dispatch_threshold=dt
     )
     ogi_no_survey = Dm.comp_survey.CompSurvey(
         timeobj,
@@ -188,7 +188,7 @@ def define_detection_methods(timeobj):
         dispatch_object=copy.copy(rep0),
         site_queue=[],
         sensitivity=sens,
-        dispatch_treshold=dt
+        dispatch_threshold=dt
     )
     points = np.logspace(-3, 1, 100)
     # 0.474
@@ -217,7 +217,9 @@ def define_detection_methods(timeobj):
         detection_variables={'flux': 'mean', 'wind speed': 'mean'},
         site_queue=list(range(gas_field.n_sites)),
         dispatch_object=copy.deepcopy(rep0),
-        ophrs={'begin': 8, 'end': 17}
+        ophrs={'begin': 8, 'end': 17},
+        sensitivity=sens,
+        dispatch_threshold=dt
     )
     return ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7
 

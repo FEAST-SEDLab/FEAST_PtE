@@ -20,7 +20,7 @@ class CompSurvey(DetectionMethod):
     """
     def __init__(self, time, dispatch_object, survey_interval, survey_speed, labor, site_queue,
                  detection_probability_points, detection_probabilities, ophrs,
-                 comp_survey_index=0, site_survey_index=0, dispatch_treshold=None, sensitivity=None,
+                 comp_survey_index=0, site_survey_index=0,
                  op_env_wait_time=7, **kwargs):
         """
         :param time: a Time object
@@ -47,7 +47,6 @@ class CompSurvey(DetectionMethod):
         self.labor = labor  # $/hr
         # days (amount of time to wait for operating envelope conditions at a partly surveyed site)
         self.op_env_wait_time = op_env_wait_time
-        self.sensitivity = sensitivity # instrument measurement error
 
         # --------------- Detection Variables -----------------
         self.site_queue = site_queue  # queue of sites to survey
@@ -55,7 +54,6 @@ class CompSurvey(DetectionMethod):
         self.site_survey_index = site_survey_index
         self.detection_probability_points = np.array(detection_probability_points)
         self.detection_probabilities = np.array(detection_probabilities)
-        self.dispatch_threshold = dispatch_treshold # user defined threshold to decide whether to dispatch repair team
 
         # -------------- Internal variables -----------------
         self.mid_site_fail_time = np.infty

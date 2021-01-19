@@ -18,8 +18,7 @@ class SiteSurvey(DetectionMethod):
     3. The ability to dispatch a follow up action
     """
     def __init__(self, time, dispatch_object, sites_per_day, site_cost, detection_probability_points,
-                 detection_probabilities, op_envelope=None, ophrs=None, site_queue=None, sensitivity=None,
-                 dispatch_threshold=None,
+                 detection_probabilities, op_envelope=None, ophrs=None, site_queue=None,
                  survey_interval=None, **kwargs):
         """
         :param time: a Time object
@@ -51,13 +50,11 @@ class SiteSurvey(DetectionMethod):
         self.survey_interval = survey_interval
         self.sites_per_day = sites_per_day
         self.site_cost = site_cost  # $/site
-        self.sensitivity = sensitivity  # instrument measurement error
 
         # --------------- Detection Variables -----------------
         self.site_queue = site_queue or []  # queue of sites to survey
         self.detection_probability_points = np.array(detection_probability_points)
         self.detection_probabilities = np.array(detection_probabilities)
-        self.dispatch_threshold = dispatch_threshold  # user defined threshold to decide whether to dispatch repair team
 
         # -------------- Set calculated parameters --------------
         work_time = (self.ophrs['end'] - self.ophrs['begin']) / 24
