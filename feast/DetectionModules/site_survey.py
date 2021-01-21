@@ -130,7 +130,7 @@ class SiteSurvey(DetectionMethod):
             site_inds = self.sites_surveyed(gas_field, time)
             if len(site_inds) > 0:
                 detect = self.detect_prob_curve(time, gas_field, site_inds, emissions)
-                thresh_detect, thresh_emission = self.detection_quantification(emissions, site_inds)
+                thresh_detect, thresh_emission = self.detection_quantification(emissions, detect, time)
                 if len(thresh_detect) > 0:
                     self.detection_count.append_entry([time.current_time, len(thresh_detect)])
                 # Deploy follow up action

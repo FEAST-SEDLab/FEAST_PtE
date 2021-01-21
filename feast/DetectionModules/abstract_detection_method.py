@@ -264,7 +264,7 @@ class DetectionMethod:
         else:
             return dflux
 
-    def detection_quantification(self, emissions, eIDs):
+    def detection_quantification(self, emissions, eIDs, time):
         """
         The detection_quantification method checks the detected emission and evaluates the magnitude of the emission
         measured by the detection technology measurement sensitivity. If the measured emission is greater than the
@@ -277,24 +277,28 @@ class DetectionMethod:
 
         if (self.sensitivity == None) | (self.dispatch_threshold == None):
             return eIDs, None
-        elif len(eIDs) == 0:
+        if len(eIDs) == 0:
             return eIDs, None
+
+        if ((self.__module__ == 'feast.DetectionModules.site_survey') |
+                (self.__module__ == 'feast.DetectionModules.site_monitor')):
+            em = emissions.loc[(emissions['start_time'] <= time.current_time) &
+                                      (emissions['end_time'] > time.current_time)]
+            em = em.loc[
+                em['site_index'].isin(eIDs)].groupby('site_index')['flux'].sum().reset_index()
+            em['detect_val'] = None
+            em['detect_val'] = em['flux'].apply(lambda x: self.flux_val(x))
+            thresh_eIDs = em.loc[em['detect_val'] >= self.dispatch_threshold, 'site_index'].values
+            permiss_emiss = em.loc[em['detect_val'] >= self.dispatch_threshold, 'detect_val'].values
+            return thresh_eIDs, permiss_emiss
+        elif self.__module__ == 'feast.DetectionModules.comp_survey':
+            em = emissions.loc[emissions.index.isin(eIDs)].copy()
+            em['detect_val'] = None
+            em['detect_val'] = em['flux'].apply(lambda x: self.flux_val(x))
+            thresh_eIDs = em.loc[((em['detect_val'] >= self.dispatch_threshold) &
+                                  ((em['start_time'] >= time.current_time) &
+                                   (em['end_time'] <= time.current_time)))].index
+            permiss_emiss = em.loc[em['detect_val'] >= self.dispatch_threshold, 'detect_val'].values
+            return thresh_eIDs, permiss_emiss
         else:
-            if ((self.__module__ == 'feast.DetectionModules.site_survey') |
-                    (self.__module__ == 'feast.DetectionModules.site_monitor')):
-                em = emissions.loc[
-                    emissions['site_index'].isin(eIDs)].groupby('site_index')['flux'].sum().reset_index()
-                em['detect_val'] = None
-                em['detect_val'] = em['flux'].apply(lambda x: self.flux_val(x))
-                thresh_eIDs = em.loc[em['detect_val'] >= self.dispatch_threshold, 'site_index'].values
-                permiss_emiss = em.loc[em['detect_val'] >= self.dispatch_threshold, 'detect_val'].values
-                return thresh_eIDs, permiss_emiss
-            elif self.__module__ == 'feast.DetectionModules.comp_survey':
-                em = emissions.loc[emissions.index.isin(eIDs)].copy()
-                em['detect_val'] = None
-                em['detect_val'] = em['flux'].apply(lambda x: self.flux_val(x))
-                thresh_eIDs = em.loc[em['detect_val'] >= self.dispatch_threshold].index
-                permiss_emiss = em.loc[em['detect_val'] >= self.dispatch_threshold, 'detect_val'].values
-                return thresh_eIDs, permiss_emiss
-            else:
-                raise Exception('this survey type not yet supported')
+            raise Exception('this survey type not yet supported')

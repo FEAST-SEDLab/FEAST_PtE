@@ -160,8 +160,8 @@ def define_detection_methods(timeobj):
     probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(0.02)) / (0.8 * np.sqrt(2))) for f
                                   in points])
     probs[0] = 0
-    sens = 0.01
-    dt = 0.05
+    sens = 0.1
+    dt = 100 * (1000/86400)
     ogi = Dm.comp_survey.CompSurvey(
         timeobj,
         survey_interval=180,
@@ -185,17 +185,17 @@ def define_detection_methods(timeobj):
         detection_variables={'flux': 'mean'},
         detection_probability_points=points,
         detection_probabilities=probs,
-        dispatch_object=copy.copy(rep0),
+        dispatch_object=copy.deepcopy(rep0),
         site_queue=[],
         sensitivity=sens,
-        dispatch_threshold=dt
+        dispatch_threshold=None
     )
     points = np.logspace(-3, 1, 100)
     # 0.474
     probs = 0.5 + 0.5 * np.array([np.math.erf((np.log(f) - np.log(1.5)) / (1.36 * np.sqrt(2))) for f
                                   in points])
     probs[0] = 0
-    plane_survey = Dm.site_survey.SiteSurvey(
+    plane_survey_dispatch = Dm.site_survey.SiteSurvey(
         timeobj,
         survey_interval=180,
         sites_per_day=200,
@@ -203,11 +203,25 @@ def define_detection_methods(timeobj):
         detection_variables={'flux': 'mean'},
         detection_probability_points=points,
         detection_probabilities=probs,
-        dispatch_object=ogi_no_survey,
+        dispatch_object=copy.deepcopy(ogi_no_survey),
         site_queue=[],
         ophrs={'begin': 8, 'end': 17},
         sensitivity=sens,
         dispatch_threshold=dt
+    )
+    plane_survey_nodispatch = Dm.site_survey.SiteSurvey(
+        timeobj,
+        survey_interval=180,
+        sites_per_day=200,
+        site_cost=100,
+        detection_variables={'flux': 'mean'},
+        detection_probability_points=points,
+        detection_probabilities=probs,
+        dispatch_object=copy.deepcopy(ogi_no_survey),
+        site_queue=[],
+        ophrs={'begin': 8, 'end': 17},
+        sensitivity=sens,
+        dispatch_threshold=None
     )
     cont_monitor = Dm.site_monitor.SiteMonitor(
         timeobj,
@@ -221,10 +235,10 @@ def define_detection_methods(timeobj):
         sensitivity=sens,
         dispatch_threshold=dt
     )
-    return ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7
+    return ogi, ogi_no_survey, plane_survey_dispatch, plane_survey_nodispatch, cont_monitor, rep0, rep7
 
 
-def define_ldar_programs(gas_field, ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7):
+def define_ldar_programs(gas_field, ogi, ogi_no_survey, plane_survey_dispatch, plane_survey_nodispatch, cont_monitor, rep0, rep7):
     """
     Define LDAR programs using the detection and repair methods defined previously
     :param gas_field: Emission simulation settings
@@ -239,9 +253,7 @@ def define_ldar_programs(gas_field, ogi, ogi_no_survey, plane_survey, cont_monit
     # Add dispatch methods and site specific conditions to detection methods
     # Good practice to use copies so that LDAR programs do not interfere with eachother in the simulation
     ogi.dispatch_object = copy.deepcopy(rep0)
-    ogi_no_survey.dispatch_object = copy.deepcopy(rep0)
-    plane_ogi = copy.deepcopy(ogi_no_survey)
-    plane_survey.dispatch_object = plane_ogi
+    #ogi_no_survey.dispatch_object = copy.deepcopy(rep0)
     cm_ogi = copy.deepcopy(ogi_no_survey)
     cont_monitor.dispatch_object = cm_ogi
     cont_monitor.site_queue = np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)
@@ -256,11 +268,20 @@ def define_ldar_programs(gas_field, ogi, ogi_no_survey, plane_survey, cont_monit
     )
     # tiered survey
     tech_dict = {
-        'plane': plane_survey,
-        'ogi': plane_ogi
+        'plane__wdispatch': plane_survey_dispatch,
+        'ogi': plane_survey_dispatch.dispatch_object
     }
+
+    tech_dict_no = {
+        'plane__nodispatch': plane_survey_nodispatch,
+        'ogi': plane_survey_nodispatch.dispatch_object
+    }
+
     plane_ogi_survey = Dm.ldar_program.LDARProgram(
         copy.deepcopy(gas_field), tech_dict,
+    )
+    plane_ogi_survey_no = Dm.ldar_program.LDARProgram(
+        copy.deepcopy(gas_field), tech_dict_no,
     )
 
     # continuous monitor
@@ -274,9 +295,10 @@ def define_ldar_programs(gas_field, ogi, ogi_no_survey, plane_survey, cont_monit
 
     # All programs
     ldar_dict = {
-        'cm': cm_ogi,
-        'ogi': ogi_survey,
-        'plane': plane_ogi_survey
+        #'cm': cm_ogi,
+        #'ogi': ogi_survey,
+        'plane_no': plane_ogi_survey_no,
+        'plane_yes': plane_ogi_survey
     }
     return ldar_dict
 
@@ -287,10 +309,11 @@ for ind in range(n_montecarlo):
     site_dict = define_sites(comp_fug, misc_vent, plunger, noplunger)
     timeobj = define_time_settings()
     gas_field = define_gas_field(timeobj, site_dict)
-    ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7 = define_detection_methods(timeobj)
-    ldar_dict = define_ldar_programs(gas_field, ogi, ogi_no_survey, plane_survey, cont_monitor, rep0, rep7)
+    ogi, ogi_no_survey, plane_survey_dispatch, plane_survey_nodispatch, cont_monitor, rep0, rep7 = define_detection_methods(timeobj)
+    ldar_dict = define_ldar_programs(gas_field, ogi, ogi_no_survey, plane_survey_dispatch, plane_survey_nodispatch, cont_monitor, rep0, rep7)
     scenario = sc.Scenario(time=timeobj, gas_field=gas_field, ldar_program_dict=ldar_dict)
     scenario.run(dir_out='ExampleRunScriptResults', display_status=True, save_method='pickle')
+
 
 b = time.time()
 print("run time {:0.2f} seconds".format(b - a))
