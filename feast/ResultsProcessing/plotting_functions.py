@@ -75,7 +75,7 @@ def time_series(results_file, line_width=6):
         counter += 1
         tech_dict[tech].line = ax.plot(np.array(range(0, results.time.n_timesteps)) * results.time.delta_t / 365,
                                        np.array(tech_dict[tech].emissions_timeseries)/tech_dict[
-                                           tech].emissions_timeseries[0], label=lab,
+                                           'Null'].emissions_timeseries[0], label=lab,
                                        color=color_set[counter], linewidth=line_width)
         avg_emissions = np.mean(np.array(tech_dict[tech].emissions_timeseries)/tech_dict[tech].emissions_timeseries[0])
         ax.plot([0, results.time.end_time / 365],
