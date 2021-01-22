@@ -389,7 +389,8 @@ for ind in range(n_montecarlo):
     ogi, ogi_no_survey, plane_survey_dispatch_10, plane_survey_dispatch_50, plane_survey_dispatch_200, \
     plane_survey_nodispatch, cont_monitor, rep0, rep7 = define_detection_methods(timeobj)
 
-    ldar_dict = define_ldar_programs(ogi, ogi_no_survey, plane_survey_dispatch_10, plane_survey_dispatch_50, plane_survey_dispatch_200,
+    ldar_dict = define_ldar_programs(gas_field, ogi, ogi_no_survey, plane_survey_dispatch_10, plane_survey_dispatch_50,
+                                     plane_survey_dispatch_200,
     plane_survey_nodispatch, cont_monitor, rep0, rep7)
 
 
