@@ -275,7 +275,7 @@ class DetectionMethod:
         :return: array of emissions that meet dispatch criteria
         """
 
-        if (self.sensitivity == None) | (self.dispatch_threshold == None):
+        if (self.sensitivity is None) | (self.dispatch_threshold is None):
             return eIDs, None
         if len(eIDs) == 0:
             return eIDs, None
