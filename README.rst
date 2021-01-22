@@ -15,9 +15,11 @@ released in 2016 (C.Kemp et al. Environ. Sci. Tech. 50 4546 http://dx.doi.org/10
 
 Jupyter notebook tutorial
 -------------------------
-Clicking the link below will direct you to a jupyter notebook server that demonstrates a few basic simulations in FEAST. The server will not support advanced simulations and your results will not be maintained indefinitely, so it should be used as an educational tool rather than an analysis platform. Enter any username and password to access the server. By recording your username and password you will be able to reaccess your work after the server times out.
+FEAST includes a jupyter notebook that can serve as a tutorial. We host a live jupyter notebook that you can access to run FEAST examples without any software installed on your machine. If you want to try out the model quickly and do not need to save your work, follow the "quick access" link below. You may use any username to log in to the notebook. In order to save your work, you will need to have a github account and use it to log in to the jupyter notebook via the "github supported" link below.
 
-http://feast.harrisburgu.cloud
+Quick access FEAST tutorial without storage: https://feast-tmp.apps.h2.harrisburgu.cloud/
+
+Github supported access to FEAST tutorial with persistent storage: https://feast.apps.h2.harrisburgu.cloud/ 
 
 FEAST-related Resources
 ------------------------
