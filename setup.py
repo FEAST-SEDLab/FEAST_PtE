@@ -271,7 +271,7 @@ setup(
 
     # https://packaging.python.org/en/latest/requirements.html
 
-    install_requires=['numpy, scipy, os, matplotlib, pickle, copy'],  # Optional
+    install_requires=['numpy', 'scipy', 'matplotlib', 'pandas'],  # Optional
 
 
 
@@ -293,7 +293,7 @@ setup(
 
     extras_require={  # Optional
 
-        'dev': ['csv, pandas, pysal, geopy'],
+        'dev': ['csv'],
 
         'test': ['sys'],
 
