@@ -26,7 +26,7 @@ def prob_pts(lower, upper):
 
 # The random seed below can be un-commented to generate reproducible realizations.
 # np.random.seed(0)
-n_montecarlo = 30
+n_montecarlo = 10
 a = time.time()
 
 
@@ -394,7 +394,7 @@ for ind in range(n_montecarlo):
 
 
     scenario = sc.Scenario(time=timeobj, gas_field=gas_field, ldar_program_dict=ldar_dict)
-    scenario.run(dir_out='ExampleRunScriptResults', display_status=True, save_method='pickle')
+    scenario.run(dir_out='ExampleRunScriptResults', display_status=True, save_method='json')
 
 
 b = time.time()

@@ -5,7 +5,7 @@ This module defines the LDARProgram class.
 import numpy as np
 import copy
 from .repair import Repair
-from ..EmissionSimModules.result_classes import ResultDiscrete
+from ..EmissionSimModules.result_classes import ResultDiscrete, ResultContinuous
 
 
 class LDARProgram:
@@ -25,6 +25,8 @@ class LDARProgram:
         self.emissions = copy.deepcopy(gas_field.emissions)
         self.emissions_timeseries = []
         self.vents_timeseries = []
+        #self.emissions_results = ResultContinuous(units='g/s')
+        #self.vents_results = ResultContinuous(units='g/s')
         self.tech_dict = tech_dict
         self.repair = {}
         self.repair_cost = ResultDiscrete(units='USD')
