@@ -55,6 +55,8 @@ class ResultDiscrete(ResultAggregate):
         :param t_end: time to end the cumulative sum
         :return: Array of times in between t_start and t_end, cumulative sum of the attribute "value"
         """
+        #todo ensure that np.array self.time_val is sorted by time
+
         ti = np.array(self.time_value)[:, 0]
         ti = ti[(ti >= t_start) & (ti < t_end)]
         return ti, np.cumsum(self.get_vals(t_start, t_end))

@@ -5,13 +5,16 @@ This module contains an abstract class that all DetectionMethods should inherit.
 import numpy as np
 from scipy import interpolate as interp
 from feast.EmissionSimModules import result_classes as rc
+import copy
 
 
 class DetectionMethod:
     """
     DetectionMethod is an abstract super class that defines the form required for all detection methods
     """
-    def __init__(self, time, detection_variables=None, op_envelope=None, ophrs=None):
+
+    def __init__(self, time, detection_variables=None, op_envelope=None, ophrs=None, dispatch_threshold=None,
+                 sensitivity=None):
         """
         :param time: a Time object
         :param detection_variables: dict of variables used in probability of detection calculations with the name of
@@ -28,6 +31,8 @@ class DetectionMethod:
         self.deployment_count = rc.ResultDiscrete(units='Count')
         self.deployment_cost = rc.ResultDiscrete(units='USD')
         self.detection_count = rc.ResultDiscrete(units='Count')
+        self.dispatch_threshold = dispatch_threshold
+        self.sensitivity = sensitivity
         if type(self.detection_variables) is not dict:
             raise TypeError("Detection_variables must be a dict of form {name: interpolation mode,}")
 
@@ -246,3 +251,54 @@ class DetectionMethod:
         for si in site_inds:
             if si not in self.site_queue:
                 self.site_queue.append(si)
+
+    def flux_val(self, flux):
+        """
+        Helper function for detection_quantification.
+
+        :param flux: Flux passed to function from emissions DataFrame
+        :return: Original flux if flux is greater than or equal to 0; 0 if flux is less than 0
+        """
+        dflux = np.random.normal(flux, self.sensitivity)
+        if dflux < 0:
+            return 0
+        else:
+            return dflux
+
+    def detection_quantification(self, emissions, eIDs, time):
+        """
+        The detection_quantification method checks the detected emission and evaluates the magnitude of the emission
+        measured by the detection technology measurement sensitivity. If the measured emission is greater than the
+        user defined dispatch threshold, it is returned in an array.
+
+        :param emissions: DataFrame of emissions at current time-step
+        :param eIDs: array of detected emissions DataFrame indices
+        :return: array of emissions that meet dispatch criteria
+        """
+
+        if (self.sensitivity is None) | (self.dispatch_threshold is None):
+            return eIDs, None
+        if len(eIDs) == 0:
+            return eIDs, None
+
+        if ((self.__module__ == 'feast.DetectionModules.site_survey') |
+                (self.__module__ == 'feast.DetectionModules.site_monitor')):
+            em = emissions.loc[(emissions['start_time'] <= time.current_time) &
+                               (emissions['end_time'] > time.current_time)]
+            em = em.loc[
+                em['site_index'].isin(eIDs)].groupby('site_index')['flux'].sum().reset_index()
+            em['detect_val'] = em['flux'].apply(lambda x: self.flux_val(x))
+            thresh_eIDs = em.loc[em['detect_val'] >= self.dispatch_threshold, 'site_index'].values
+            permiss_emiss = em.loc[em['detect_val'] >= self.dispatch_threshold, 'detect_val'].values
+            return thresh_eIDs, permiss_emiss
+        elif self.__module__ == 'feast.DetectionModules.comp_survey':
+            em = emissions.loc[emissions.index.isin(eIDs)].copy()
+            em['detect_val'] = None
+            em['detect_val'] = em['flux'].apply(lambda x: self.flux_val(x))
+            thresh_eIDs = em.loc[((em['detect_val'] >= self.dispatch_threshold) &
+                                  ((em['start_time'] >= time.current_time) &
+                                   (em['end_time'] <= time.current_time)))].index
+            permiss_emiss = em.loc[em['detect_val'] >= self.dispatch_threshold, 'detect_val'].values
+            return thresh_eIDs, permiss_emiss
+        else:
+            raise Exception('this survey type not yet supported')

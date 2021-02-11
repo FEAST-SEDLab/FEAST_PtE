@@ -2,7 +2,7 @@
 This module defines the component level survey based detection class, CompSurvey.
 """
 import numpy as np
-from .abstract_detection_method import DetectionMethod
+from feast.DetectionModules.abstract_detection_method import DetectionMethod
 
 
 class CompSurvey(DetectionMethod):
@@ -145,15 +145,17 @@ class CompSurvey(DetectionMethod):
         :param gas_field: a GasField object
         :param emissions: a DataFrame of current emissions
         """
+
         # enforces the operating hours
         if self.check_time(time):
             emitter_inds = self.emitters_surveyed(time, gas_field, emissions)
             if len(emitter_inds) > 0:
                 detect = self.detect_prob_curve(time, gas_field, np.array(emitter_inds), emissions)
-                if len(detect) > 0:
-                    self.detection_count.append_entry([time.current_time, len(detect)])
+                thresh_detect, thresh_emission =self.detection_quantification(emissions, detect, time)
+                if len(thresh_detect) > 0:
+                    self.detection_count.append_entry([time.current_time, len(thresh_detect)])
                 # Deploy follow up action
-                self.dispatch_object.action(None, detect)
+                self.dispatch_object.action(None, thresh_detect)
 
     def action(self, site_inds=None, emit_inds=None):
         """
