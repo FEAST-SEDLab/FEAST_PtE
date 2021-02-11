@@ -156,6 +156,19 @@ def time_series_allmc(results_dir, mc_line_width=0.5, mean_line_width=1):
         plt.savefig(f"{results_dir}/{title}_timeseries_plot.pdf", dpi=600, format='pdf')
         plt.close(fig)
 
+        # Boxplots
+        box_data = {prog: techvals.flatten() for (prog, techvals) in em_tseries_dict.items()}
+        fig1, ax3 = plt.subplots(figsize=(20, 10))
+        plt.ion()
+        ax3.boxplot(box_data.values())
+        ax3.set_xticklabels([i for i in box_data.keys()])
+        ax3.set_xlabel('LDAR Programs', fontsize=20)
+        ax3.set_ylabel('Fraction of Initial Emissions', fontsize=20)
+        ax3.tick_params(axis='both', which='major', labelsize=18)
+        plt.ioff()
+        plt.savefig(f"{results_dir}/LDAR_Programs_Boxplot.pdf", dpi=600, format='pdf')
+        plt.close(fig1)
+
 def time_series_allmc_json(results_dir, mc_line_width=0.5, mean_line_width=1):
     """
     Display a time series of emissions from each detection method in a results file
