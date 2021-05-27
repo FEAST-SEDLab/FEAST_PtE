@@ -65,7 +65,10 @@ class Scenario:
         [lp.calc_rep_costs(self.time) for lp in self.ldar_program_dict.values()]
 
         # -------------- Save results --------------
-        self.save(dir_out, method=save_method)
+        if save_method == 'object':
+            return self.ldar_program_dict
+        else:
+            self.save(dir_out, method=save_method)
 
     def save(self, dir_out, method='json'):
         """
