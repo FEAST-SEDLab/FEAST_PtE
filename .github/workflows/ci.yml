@@ -1,0 +1,67 @@
+name: CI
+
+on: push
+  # pull_request:
+    # branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Get pip cache dir
+        id: pip-cache
+        run: |
+          echo "::set-output name=dir::$(pip cache dir)"
+      - name: pip cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: py-${{ matrix.python-version }}-pip-${{ hashFiles('**/requirements.txt') }}
+      - name: Install testing dependencies
+        run: |
+          # sudo apt-get update
+          # sudo apt-get install -y gdal-bin
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r testing_requirements.txt
+          pip install -r requirements-dev.txt
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --exclude kowalski --select=E9,F,T --show-source --statistics --per-file-ignores="__init__.py:F401"
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exclude kowalski --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Install the app
+        run: python -m pip install -e .
+      - name: Generate coverage report
+        run: pytest --cov=./ --cov-report=html
+      - name: Upload coverage report
+        if: ${{ matrix.python-version == 3.8 }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-report
+          path: htmlcov/
+
+  # build:
+  #   needs: test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check out the repo
+  #       uses: actions/checkout@v2
+  #     - name: Push to GitHub Packages
+  #       uses: docker/build-push-action@v1
+  #       with:
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
+  #         registry: docker.pkg.github.com
+  #         repository: seekops/FEAST/FEAST
+  #         tags: latest

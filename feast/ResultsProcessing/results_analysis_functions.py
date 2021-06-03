@@ -14,7 +14,6 @@ def results_analysis(directory, discount_rate, gas_price):
     :return:
         null_npv          array of null-NPV of each LDAR program in each realization [k$/well]
         emissions_timeseries  Array of emissions in each LDAR program in each realization at each time step
-        costs                 Array of costs associated with each LDAR program (no discounting, all costs summed)
         techs           list of detection program names
     """
     files = [f for f in listdir(directory) if isfile(join(directory, f)) and '.p' in f]
@@ -23,7 +22,6 @@ def results_analysis(directory, discount_rate, gas_price):
     n_prog = len(sample.ldar_program_dict)
     # Initialize an array to store a time series of emissions for every LDAR program in every realization
     emissions_timeseries = np.zeros([n_prog, sample.time.n_timesteps, n_realizations])
-    costs = np.zeros([n_prog, n_realizations])
     progs = list(sample.ldar_program_dict.keys())
     null_npv = dict()
     npv_keys = ['Repair', 'Finding', 'Gas', 'Total']

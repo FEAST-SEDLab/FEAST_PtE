@@ -6,8 +6,7 @@ import pickle
 from feast import DetectionModules as Dm
 from feast import EmissionSimModules as Esm
 from feast.ResultsProcessing import results_analysis_functions as raf
-from Tests.test_helper import basic_gas_field
-import pandas as pd
+from tests.test_helper import basic_gas_field
 
 
 def test_results_analysis():

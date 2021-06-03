@@ -5,15 +5,15 @@ from feast.EmissionSimModules import simulation_classes as sc
 import feast.EmissionSimModules.emission_class_functions as lcf
 import os
 import pickle
-from Tests.test_helper import basic_gas_field
+from tests.test_helper import basic_gas_field
 
 
 def test_component():
     comp = ic.Component(
         emission_production_rate=1e-5,
         dist_type='bootstrap',
-        emission_data_path='../ExampleData/DataObjectInstances/production_emissions.p',
-        repair_cost_path='../ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p',
+        emission_data_path='ExampleData/DataObjectInstances/production_emissions.p',
+        repair_cost_path='ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p',
         base_reparable=True
     )
     if comp.emission_production_rate != 1e-5:
@@ -84,8 +84,8 @@ def test_gasfield_leak_maker():
 def test_bootstrap_emission_maker():
     comp_fug = feast.EmissionSimModules.infrastructure_classes.Component(
         name='Fugitive emitters',
-        emission_data_path='../ExampleData/DataObjectInstances/production_emissions.p',
-        repair_cost_path='../ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p',
+        emission_data_path='ExampleData/DataObjectInstances/production_emissions.p',
+        repair_cost_path='ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p',
         emission_per_comp=0.0026,
         emission_production_rate=5.4 / 650 / 365
     )
@@ -111,8 +111,8 @@ def test_bootstrap_emission_maker():
 def test_gasfield_emission_size_maker():
     comp_fug = feast.EmissionSimModules.infrastructure_classes.Component(
         name='Fugitive emitters',
-        emission_data_path='../ExampleData/DataObjectInstances/production_emissions.p',
-        repair_cost_path='../ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p',
+        emission_data_path='ExampleData/DataObjectInstances/production_emissions.p',
+        repair_cost_path='ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p',
         emission_per_comp=0.0026,
         emission_production_rate=5.4 / 650 / 365
     )
@@ -147,7 +147,7 @@ def test_emission_obj():
     comp_fug = feast.EmissionSimModules.infrastructure_classes.Component(
         name='Fugitive emitters',
         emission_data_path='temp_dat.p',
-        repair_cost_path='../ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p',
+        repair_cost_path='ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p',
         emission_per_comp=0.00231,
         emission_production_rate=5.4 / 650 / 365
     )
@@ -210,20 +210,3 @@ def test_emission_class():
     leak2.emissions.end_time = np.ones(len(leak2.emissions.flux))
     if leak2.em_rate_in_range(99, 101) != 0:
         raise ValueError("emission_class_functions.Emission.sum_emissions_in_range is failing to return zero")
-
-
-test_component()
-
-test_gas_field()
-
-test_gasfield_leak_maker()
-
-test_bootstrap_emission_maker()
-
-test_gasfield_emission_size_maker()
-
-test_emission_obj()
-
-test_emission_class()
-
-print("Successfully completed emission tests.")
