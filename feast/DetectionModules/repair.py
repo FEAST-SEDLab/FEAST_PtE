@@ -38,7 +38,10 @@ class Repair:
             rep_cond = emissions.emissions.reparable & emissions.emissions.index.isin(self.to_repair) & \
                        (emissions.emissions.end_time > time.current_time + self.repair_delay)
             emissions.emissions.loc[rep_cond, 'end_time'] = time.current_time + self.repair_delay
-            self.repair_count.append_entry([time.current_time + self.repair_delay, int(np.sum(rep_cond))])
+            time_cond = emissions.emissions['start_time'] >= emissions.emissions['end_time']
+            emissions.emissions.loc[time_cond, 'start_time'] = emissions.emissions.loc[time_cond, 'end_time']
+            self.repair_count.append_entry([time.current_time + self.repair_delay,
+                                            len(emissions.emissions.loc[rep_cond].index.unique())])
             self.repair_cost.append_entry([time.current_time + self.repair_delay,
                                            np.sum(emissions.emissions.loc[rep_cond, 'repair_cost'])])
             self.to_repair = []

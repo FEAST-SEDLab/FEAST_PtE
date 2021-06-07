@@ -169,8 +169,12 @@ class DetectionMethod:
             params['max'] = [params['max']]
         condition_allowed = False
         for ind in range(len(params['min'])):
-            if params['min'][ind] <= condition <= params['max'][ind]:
-                condition_allowed = True
+            if params['min'][ind] > params['max'][ind]:
+                if ~(params['max'][ind] <= condition <= params['min'][ind]):
+                    condition_allowed = True
+            else:
+                if params['min'][ind] <= condition <= params['max'][ind]:
+                    condition_allowed = True
         return condition_allowed
 
     @staticmethod
