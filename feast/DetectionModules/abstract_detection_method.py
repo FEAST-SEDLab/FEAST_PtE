@@ -287,8 +287,8 @@ class DetectionMethod:
 
         if ((self.__module__ == 'feast.DetectionModules.site_survey') |
                 (self.__module__ == 'feast.DetectionModules.site_monitor')):
-            em = emissions.loc[(emissions['start_time'] <= time.current_time) &
-                               (emissions['end_time'] > time.current_time)]
+            em = emissions.loc[(emissions['start_time'] >= time.current_time) &
+                               (emissions['end_time'] < time.current_time)]
             em = em.loc[
                 em['site_index'].isin(eIDs)].groupby('site_index')['flux'].sum().reset_index()
             em['detect_val'] = em['flux'].apply(lambda x: self.flux_val(x))
