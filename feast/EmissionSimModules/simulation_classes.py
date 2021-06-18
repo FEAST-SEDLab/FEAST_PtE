@@ -18,11 +18,12 @@ class Time:
         :param end_time: length of the simulation (days)
         :param current_time: current time in a simulation (days)
         """
-        self.n_timesteps = int(end_time / delta_t)
+        # self.n_timesteps = int(end_time / delta_t)
         self.end_time = end_time
         self.delta_t = delta_t
         self.current_time = current_time
         self.time_index = 0
+        self.n_timesteps = int((end_time - self.current_time)/delta_t)
 
 
 class Scenario:
