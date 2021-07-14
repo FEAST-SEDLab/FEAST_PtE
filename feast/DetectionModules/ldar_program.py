@@ -5,7 +5,7 @@ This module defines the LDARProgram class.
 import numpy as np
 import copy
 from .repair import Repair
-from ..EmissionSimModules.result_classes import ResultDiscrete, ResultContinuous
+from ..EmissionSimModules.result_classes import ResultDiscrete
 
 
 class LDARProgram:

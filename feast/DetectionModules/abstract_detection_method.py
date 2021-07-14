@@ -5,7 +5,6 @@ This module contains an abstract class that all DetectionMethods should inherit.
 import numpy as np
 from scipy import interpolate as interp
 from feast.EmissionSimModules import result_classes as rc
-import copy
 
 
 class DetectionMethod:

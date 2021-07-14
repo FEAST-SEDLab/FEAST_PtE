@@ -64,7 +64,6 @@ def results_analysis_json(directory, discount_rate, gas_price):
     n_prog = len([i for i in sample.keys() if i not in not_prog_keys])
     # Initialize an array to store a time series of emissions for every LDAR program in every realization
     emissions_timeseries = np.zeros([n_prog, sample['time']['n_timesteps'], n_realizations])
-    costs = np.zeros([n_prog, n_realizations])
     progs = [i for i in sample.keys() if i not in not_prog_keys]
     null_npv = dict()
     npv_keys = ['Repair', 'Finding', 'Gas', 'Total']

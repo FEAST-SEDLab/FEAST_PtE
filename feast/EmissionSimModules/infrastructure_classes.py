@@ -8,7 +8,6 @@ import pandas as pd
 
 from feast.EmissionSimModules import emission_class_functions as ecf
 from feast.EmissionSimModules.emission_class_functions import emission_objects_generator as leak_obj_gen
-from feast.EmissionSimModules.simulation_classes import Time
 
 
 class Component:
@@ -216,7 +215,7 @@ class GasField:
         """
         Return the relevant meteorological condition, accounting for discrepancies between simulation time resolution
         and data time resolution
-        
+
         :param time: time object
         :param parameter_names: specify a list of meteorological conditions to return
         :param interp_modes: can be a list of strings: mean, median, max or min
