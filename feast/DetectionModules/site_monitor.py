@@ -115,10 +115,11 @@ class SiteMonitor(DetectionMethod):
             site_inds = self.choose_sites(gas_field, time, len(self.site_queue), clear_sites=False)
             if len(site_inds) > 0:
                 detect = self.detect_prob_curve(time, gas_field, site_inds, emissions)
-                if len(detect) > 0:
-                    self.detection_count.append_entry([time.current_time, len(detect)])
+                thresh_detect, thresh_emission = self.detection_quantification(emissions, detect, time)
+                if len(thresh_detect) > 0:
+                    self.detection_count.append_entry([time.current_time, len(thresh_detect)])
                 # Deploy follow up action
-                self.dispatch_object.action(detect, None)
+                self.dispatch_object.action(thresh_detect, None)
 
     def action(self, site_inds=None, emit_inds=None):
         """

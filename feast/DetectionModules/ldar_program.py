@@ -5,7 +5,7 @@ This module defines the LDARProgram class.
 import numpy as np
 import copy
 from .repair import Repair
-from ..EmissionSimModules.result_classes import ResultDiscrete
+from ..EmissionSimModules.result_classes import ResultDiscrete, ResultContinuous
 
 
 class LDARProgram:
@@ -25,6 +25,8 @@ class LDARProgram:
         self.emissions = copy.deepcopy(gas_field.emissions)
         self.emissions_timeseries = []
         self.vents_timeseries = []
+        #self.emissions_results = ResultContinuous(units='g/s')
+        #self.vents_results = ResultContinuous(units='g/s')
         self.tech_dict = tech_dict
         self.repair = {}
         self.repair_cost = ResultDiscrete(units='USD')
@@ -39,11 +41,24 @@ class LDARProgram:
         :param gas_field: the simulation gas_field object
         :return:
         """
-        for tech in self.tech_dict.values():
-            if hasattr(tech, 'survey_interval') and tech.survey_interval \
-                    and np.mod(time.current_time, tech.survey_interval) < time.delta_t:
-                tech.action(list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)))
-            tech.detect(time, gas_field, self.emissions.get_current_emissions(time))
+        for i, tech in enumerate(self.tech_dict.values()):
+            # Check for tiered detection
+            if (len(self.tech_dict.values()) > 1) and (i >= 1):
+                det_ct = self.tech_dict[list(self.tech_dict.keys())[i - 1]].detection_count.time_value
+                if len(det_ct) > 0:
+                    det_ct_time = det_ct[-1][0]
+                else:
+                    det_ct_time = None
+                if (det_ct_time == time.current_time) or (det_ct_time is not None):
+                    if hasattr(tech, 'survey_interval') and tech.survey_interval \
+                            and np.mod(time.current_time, tech.survey_interval) < time.delta_t:
+                        tech.action(list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)))
+                    tech.detect(time, gas_field, self.emissions.get_current_emissions(time))
+            else:
+                if hasattr(tech, 'survey_interval') and tech.survey_interval \
+                        and np.mod(time.current_time, tech.survey_interval) < time.delta_t:
+                    tech.action(list(np.linspace(0, gas_field.n_sites - 1, gas_field.n_sites, dtype=int)))
+                tech.detect(time, gas_field, self.emissions.get_current_emissions(time))
         for rep in self.repair.values():
             rep.repair(time, self.emissions)
 

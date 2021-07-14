@@ -5,6 +5,7 @@ import os
 import pickle
 from ..DetectionModules.ldar_program import LDARProgram
 import json
+import pandas as pd
 
 
 class Time:
@@ -61,11 +62,17 @@ class Scenario:
                 t0 = self.time.current_time
                 lp.emissions_timeseries.append(lp.emissions.em_rate_in_range(t0, t0 + self.time.delta_t))
                 lp.vents_timeseries.append(lp.emissions.em_rate_in_range(t0, t0 + self.time.delta_t, reparable=False))
+                #todo populate emissions and vent timeseries as a result continuous class
+                #lp.emissions_results.append([t0, lp.emissions.em_rate_in_range(t0, t0 + self.time.delta_t)])
+                #lp.vents_results.append([t0, lp.emissions.em_rate_in_range(t0, t0 + self.time.delta_t, reparable=False)])
             self.time.current_time += self.time.delta_t
         [lp.calc_rep_costs(self.time) for lp in self.ldar_program_dict.values()]
 
         # -------------- Save results --------------
-        self.save(dir_out, method=save_method)
+        if save_method == 'object':
+            return self.ldar_program_dict
+        else:
+            self.save(dir_out, method=save_method)
 
     def save(self, dir_out, method='json'):
         """
@@ -74,13 +81,15 @@ class Scenario:
         :param dir_out: Name of directory in which to save output file.
         :param method: Specifies how results should be saved. Can be 'json' or 'pickle'
         """
-        file_out = self.real_filename(dir_out)
+        file_out, emiss_out = self.real_filename(dir_out)
         res_dict = {}
         for prog_name, prog in self.ldar_program_dict.items():
             res_dict[prog_name] = {
                 'emission timeseries': prog.emissions_timeseries,
                 'vent timeseries': prog.vents_timeseries,
-                'repair cost': prog.repair_cost.__dict__
+                'repair cost': prog.repair_cost.__dict__,
+                #'emissions results': prog.emissions_results.__dict__,
+                #'vents results': prog.vents_results.__dict__
             }
             for tech_name, tech in prog.tech_dict.items():
                 res_dict[prog_name][tech_name] = {}
@@ -96,9 +105,19 @@ class Scenario:
                 res_dict[prog_name][rep_name] = {}
                 res_dict[prog_name][rep_name]['repair cost'] = rep.repair_cost.__dict__
                 res_dict[prog_name][rep_name]['repair count'] = rep.repair_count.__dict__
+        # add time data to res_dict
+        res_dict['time'] = {
+            'current_time': self.time.current_time,
+            'delta_t': self.time.delta_t,
+            'end_time': self.time.end_time,
+            'n_timesteps': self.time.n_timesteps,
+            'time_index': self.time.time_index
+        }
         if method == 'json':
             with open(file_out + '.json', 'w') as f:
                 json.dump(res_dict, f)
+            # save the emissions dataframe for the current MC to pickle
+            self.gas_field.emissions.emissions.to_pickle(f"{emiss_out}.p")
         elif method == 'pickle':
             pickle.dump(self, open(file_out + '.p', 'wb'))
         else:
@@ -125,7 +144,8 @@ class Scenario:
             if real.split('.')[0] not in unique_reals:
                 unique_reals.append(real)
         file_out = dir_out + '/realization' + str(len(unique_reals))
-        return file_out
+        emissions_out = f"{dir_out}/realization{len(unique_reals)}_emissionsDataFrame"
+        return file_out, emissions_out
 
     def check_timestep(self):
         """

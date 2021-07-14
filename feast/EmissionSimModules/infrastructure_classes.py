@@ -249,6 +249,8 @@ class GasField:
                     met_conds[parameter_name] = np.min(relevant_metdat)
                 elif interp_mode.lower() == 'median':
                     met_conds[parameter_name] = np.median(relevant_metdat)
+                elif interp_mode.lower() == 'random':
+                    met_conds[parameter_name] = np.random.choice(relevant_metdat)
                 else:
                     raise ValueError("Invalid meteorological data type.")
         return met_conds

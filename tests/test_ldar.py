@@ -606,8 +606,77 @@ def test_site_monitor():
         raise ValueError("SiteMonitor deployment cost is not calculated correctly.")
     cm.detect(time, gas_field, emissions)
 
+def test_detect_quantification():
 
-test_repair()
+    test_emissions = pd.DataFrame({'flux': [0, 0.00001, 0.1, 0.5, 0.9],
+                                   'site_index': [0, 5, 5, 15, 20]})
+    time = sc.Time(delta_t=1, end_time=10, current_time=0)
+    rep = Dm.repair.Repair(repair_delay=0)
+    sens = 0.001
+    dt = 0.05
+    comp_check = [2, 3, 4]
+    site_check = [5, 15, 20]
+    # test component survey
+    cs = feast.DetectionModules.comp_survey.CompSurvey(
+        time,
+        survey_interval=180,
+        survey_speed=150,
+        ophrs={'begin': 8, 'end': 17},
+        labor=100,
+        detection_variables={'flux': 'mean'},
+        detection_probability_points=[0,1,2],  # g/s
+        detection_probabilities=[1,1,1],
+        dispatch_object=rep,
+        site_queue=[],
+        sensitivity=sens,
+        dispatch_threshold=dt)
+    di, de = cs.detection_quantification(test_emissions, [0, 1, 2, 3, 4])
+    comp_test = all(item in di for item in comp_check)
+    if comp_test is False:
+        raise Exception('component survey detection_quantification fails to identify the correct emitter IDs')
+
+    # test site survey
+    ss = feast.DetectionModules.site_survey.SiteSurvey(
+        time,
+        survey_interval=180,
+        sites_per_day=200,
+        site_cost=100,
+        detection_variables={'flux': 'mean'},
+        detection_probability_points=[0,1,2],
+        detection_probabilities=[1,1,1],
+        dispatch_object=rep,
+        site_queue=[],
+        ophrs={'begin': 8, 'end': 17},
+        sensitivity=sens,
+        dispatch_threshold=dt
+    )
+
+    di, de = ss.detection_quantification(test_emissions, [0, 5, 5, 15, 20])
+    site_test = all(item in di for item in site_check)
+    if site_test is False:
+        raise Exception('site survey detection_quantification fails to identify the correct site IDs')
+
+    # Test site monitor
+    sm = feast.DetectionModules.site_monitor.SiteMonitor(
+        time=time,
+        time_to_detect_points=[[0.5, 1], [1.0, 1], [1.1, 1], [0.5, 5], [1.0, 5], [1.1, 5],
+                               [0.5, 5.1], [1.0, 5.1], [1.1, 5.1]],
+        time_to_detect_days=[np.infty, 1, 0, np.infty, 5, 0, np.infty, np.infty, np.infty],
+        detection_variables={'flux': 'mean', 'wind speed': 'mean'},
+        site_queue=[],
+        dispatch_object=copy.deepcopy(rep),
+        ophrs={'begin': 8, 'end': 17},
+        sensitivity=sens,
+        dispatch_threshold=dt
+    )
+
+    di, de = sm.detection_quantification(test_emissions, [0, 5, 5, 15, 20])
+    site_test = all(item in di for item in site_check)
+    if site_test is False:
+        raise Exception('site monitor detection_quantification fails to identify the correct site IDs')
+
+
+'''test_repair()
 test_comp_survey()
 test_check_time()
 test_site_survey()
@@ -619,7 +688,7 @@ test_comp_survey_emitters_surveyed()
 test_get_current_conditions()
 test_empirical_interpolator()
 test_choose_sites()
-test_site_monitor()
-
+test_site_monitor()'''
+test_detect_quantification()
 
 print("Successfully completed LDAR tests.")
