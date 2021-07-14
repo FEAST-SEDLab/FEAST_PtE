@@ -293,9 +293,9 @@ setup(
 
     extras_require={  # Optional
 
-        'dev': ['csv']
+        'dev': ['csv'],
 
-        'test': [],
+        'test': ['sys'],
 
     },
 
