@@ -83,15 +83,15 @@ class SiteSurvey(DetectionMethod):
         probs = np.zeros(n_scores)
         counter = 0
         for site_ind in site_inds:
-            vals = np.zeros(len(self.detection_variables))
+            vals = np.zeros([1, len(self.detection_variables)])
             ind = 0
             cond = emissions.index[emissions.site_index == site_ind].to_list()
             for v, im in self.detection_variables.items():
                 if v in gas_field.met:
-                    vals[ind] = gas_field.get_met(time, v, interp_modes=im, ophrs=self.ophrs)[v]
+                    vals[0, ind] = gas_field.get_met(time, v, interp_modes=im, ophrs=self.ophrs)[v]
                 else:
                     # sum all emission variables needed for detection
-                    vals[ind] = np.sum(emissions[v][cond])
+                    vals[0, ind] = np.sum(emissions[v][cond])
                 ind += 1
             prob = self.empirical_interpolator(self.detection_probability_points, self.detection_probabilities, vals)
             probs[counter] = prob
