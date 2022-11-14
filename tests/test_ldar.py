@@ -7,8 +7,7 @@ import pandas as pd
 from feast.EmissionSimModules import simulation_classes as sc
 import feast.EmissionSimModules.emission_class_functions as ecf
 from feast import DetectionModules as Dm
-from Tests.test_helper import basic_gas_field
-from Tests.test_helper import ex_prob_detect_arrays
+from tests.test_helper import basic_gas_field, ex_prob_detect_arrays
 
 
 def test_repair():
@@ -114,7 +113,7 @@ def test_comp_survey():
 
 def test_comp_survey_emitters_surveyed():
     gas_field = basic_gas_field()
-    gas_field.met_data_path = 'TMY-DataExample.csv'
+    gas_field.met_data_path = 'ExampleData/TMY-DataExample.csv'
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
     gas_field.met_data_maker()
     rep = Dm.repair.Repair(repair_delay=0)
@@ -216,7 +215,7 @@ def test_site_survey():
 
 def test_sitedetect_sites_surveyed():
     gas_field = basic_gas_field()
-    gas_field.met_data_path = 'TMY-DataExample.csv'
+    gas_field.met_data_path = 'ExampleData/TMY-DataExample.csv'
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
     gas_field.met_data_maker()
     wind_dirs_mins = np.zeros(gas_field.n_sites)
@@ -410,7 +409,7 @@ def test_scenario_run():
 
 def test_check_op_envelope():
     gas_field = basic_gas_field()
-    gas_field.met_data_path = 'TMY-DataExample.csv'
+    gas_field.met_data_path = 'ExampleData/TMY-DataExample.csv'
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
     gas_field.met_data_maker()
     rep = Dm.repair.Repair(repair_delay=0)
@@ -457,7 +456,7 @@ def test_check_op_envelope():
 
 def test_get_current_conditions():
     gas_field = basic_gas_field()
-    gas_field.met_data_path = 'TMY-DataExample.csv'
+    gas_field.met_data_path = 'ExampleData/TMY-DataExample.csv'
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
     gas_field.met_data_maker()
     rep = Dm.repair.Repair(repair_delay=0)
@@ -518,7 +517,7 @@ def test_empirical_interpolator():
 
 def test_choose_sites():
     gas_field = basic_gas_field()
-    gas_field.met_data_path = 'TMY-DataExample.csv'
+    gas_field.met_data_path = 'ExampleData/TMY-DataExample.csv'
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
     gas_field.met_data_maker()
     rep = Dm.repair.Repair(repair_delay=0)
@@ -552,7 +551,7 @@ def test_choose_sites():
 
 def test_site_monitor():
     gas_field = basic_gas_field()
-    gas_field.met_data_path = 'TMY-DataExample.csv'
+    gas_field.met_data_path = 'ExampleData/TMY-DataExample.csv'
     time = sc.Time(delta_t=1, end_time=10, current_time=0)
     gas_field.met_data_maker()
     rep = Dm.repair.Repair(repair_delay=0)

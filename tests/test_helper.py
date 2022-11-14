@@ -9,8 +9,8 @@ def basic_gas_field():
     n_em = 100
     site_dict = {}
     comp_fug = feast.EmissionSimModules.infrastructure_classes.Component(
-        repair_cost_path='../ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p',
-        emission_data_path='../ExampleData/DataObjectInstances/production_emissions.p',
+        repair_cost_path='ExampleData/DataObjectInstances/fernandez_leak_repair_costs_2006.p',
+        emission_data_path='ExampleData/DataObjectInstances/production_emissions.p',
         base_reparable=True,
         name='Fugitive emitters',
         emission_per_comp=0.0026,
@@ -32,7 +32,7 @@ def basic_gas_field():
     gas_field = feast.EmissionSimModules.infrastructure_classes.GasField(
         sites=site_dict,
         time=timeobj,
-        met_data_path='TMY-DataExample.csv'
+        met_data_path='ExampleData/TMY-DataExample.csv'
     )
     # This enforces hard coded emissions for test reproducability
     gas_field.emissions.emissions = gas_field.emissions.emissions[gas_field.emissions.emissions.start_time > 0]

@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from pickle import load
-from os import listdir, getcwd
+from os import listdir
 from os.path import isfile, join
 import numpy as np
 from feast.ResultsProcessing import results_analysis_functions

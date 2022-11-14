@@ -1,0 +1,4 @@
+flake8>=2.4.0
+flake8-debugger>=4.0.0
+pytest>=6.2
+pytest-cov>=2.10.1

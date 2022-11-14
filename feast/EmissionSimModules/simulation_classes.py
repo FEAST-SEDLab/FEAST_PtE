@@ -5,7 +5,6 @@ import os
 import pickle
 from ..DetectionModules.ldar_program import LDARProgram
 import json
-import pandas as pd
 
 
 class Time:

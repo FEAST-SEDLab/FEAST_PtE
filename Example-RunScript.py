@@ -9,7 +9,6 @@ import feast.EmissionSimModules.infrastructure_classes
 import feast.EmissionSimModules.simulation_classes as sc
 from feast.EmissionSimModules.infrastructure_classes import Component
 import feast.DetectionModules as Dm
-import pickle
 import time
 
 def prob_curve(pts):
@@ -308,11 +307,6 @@ def define_ldar_programs(gas_field, ogi, ogi_no_survey, plane_survey_dispatch_10
                            'min': [[45, 225]] * gas_field.n_sites,
                            'max': [[135, 315]] * gas_field.n_sites}
     }
-    # Define LDAR programs
-    ogi_survey = Dm.ldar_program.LDARProgram(
-        copy.deepcopy(gas_field), {'ogi': ogi},
-    )
-    # tiered survey
 
     # Plane survey with dispatch threshold, accuracy 10%
     tech_dict_10 = {
